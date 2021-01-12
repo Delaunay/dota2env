@@ -271,15 +271,16 @@ Lane Assign         |   -0.15   | Solo
 
 ## Unit Target Embedding
 
-* Unit Target Embedding     (128)
+Unit Info -> f -> Vector(128) -> F > Unit Info
+
 
 ## Action Embedding
 
 * Primary Action Embedding  (128)
 
-## Ability Embedding
+## Ability & Item Embedding
 
-TODO
+We see Item as Ability you can buy/Equip
 
 # The ML Model
 
