@@ -10,6 +10,12 @@ local ipc_prefix = '[IPC]' .. faction .. '.' .. player_id
 --  A: acknowledge
 --  S: status        R: Ready
 --  E: error
+-- 
+-- About Efficiency: that log file could become fairly large since we never truncate it 
+-- Given that dota has control over it is unclear what could be done
+-- on a plus side we do jump at the end to read the last lines only
+-- but it is unclear is that file will be in RAM most of the time
+-- Anyway bots only execute commands sent to them they should not have much to send back
 local function send_message(data)
     print(ipc_prefix, dkjson.encode(data))
 end
@@ -20,6 +26,10 @@ end
 -- Lua 5.1 is embedded into Source 2, we have no library to link against
 -- we could try to compile lua 5.1 as a shared library and compile our C package
 -- and we might be able to load tcp socket lib but it is assuming require wasnt stripped
+-- 
+-- About efficiency: we only update a single file that is going to be fairly small and
+-- read 10 times before being overriden, the file should always be cached in RAM
+-- so this method in terms of speed should be fine
 local function receive_message()
     local file = loadfile(RECV_MSG)
 
@@ -85,7 +95,12 @@ local function get_player_info()
     send_message({P = players})
 end
 
--- A single Game will generate 10 sample for each player
+-- Decode the message and execute the requested command
+local function execute_rpc(message)
+
+end
+
+-- A single Game will generate 10 sample, one for each bot
 local function delegate_think()
     -- Ready to process a new message
     send_message({S = "R"})
@@ -95,13 +110,8 @@ local function delegate_think()
     local message = receive_message()
 
     if message ~= nil then
-        print(message)
+        execute_rpc(message)
     end
-end
-
-
-local function execute_rpc(message)
-
 end
 
 -- Print the Base game information
