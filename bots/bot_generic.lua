@@ -1,5 +1,4 @@
 local dkjson = require('game/dkjson')
-local msgpack = require('bots/msgpack')
 
 local RECV_MSG = 'bots/IPC_recv'
 local player_id = GetBot():GetPlayerID()

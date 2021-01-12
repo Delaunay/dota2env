@@ -26,7 +26,7 @@ class Dota2Game:
     -----
     Type  ``jointeam spec`` in the dota2 console to observe the game
     """
-    def __init__(self, path=None):
+    def __init__(self, path=None, dedicated=True):
         self.paths = DotaPaths(path)
         self.game_id = str(uuid.uuid1())
         self.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_AP)
@@ -36,7 +36,8 @@ class Dota2Game:
             self.paths,
             self.game_id,
             self.game_mode,
-            self.game_time_scale
+            self.game_time_scale,
+            dedicated
         )
 
         self.loop = asyncio.get_event_loop()
@@ -106,7 +107,7 @@ def main():
     from luafun.ipc_send import new_ipc_message
     logging.basicConfig(level=logging.DEBUG)
 
-    game = Dota2Game('F:/SteamLibrary/steamapps/common/dota 2 beta/')
+    game = Dota2Game('F:/SteamLibrary/steamapps/common/dota 2 beta/', False)
 
     with game:
         game.send_message(new_ipc_message())

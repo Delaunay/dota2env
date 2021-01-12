@@ -1,11 +1,13 @@
 PORT_TEAM_RADIANT = 12120
 PORT_TEAM_DIRE = 12121
 
-def dota2_aguments(paths, game_id, game_mode=1, host_timescale=2, ticks_per_observation=30):
-    # type > jointeam spec
-    # in the console to observe the game
-    return [
-        # '-dedicated',
+def dota2_aguments(paths, game_id, game_mode=1, host_timescale=2, dedicated, ticks_per_observation=30):
+    additional = []
+
+    if dedicated:
+        additional.append('-dedicated')
+
+    return dedicated + [
         '-botworldstatesocket_threaded',
         '-botworldstatetosocket_frames', '{}'.format(ticks_per_observation),
         '-botworldstatetosocket_radiant', '{}'.format(PORT_TEAM_RADIANT),
@@ -21,9 +23,12 @@ def dota2_aguments(paths, game_id, game_mode=1, host_timescale=2, ticks_per_obse
         '-insecure',
         # do not bind the ip
         '-noip',
-        '-nowatchdog',  # WatchDog will quit the game if e.g. the lua api takes a few seconds.
-        '+clientport', '27006',  # Relates to steam client.
+        # WatchDog will quit the game if e.g. the lua api takes a few seconds.
+        '-nowatchdog', 
+        # Relates to steam client.
+        '+clientport', '27006',
         '+dota_1v1_skip_strategy', '1',
+        # Close dota when the game is over
         '+dota_surrender_on_disconnect', '0',
         # Make the game start with bots
         '-fill_with_bots',
