@@ -4,3 +4,7 @@ dependencies/
 *.pyc
 __pycache__
 .idea/
+out_dire.txt
+out_radiant.txt
+console.log
+IPC_recv.lua

@@ -4,6 +4,7 @@ import subprocess
 import uuid
 import os
 import json
+from dataclasses import dataclass
 
 from luafun.dota2.dota_gcmessages_common_bot_script_pb2 import CMsgBotWorldState
 
@@ -41,6 +42,26 @@ TEAM_RADIANT = 2
 TEAM_DIRE = 3
 SEND_MSG = 'bots/IPC_recv.lua'
 uid = 0
+
+
+def new_ipc_message():
+    return {
+        'uid': 0,
+        TEAM_RADIANT: {
+            0: dict(),
+            1: dict(),
+            2: dict(),
+            3: dict(),
+            4: dict(),
+        },
+        TEAM_DIRE: {
+            5: dict(),
+            6: dict(),
+            7: dict(),
+            8: dict(),
+            9: dict(),
+        }
+    }
 
 
 def write_message(path, data):
@@ -179,7 +200,7 @@ def launch_dota(game_id=None, game_mode=1, host_timescale=2, ticks_per_observati
 
         write_message(
             f'{base_path}/game/dota/scripts/vscripts',
-            dict(hello='world')
+            new_ipc_message()
         )
 
         # update our observation state
