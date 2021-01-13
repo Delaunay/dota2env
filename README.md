@@ -1,6 +1,18 @@
 Dota 2 C++ Bot
 ==============
 
+Why dota2 is the ultimate RL environment
+
+* Long Time Horizons
+* Partially Observed State
+* High dimensional action and observation spaces
+
+Like in real life you need to
+1. Choose the relevant data to solve the problem and discard unnecessary data
+2. Choose the correct rewards balance early rewards and late rewards
+3. Encode the action
+
+
 # The Game
 
 From OpenAI
