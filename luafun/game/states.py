@@ -1,12 +1,11 @@
 import asyncio
+from dataclasses import dataclass
 import logging
 from struct import unpack
 
 from luafun.game.dota2.dota_gcmessages_common_bot_script_pb2 import CMsgBotWorldState
 
 log = logging.getLogger(__name__)
-# protobuf sucks
-WorldStateDelta = CMsgBotWorldState
 
 
 async def worldstate_listener(port, message_handler, state, retries=10):
@@ -45,3 +44,16 @@ async def worldstate_listener(port, message_handler, state, retries=10):
         message_handler(world_state)
 
     log.debug('World state listener shutting down')
+
+
+@dataclass
+class WorldStateDelta:
+    actionType int = 0  #    DOTA_UNIT_ORDER_NONE = 0
+    player: int = -1
+    actionID: int = -1
+    actionDelay: int = 0
+    actionData: CMsgBotWorldState.ActionData
+
+
+# protobuf sucks
+# WorldStateDelta = CMsgBotWorldState

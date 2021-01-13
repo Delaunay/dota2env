@@ -37,6 +37,13 @@ class Dota2Env(Dota2Game):
         super.__init__(self, path)
         self.radiant_state = FactionState()
         self.dire_state = FactionState()
+        self.players = {
+            TEAM_RADIANT: 0,
+            TEAM_DIRE: 0
+        }
+
+    def is_game_ready(self):
+        return self.players[TEAM_RADIANT] + self.players[TEAM_DIRE] == 10
 
     def dire_state(self, messsage: WorldStateDelta):
         """Receive a state diff from the game for dire"""
@@ -48,10 +55,20 @@ class Dota2Env(Dota2Game):
 
     def receive_message(self, faction: int, player_id: int, message: dict):
         """We only use log to get errors back if any"""
+        # error processing
         error = message.get('E')
         if error is not None:
             log.error(f'recv {team_name(faction)} {player_id} {error}')
+            return
 
+        # init message
+        info = messaget.get('P')
+        if info is not None:
+            self.players[faction] += 1
+            if self.is_game_ready():
+                log.info('All bots accounted for, Game is ready')
+            return
+    
     # Training data
     def generate_bot_state(self):
         """Generate the states of our bots. The state is the faction state augmented with

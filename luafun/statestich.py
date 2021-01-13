@@ -1,6 +1,7 @@
 import asyncio
 import copy
 
+from luafun.game.states import WorldStateDelta
 
 class FactionState:
     def __init__(self):
@@ -14,9 +15,9 @@ class FactionState:
         return copy.deepcopy(self)
 
 
-async def apply_diff(state, delta):
+async def apply_diff(state, delta: WorldStateDelta):
     async with self.lock:
         state.s += 1
         # check s == e to know if the apply has finished
-
+        print(delta)
         state.e += 1
