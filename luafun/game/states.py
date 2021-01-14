@@ -44,16 +44,3 @@ async def worldstate_listener(port, message_handler, state, retries=10):
         message_handler(world_state)
 
     log.debug('World state listener shutting down')
-
-
-@dataclass
-class WorldStateDelta:
-    actionType int = 0  #    DOTA_UNIT_ORDER_NONE = 0
-    player: int = -1
-    actionID: int = -1
-    actionDelay: int = 0
-    actionData: CMsgBotWorldState.ActionData
-
-
-# protobuf sucks
-# WorldStateDelta = CMsgBotWorldState

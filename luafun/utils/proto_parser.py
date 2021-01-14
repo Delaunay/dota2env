@@ -30,6 +30,7 @@ class ProtoParser:
 
         self.nested_message = []
         self.path = dict()
+        self.old = dict()
         self.messages = []
         self.pos = 0
 
@@ -105,7 +106,7 @@ class ProtoParser:
             field_id = field_id[:-1]
 
         log.debug(f'parse field {qualifier} {field_name}: {field_type} = {field_id}')
-        return field_id, field_name, field_type, qualifier
+        return 'F', field_id, field_name, field_type, qualifier
 
     def parse_enum_field(self):
         name = self.token()
@@ -130,7 +131,9 @@ class ProtoParser:
         name = self.next()
 
         log.debug(f'>> parsing enum {name}')
-        self.path['.'.join(self.nested_message)] = name
+        self.nested_message.append(name)
+        self.path['.' + '.'.join(self.nested_message)] = name
+        self.old[name] = '.' + '.'.join(self.nested_message)
 
         tok = self.next(), self.expect('{')
         tok = self.next()
@@ -143,6 +146,7 @@ class ProtoParser:
 
         self.expect('}'), self.next()
         self.messages.append(('E', name, fields))
+        self.nested_message.pop()
         log.debug(f'<< {name}')
 
     def parse_message(self):
@@ -151,7 +155,8 @@ class ProtoParser:
 
         log.debug(f'>> parsing message {name}')
         self.nested_message.append(name)
-        self.path['.'.join(self.nested_message)] = name
+        self.path['.' + '.'.join(self.nested_message)] = name
+        self.old[name] = '.' + '.'.join(self.nested_message)
 
         self.next(), self.expect('{')
         tok = self.next()
@@ -172,6 +177,7 @@ class ProtoParser:
             tok = self.token()
         
         self.expect('}'), self.next()
+        self.nested_message.pop()
         self.messages.append(('M', name, fields))
         log.debug(f'<< {name}')
 
