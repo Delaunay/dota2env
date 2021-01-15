@@ -42,8 +42,8 @@ class Dota2Env(Dota2Game):
             TEAM_RADIANT: 0,
             TEAM_DIRE: 0
         }
-        self.radiant_message = open(self.paths.bot_file('radiant_out.txt'), 'w')
-        self.dire_message = open(self.paths.bot_file('dire_out.txt'), 'w')
+        self.radiant_message = open(self.paths.bot_file('out_radiant.txt'), 'w')
+        self.dire_message = open(self.paths.bot_file('out_dire.txt'), 'w')
 
     def cleanup(self):
         self.radiant_message.close()
@@ -60,7 +60,7 @@ class Dota2Env(Dota2Game):
     async def update_radiant_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for radiant"""
         await apply_diff(self.radiant_state, message)
-        self.radiant_message.write(str(message))
+        self.radiant_message.write(str(message))    
 
     def receive_message(self, faction: int, player_id: int, message: dict):
         """We only use log to get errors back if any"""
@@ -71,9 +71,10 @@ class Dota2Env(Dota2Game):
             return
 
         # init message
-        info = messaget.get('P')
+        info = message.get('P')
+
         if info is not None:
-            self.players[faction] += 1
+            self.players[int(faction)] += 1
             if self.is_game_ready():
                 log.info('All bots accounted for, Game is ready')
             return

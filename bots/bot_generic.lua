@@ -77,12 +77,15 @@ end
 -- From the original dotaservice
 local function get_player_info()
     local player_ids = {}
+
     for _, pid in pairs(GetTeamPlayers(TEAM_RADIANT)) do
         table.insert(player_ids, pid)
     end
+
     for _, pid in pairs(GetTeamPlayers(TEAM_DIRE)) do
         table.insert(player_ids, pid)
     end
+
     local players = {}
     for _, pid in pairs(player_ids) do
         local player = {}
@@ -92,6 +95,7 @@ local function get_player_info()
         player['hero'] = GetSelectedHeroName(pid)
         table.insert(players, player)
     end
+
     send_message({P = players})
 end
 

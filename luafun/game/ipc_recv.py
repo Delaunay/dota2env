@@ -8,13 +8,17 @@ from pygtail import Pygtail
 
 log = logging.getLogger(__name__)
 
-IPC_RECV = re.compile(r'\[IPC\](?P<faction>[0-9]).(?P<player>[0-9])\t(?P<message>.*)')
+IPC_RECV = re.compile(r'\[IPC\](?P<faction>[0-9])\.(?P<player>[0-9])\t(?P<message>.*)')
 
 
 async def ipc_recv(logfilename, handler, state, retries=10):
     """The only way for bots to send message back is through the log file
     we have standardized our log lines so we know which bot is sending us a message
     """
+    try:
+        os.remove(f'{logfilename}.offset')
+    except:
+        pass
 
     # wait for the file to be created
     for i in range(retries):
