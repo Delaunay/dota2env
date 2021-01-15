@@ -1,13 +1,13 @@
 PORT_TEAM_RADIANT = 12120
 PORT_TEAM_DIRE = 12121
 
-def dota2_aguments(paths, game_id, game_mode=1, host_timescale=2, dedicated, ticks_per_observation=30):
+def dota2_aguments(paths, game_id, game_mode=1, host_timescale=2, dedicated=True, ticks_per_observation=30):
     additional = []
 
     if dedicated:
         additional.append('-dedicated')
 
-    return dedicated + [
+    return additional + [
         '-botworldstatesocket_threaded',
         '-botworldstatetosocket_frames', '{}'.format(ticks_per_observation),
         '-botworldstatetosocket_radiant', '{}'.format(PORT_TEAM_RADIANT),

@@ -17,7 +17,8 @@ class ProtoGenerator:
         self.object = [
             'from dataclasses import dataclass',
             'from enum import IntEnum',
-            ''
+            'from typing import Optional, List',
+            '',
         ]
 
 
@@ -33,12 +34,18 @@ class ProtoGenerator:
         
         return name
 
-    def generate(self, name):
-        for message in self.parser.messages:
-            self.generate_entity(message)
+    def generate(self, filename):
+        for name in self.parser.type_array:
+            for message in self.parser.messages:
+                _, tname, _ = message
 
-        with open(name, 'w') as f:
+                if name == tname:
+                    print(name, tname)
+                    self.generate_entity(message)
+
+        with open(filename, 'w') as f:
             f.write('\n'.join(self.object))
+        
 
     def generate_entity(self, m):
         kind, name, fields = m
@@ -48,6 +55,9 @@ class ProtoGenerator:
 
         if kind == 'E':
             return self.genererate_enum(name, fields)
+
+        if kind == 'O':
+            return self.generate_oneof(name, fields)
 
         print(kind)
 

@@ -2,14 +2,6 @@ from dataclasses import dataclass
 from enum import IntEnum
 from typing import Optional, List
 
-
-class Type:
-    pass
-
-
-class ActionData:
-    pass
-
 # .CMsgBotWorldState.Vector
 @dataclass
 class Vector:
@@ -319,6 +311,48 @@ class OceanAnnotation:
 class Header:
     startTime: Optional[float]
     name: Optional[str]
+
+# @union
+@dataclass
+class ActionData:
+    moveToLocation: Optional[MoveToLocation]
+    moveToTarget: Optional[MoveToTarget]
+    attackMove: Optional[AttackMove]
+    attackTarget: Optional[AttackTarget]
+    castLocation: Optional[CastLocation]
+    castTarget: Optional[CastTarget]
+    castTree: Optional[CastTree]
+    cast: Optional[Cast]
+    castToggle: Optional[CastToggle]
+    holdLocation: Optional[HoldLocation]
+    trainAbility: Optional[TrainAbility]
+    dropItem: Optional[DropItem]
+    pickUpItem: Optional[PickUpItem]
+    pickupRune: Optional[PickupRune]
+    purchaseItem: Optional[PurchaseItem]
+    sellItem: Optional[SellItem]
+    disassembleItem: Optional[DisassembleItem]
+    setCombineLockItem: Optional[SetCombineLockItem]
+    stop: Optional[Stop]
+    chat: Optional[Chat]
+    swapItems: Optional[SwapItems]
+    useShrine: Optional[UseShrine]
+    courier: Optional[Courier]
+    getActualIncomingDamage: Optional[GetActualIncomingDamage]
+    getEstimatedDamageToTarget: Optional[GetEstimatedDamageToTarget]
+    glyph: Optional[Glyph]
+    softReset: Optional[SoftReset]
+    buyback: Optional[Buyback]
+    scriptingDebugDrawText: Optional[ScriptingDebugDrawText]
+    scriptingDebugDrawLine: Optional[ScriptingDebugDrawLine]
+    scriptingDebugDrawScreenText: Optional[ScriptingDebugDrawScreenText]
+    scriptingDebugDrawBox: Optional[ScriptingDebugDrawBox]
+    scriptingDebugDrawCircle: Optional[ScriptingDebugDrawCircle]
+    scriptingDebugDrawClear: Optional[ScriptingDebugDrawClear]
+    scriptingDebugScreenTextPretty: Optional[ScriptingDebugScreenTextPretty]
+    moveDirectly: Optional[MoveToLocation]
+    oceanWinGame: Optional[OceanWinGame]
+    oceanReplayCorrectTime: Optional[OceanReplayCorrectTime]
 
 # .CMsgBotWorldState.Action
 @dataclass
@@ -651,48 +685,6 @@ class Type(IntEnum):
     SCRIPTING_DEBUG_DRAW_CLEAR = 61
     SCRIPTING_DEBUG_SCREEN_TEXT_PRETTY = 65
     DOTA_UNIT_ORDER_MOVE_DIRECTLY = 62
-
-# @union
-@dataclass
-class ActionData:
-    moveToLocation: Optional[MoveToLocation]
-    moveToTarget: Optional[MoveToTarget]
-    attackMove: Optional[AttackMove]
-    attackTarget: Optional[AttackTarget]
-    castLocation: Optional[CastLocation]
-    castTarget: Optional[CastTarget]
-    castTree: Optional[CastTree]
-    cast: Optional[Cast]
-    castToggle: Optional[CastToggle]
-    holdLocation: Optional[HoldLocation]
-    trainAbility: Optional[TrainAbility]
-    dropItem: Optional[DropItem]
-    pickUpItem: Optional[PickUpItem]
-    pickupRune: Optional[PickupRune]
-    purchaseItem: Optional[PurchaseItem]
-    sellItem: Optional[SellItem]
-    disassembleItem: Optional[DisassembleItem]
-    setCombineLockItem: Optional[SetCombineLockItem]
-    stop: Optional[Stop]
-    chat: Optional[Chat]
-    swapItems: Optional[SwapItems]
-    useShrine: Optional[UseShrine]
-    courier: Optional[Courier]
-    getActualIncomingDamage: Optional[GetActualIncomingDamage]
-    getEstimatedDamageToTarget: Optional[GetEstimatedDamageToTarget]
-    glyph: Optional[Glyph]
-    softReset: Optional[SoftReset]
-    buyback: Optional[Buyback]
-    scriptingDebugDrawText: Optional[ScriptingDebugDrawText]
-    scriptingDebugDrawLine: Optional[ScriptingDebugDrawLine]
-    scriptingDebugDrawScreenText: Optional[ScriptingDebugDrawScreenText]
-    scriptingDebugDrawBox: Optional[ScriptingDebugDrawBox]
-    scriptingDebugDrawCircle: Optional[ScriptingDebugDrawCircle]
-    scriptingDebugDrawClear: Optional[ScriptingDebugDrawClear]
-    scriptingDebugScreenTextPretty: Optional[ScriptingDebugScreenTextPretty]
-    moveDirectly: Optional[MoveToLocation]
-    oceanWinGame: Optional[OceanWinGame]
-    oceanReplayCorrectTime: Optional[OceanReplayCorrectTime]
 
 # .CMsgBotWorldState
 @dataclass

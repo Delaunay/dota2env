@@ -1,7 +1,8 @@
 import asyncio
 import copy
 
-from luafun.game.states import WorldStateDelta
+import luafun.game.dota2.state_types as msg
+
 
 class FactionState:
     def __init__(self):
@@ -15,9 +16,9 @@ class FactionState:
         return copy.deepcopy(self)
 
 
-async def apply_diff(state, delta: WorldStateDelta):
-    async with self.lock:
+async def apply_diff(state, delta: msg.CMsgBotWorldState):
+    async with state.lock:
         state.s += 1
         # check s == e to know if the apply has finished
-        print(delta)
+        # print(delta)
         state.e += 1

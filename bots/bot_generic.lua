@@ -103,7 +103,8 @@ end
 -- A single Game will generate 10 sample, one for each bot
 local function delegate_think()
     -- Ready to process a new message
-    send_message({S = "R"})
+    -- Usefully for debugging but it pollutes the console
+    -- send_message({S = "R"})
 
     -- Message uid used to know if we missed a message
     local uid = 0

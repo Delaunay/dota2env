@@ -41,6 +41,9 @@ async def worldstate_listener(port, message_handler, state, retries=10):
 
         world_state = CMsgBotWorldState()
         world_state.ParseFromString(data)
-        message_handler(world_state)
+
+        # wait finishing processing the state before
+        # getting a new one
+        await message_handler(world_state)
 
     log.debug('World state listener shutting down')

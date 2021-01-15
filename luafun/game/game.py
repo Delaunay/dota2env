@@ -9,7 +9,8 @@ from luafun.game.args import dota2_aguments, PORT_TEAM_RADIANT, PORT_TEAM_DIRE
 from luafun.game.modes import DOTA_GameMode
 from luafun.game.ipc_recv import ipc_recv
 from luafun.game.ipc_send import ipc_send
-from luafun.game.states import worldstate_listener, WorldStateDelta
+import luafun.game.dota2.state_types as msg
+from luafun.game.states import worldstate_listener
 
 
 log = logging.getLogger(__name__)
@@ -47,15 +48,16 @@ class Dota2Game:
 
         self.dota_args = [self.paths.executable_path] + dota2_aguments(
             self.paths,
-            self.game_id,
-            self.game_mode,
-            self.game_time_scale,
-            dedicated
+            game_id=self.game_id,
+            game_mode=self.game_mode,
+            host_timescale=self.game_time_scale,
+            dedicated=dedicated
         )
 
         self.loop = asyncio.get_event_loop()
         self.async_tasks = None
         self.state = State()
+        self.process = None
 
     def launch_dota(self):
         # make sure the log is empty so we do not get garbage from the previous run
@@ -67,13 +69,13 @@ class Dota2Game:
 
         # this is sufficient on windows
         # TODO check on linux
-        subprocess.Popen(self.dota_args)
+        self.process = subprocess.Popen(self.dota_args)
 
     def start_ipc(self):
         self.async_tasks = asyncio.gather(
             # State Capture
-            worldstate_listener(PORT_TEAM_RADIANT, self.radiant_state, self.state),
-            worldstate_listener(PORT_TEAM_DIRE, self.dire_state, self.state),
+            worldstate_listener(PORT_TEAM_RADIANT, self.update_radiant_state, self.state),
+            worldstate_listener(PORT_TEAM_DIRE, self.update_dire_state, self.state),
 
             # IPC receive
             ipc_recv(self.paths.ipc_recv_handle, self.receive_message, self.state)
@@ -96,11 +98,11 @@ class Dota2Game:
         """Receive a message directly from the bot"""
         print(f'{faction} {player_id} {message}')
 
-    def dire_state(self, messsage: WorldStateDelta):
+    async def update_dire_state(self, messsage: msg.CMsgBotWorldState):
         """Receive a state diff from the game for dire"""
         pass
 
-    def radiant_state(self, message: WorldStateDelta):
+    async def update_radiant_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for radiant"""
         pass
 
@@ -121,6 +123,9 @@ class Dota2Game:
     def __exit__(self, exception_type, exception_value, exception_traceback):
         self.cleanup()
         log.debug("Game has finished")
+        if self.process.poll() is None:
+            self.process.terminate()
+
 
 
 def main():

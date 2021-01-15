@@ -1,6 +1,7 @@
 import os
 
 EXECUTABLE_PATH = '/game/bin/win64/dota2.exe'
+BOT_PATH = '/game/dota/scripts/vscripts/bots/'
 CONSOLE_LOG = '/game/dota/scripts/vscripts/bots/console.log'
 SEND_MSG = '/game/dota/scripts/vscripts/bots/IPC_recv.lua'
 
@@ -43,3 +44,7 @@ class DotaPaths:
     @property
     def ipc_send_handle(self):
         return self.path + '/' + SEND_MSG
+
+    def bot_file(self, filename):
+        """Return a file path that is located in the bot folder"""
+        return self.path + '/' + BOT_PATH + filename

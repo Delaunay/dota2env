@@ -31,6 +31,8 @@ class ProtoParser:
         self.nested_message = []
         self.path = dict()
         self.old = dict()
+        self.type_order = dict()
+        self.type_array = []
         self.messages = []
         self.pos = 0
 
@@ -72,7 +74,16 @@ class ProtoParser:
             tok = self.token()
 
         self.expect('}'), self.next()
-        return ('O', name, fields)
+
+        print(name, name in self.type_order)
+        if name not in self.type_order:
+            self.type_order[name] = len(self.type_order)
+            self.type_array.append(name)
+
+        self.messages.append(('O', name, fields))
+
+        fname = name[0].lower() + name[1:]
+        return 'F', 0, fname, name, ''
 
     def parse_field(self):
         qualifier = ''
@@ -105,6 +116,11 @@ class ProtoParser:
         elif field_id[-1] == ';':
             field_id = field_id[:-1]
 
+        new_name = field_type.split('.')[-1]
+        if new_name not in self.type_order:
+            self.type_order[new_name] = len(self.type_order)
+            self.type_array.append(new_name)
+        
         log.debug(f'parse field {qualifier} {field_name}: {field_type} = {field_id}')
         return 'F', field_id, field_name, field_type, qualifier
 
@@ -147,6 +163,11 @@ class ProtoParser:
         self.expect('}'), self.next()
         self.messages.append(('E', name, fields))
         self.nested_message.pop()
+
+        if name not in self.type_order:
+            self.type_order[name] = len(self.type_order)
+            self.type_array.append(name)
+
         log.debug(f'<< {name}')
 
     def parse_message(self):
@@ -179,6 +200,11 @@ class ProtoParser:
         self.expect('}'), self.next()
         self.nested_message.pop()
         self.messages.append(('M', name, fields))
+        
+        if name not in self.type_order:
+            self.type_order[name] = len(self.type_order)
+            self.type_array.append(name)
+
         log.debug(f'<< {name}')
 
 
