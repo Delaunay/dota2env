@@ -1,4 +1,5 @@
 import asyncio
+from collections import defaultdict
 import logging
 
 from luafun.game.game import Dota2Game
@@ -44,6 +45,8 @@ class Dota2Env(Dota2Game):
         }
         self.radiant_message = open(self.paths.bot_file('out_radiant.txt'), 'w')
         self.dire_message = open(self.paths.bot_file('out_dire.txt'), 'w')
+        self.reply_count = defaultdict(int)
+        self.bot_count = 10
 
     def cleanup(self):
         self.radiant_message.close()
@@ -78,9 +81,13 @@ class Dota2Env(Dota2Game):
                 log.info('All bots accounted for, Game is ready')
             return
 
+        # Message ack
         ack = message.get('A')
         if ack is not None:
-            log.info(f'(Team: {faction}, Player {player_id}) Message received')
+            self.reply_count[ack] += 1
+            if self.reply_count[ack] == self.bot_count:
+                log.debug(f'(uid: {ack}) message received by all {self.bot_count} bots')
+                self.reply_count.pop(ack)
     
     # Training data
     def generate_bot_state(self):
