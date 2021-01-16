@@ -2,7 +2,7 @@ local dkjson = require('game/dkjson')
 
 local RECV_MSG = 'bots/IPC_recv'
 local player_id = GetBot():GetPlayerID()
-local faction = GetBot():GetTeam()
+local faction = '' .. GetBot():GetTeam()
 local uid = 0
 local ipc_prefix = '[IPC]' .. faction .. '.' .. player_id
 
@@ -46,6 +46,8 @@ local function receive_message()
             -- Make sure we do not execute a message twice
             local new_uid = internal['uid']
             if new_uid <= uid then
+                -- This is expected to happen relatively often
+                -- send_message({E = "Message already read " .. uid .. " " .. new_uid})
                 return nil
             end
 
@@ -67,8 +69,14 @@ local function receive_message()
                 uid = new_uid
                 send_message({A = uid})
                 return player_dat
+            else
+                send_message({E = "No faction found in message: " .. json_string})
             end
+        else
+            send_message({E = "json string not found"})
         end
+    else
+        send_message({E = "No file found"})
     end
 
     return nil
@@ -101,7 +109,7 @@ end
 
 -- Decode the message and execute the requested command
 local function execute_rpc(message)
-
+    send_message({E = message})
 end
 
 -- A single Game will generate 10 sample, one for each bot

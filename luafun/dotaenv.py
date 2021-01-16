@@ -72,12 +72,15 @@ class Dota2Env(Dota2Game):
 
         # init message
         info = message.get('P')
-
         if info is not None:
             self.players[int(faction)] += 1
             if self.is_game_ready():
                 log.info('All bots accounted for, Game is ready')
             return
+
+        ack = message.get('A')
+        if ack is not None:
+            log.info(f'(Team: {faction}, Player {player_id}) Message received')
     
     # Training data
     def generate_bot_state(self):
