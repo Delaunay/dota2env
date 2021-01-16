@@ -77,8 +77,6 @@ class Dota2Game:
         if os.path.exists(self.paths.ipc_send_handle):
             os.remove(self.paths.ipc_send_handle)
 
-        # this is sufficient on windows
-        # TODO check on linux
         self.process = subprocess.Popen(self.dota_args)
 
     def start_ipc(self):

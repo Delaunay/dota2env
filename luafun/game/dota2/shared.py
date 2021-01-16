@@ -2,6 +2,12 @@ from dataclasses import dataclass
 from enum import IntEnum
 from typing import Optional, List
 
+class fixed64:
+    pass
+
+
+uint64 = int
+
 # .DOTA_GameMode
 class DOTA_GameMode(IntEnum):
     DOTA_GAMEMODE_NONE = 0

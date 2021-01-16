@@ -4,7 +4,7 @@ import logging
 from luafun.game.game import Dota2Game
 from luafun.statestich import FactionState, apply_diff
 import luafun.game.dota2.state_types as msg
-
+import luafun.game.dota2.shared as enums
 
 log = logging.getLogger(__name__)
 
@@ -17,8 +17,8 @@ def team_name(faction):
 
 async def _acquire_faction(state):
     # wait for latest diff to be applied
-    async with state.lock:
-        state.r += 1
+    async with state._lock:
+        state._r += 1
         return state.copy()
 
 def acquire_state(state):
