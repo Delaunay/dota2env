@@ -126,6 +126,9 @@ class ProtoGenerator:
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
-    p = ProtoGenerator('C:/Users/Newton/work/luafun/luafun/game/dota2/dota_gcmessages_common_bot_script.proto')
-    p.generate('C:/Users/Newton/work/luafun/luafun/game/dota2/state_types.py')
+    # p = ProtoGenerator('C:/Users/Newton/work/luafun/luafun/game/dota2/dota_gcmessages_common_bot_script.proto')
+    # p.generate('C:/Users/Newton/work/luafun/luafun/game/dota2/state_types.py')
+
+    p = ProtoGenerator('C:/Users/Newton/work/luafun/luafun/game/dota2/dota_shared_enums.proto')
+    p.generate('C:/Users/Newton/work/luafun/luafun/game/dota2/shared.py')
 

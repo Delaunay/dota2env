@@ -47,7 +47,9 @@ class Dota2Env(Dota2Game):
     async def update_dire_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for dire"""
         await apply_diff(self.dire_state, message)
+        self.dire_message.write(str(type(message)) + '\n')
         self.dire_message.write(str(message))
+        self.dire_message.write('-------\n')
 
     async def update_radiant_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for radiant"""
