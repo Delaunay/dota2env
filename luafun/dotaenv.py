@@ -1,9 +1,7 @@
 import asyncio
-from collections import defaultdict
 import logging
 
 from luafun.game.game import Dota2Game
-from luafun.game.ipc_send import TEAM_RADIANT, TEAM_DIRE
 from luafun.statestich import FactionState, apply_diff
 import luafun.game.dota2.state_types as msg
 
@@ -39,21 +37,12 @@ class Dota2Env(Dota2Game):
         super(Dota2Env, self).__init__(path, dedicated)
         self.radiant_state = FactionState()
         self.dire_state = FactionState()
-        self.players = {
-            TEAM_RADIANT: 0,
-            TEAM_DIRE: 0
-        }
         self.radiant_message = open(self.paths.bot_file('out_radiant.txt'), 'w')
         self.dire_message = open(self.paths.bot_file('out_dire.txt'), 'w')
-        self.reply_count = defaultdict(int)
-        self.bot_count = 10
 
     def cleanup(self):
         self.radiant_message.close()
         self.dire_message.close()
-
-    def is_game_ready(self):
-        return self.players[TEAM_RADIANT] + self.players[TEAM_DIRE] == 10
 
     async def update_dire_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for dire"""
@@ -67,27 +56,7 @@ class Dota2Env(Dota2Game):
 
     def receive_message(self, faction: int, player_id: int, message: dict):
         """We only use log to get errors back if any"""
-        # error processing
-        error = message.get('E')
-        if error is not None:
-            log.error(f'recv {team_name(faction)} {player_id} {error}')
-            return
-
-        # init message
-        info = message.get('P')
-        if info is not None:
-            self.players[int(faction)] += 1
-            if self.is_game_ready():
-                log.info('All bots accounted for, Game is ready')
-            return
-
-        # Message ack
-        ack = message.get('A')
-        if ack is not None:
-            self.reply_count[ack] += 1
-            if self.reply_count[ack] == self.bot_count:
-                log.debug(f'(uid: {ack}) message received by all {self.bot_count} bots')
-                self.reply_count.pop(ack)
+        pass
     
     # Training data
     def generate_bot_state(self):

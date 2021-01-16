@@ -1,4 +1,5 @@
 import asyncio
+from collections import defaultdict
 import logging
 import os
 import subprocess
@@ -8,7 +9,7 @@ from luafun.game.config import DotaPaths
 from luafun.game.args import dota2_aguments, PORT_TEAM_RADIANT, PORT_TEAM_DIRE
 from luafun.game.modes import DOTA_GameMode
 from luafun.game.ipc_recv import ipc_recv
-from luafun.game.ipc_send import ipc_send
+from luafun.game.ipc_send import ipc_send, TEAM_RADIANT, TEAM_DIRE
 import luafun.game.dota2.state_types as msg
 from luafun.game.states import worldstate_listener
 
@@ -58,6 +59,15 @@ class Dota2Game:
         self.async_tasks = None
         self.state = State()
         self.process = None
+        self.reply_count = defaultdict(int)
+        self.bot_count = 10
+        self.players = {
+            TEAM_RADIANT: 0,
+            TEAM_DIRE: 0
+        }
+
+    def is_game_ready(self):
+        return self.players[TEAM_RADIANT] + self.players[TEAM_DIRE] == self.bot_count
 
     def launch_dota(self):
         # make sure the log is empty so we do not get garbage from the previous run
@@ -78,7 +88,7 @@ class Dota2Game:
             worldstate_listener(PORT_TEAM_DIRE, self.update_dire_state, self.state),
 
             # IPC receive
-            ipc_recv(self.paths.ipc_recv_handle, self.receive_message, self.state)
+            ipc_recv(self.paths.ipc_recv_handle, self._receive_message, self.state)
         )
 
     def stop():
@@ -93,6 +103,32 @@ class Dota2Game:
     def wait(self):
         """Wait for the asyncio coroutine to finish"""
         self.loop.run_until_complete(self.async_tasks)
+
+    def _receive_message(self, faction: int, player_id: int, message: dict):
+        # error processing
+        error = message.get('E')
+        if error is not None:
+            log.error(f'recv {team_name(faction)} {player_id} {error}')
+            return
+
+        # init message
+        info = message.get('P')
+        if info is not None:
+            self.players[int(faction)] += 1
+            if self.is_game_ready():
+                log.debug('All bots accounted for, Game is ready')
+            return
+
+        # Message ack
+        ack = message.get('A')
+        if ack is not None:
+            self.reply_count[ack] += 1
+            if self.reply_count[ack] == self.bot_count:
+                log.debug(f'(uid: {ack}) message received by all {self.bot_count} bots')
+                self.reply_count.pop(ack)
+            return
+
+        self.receive_message(faction, player_id, message)
 
     def receive_message(self, faction: int, player_id: int, message: dict):
         """Receive a message directly from the bot"""
