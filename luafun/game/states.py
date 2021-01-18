@@ -8,7 +8,7 @@ from luafun.game.dota2.dota_gcmessages_common_bot_script_pb2 import CMsgBotWorld
 log = logging.getLogger(__name__)
 
 
-async def worldstate_listener(port, message_handler, state, retries=10):
+async def worldstate_listener(port, message_handler, game, retries=10):
     """Dota2 send us struct with what changed in the world
     we need to stitch them together to get the whole picture
     """
@@ -33,7 +33,7 @@ async def worldstate_listener(port, message_handler, state, retries=10):
 
         if len(data) != 4:
             log.debug('Could not read message length')
-            state.running = False
+            game.stop()
             break
 
         n_bytes = unpack("@I", data)[0]

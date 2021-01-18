@@ -1,3 +1,6 @@
+"""This module encapsulate the basic Dota2Game API and make it a RL gym environment
+that is suitable for machine learning
+"""
 import asyncio
 import logging
 
@@ -22,8 +25,7 @@ async def _acquire_faction(state):
         return state.copy()
 
 def acquire_state(state):
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(_acquire_faction(state))
+    return asyncio.run(_acquire_faction(state))
 
 
 class Dota2Env(Dota2Game):
@@ -43,6 +45,14 @@ class Dota2Env(Dota2Game):
     def cleanup(self):
         self.radiant_message.close()
         self.dire_message.close()
+
+    @property
+    async def dire_state_async(self):
+        return await _acquire_faction(self._dire_state)
+
+    @property
+    async def radiant_state_async(self):
+        return await _acquire_faction(self._radiant_state)
 
     @property
     def dire_state(self):

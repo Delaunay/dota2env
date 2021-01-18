@@ -8,6 +8,7 @@ import uuid
 from luafun.game.config import DotaPaths
 from luafun.game.args import dota2_aguments, PORT_TEAM_RADIANT, PORT_TEAM_DIRE
 from luafun.game.modes import DOTA_GameMode
+from luafun.game.http_inspect import http_inspect
 from luafun.game.ipc_recv import ipc_recv
 from luafun.game.ipc_send import ipc_send, TEAM_RADIANT, TEAM_DIRE
 import luafun.game.dota2.state_types as msg
@@ -46,6 +47,7 @@ class Dota2Game:
         self.game_id = str(uuid.uuid1())
         self.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_AP)
         self.game_time_scale = 2
+        self.http_server = None
 
         self.dota_args = [self.paths.executable_path] + dota2_aguments(
             self.paths,
@@ -55,7 +57,9 @@ class Dota2Game:
             dedicated=dedicated
         )
 
-        self.loop = asyncio.new_event_loop()
+        self.loop = asyncio.get_event_loop()
+        # self.loop = asyncio.new_event_loop()
+        # asyncio.set_event_loop(self.loop)
         self.async_tasks = None
         self.state = State()
         self.process = None
@@ -88,14 +92,17 @@ class Dota2Game:
     def start_ipc(self):
         self.async_tasks = asyncio.gather(
             # State Capture
-            worldstate_listener(PORT_TEAM_RADIANT, self.update_radiant_state, self.state),
-            worldstate_listener(PORT_TEAM_DIRE, self.update_dire_state, self.state),
+            worldstate_listener(PORT_TEAM_RADIANT, self.update_radiant_state, self),
+            worldstate_listener(PORT_TEAM_DIRE, self.update_dire_state, self),
 
             # IPC receive
-            ipc_recv(self.paths.ipc_recv_handle, self._receive_message, self.state)
+            ipc_recv(self.paths.ipc_recv_handle, self._receive_message, self.state),
+
+            # Debug HTTP server, so state can be inspected at runtime
+            http_inspect(self)
         )
 
-    def stop():
+    def stop(self):
         """Stop the game in progress
         
         Notes
@@ -104,9 +111,25 @@ class Dota2Game:
         """
         self.state.running = False
 
+        # Stop HTTP server
+        if self.http_server is not None:
+            log.debug('Stopping HTTP server')
+        
+            if hasattr(self.http_server, 'cancel'):
+                self.http_server.cancel()
+            else:
+                self.http_server.close()
+
     def wait(self):
         """Wait for the asyncio coroutine to finish"""
-        self.loop.run_until_complete(self.async_tasks)
+        try:
+            self.loop.run_until_complete(self.async_tasks)
+        except Exception as e:
+            if self.state.running:
+                log.error(f'Error happened while game was running {e}')
+            else:
+                log.debug(f'Error happened on shutting down {e}')
+        
 
     def _receive_message(self, faction: int, player_id: int, message: dict):
         # error processing
@@ -165,7 +188,6 @@ class Dota2Game:
         log.debug("Game has finished")
         if self.process.poll() is None:
             self.process.terminate()
-
 
 
 def main():
