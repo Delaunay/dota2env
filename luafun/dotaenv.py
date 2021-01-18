@@ -35,8 +35,8 @@ class Dota2Env(Dota2Game):
     """
     def __init__(self, path, dedicated=True):
         super(Dota2Env, self).__init__(path, dedicated)
-        self.radiant_state = FactionState()
-        self.dire_state = FactionState()
+        self._radiant_state = FactionState()
+        self._dire_state = FactionState()
         self.radiant_message = open(self.paths.bot_file('out_radiant.txt'), 'w')
         self.dire_message = open(self.paths.bot_file('out_dire.txt'), 'w')
 
@@ -44,16 +44,24 @@ class Dota2Env(Dota2Game):
         self.radiant_message.close()
         self.dire_message.close()
 
+    @property
+    def dire_state(self):
+        return acquire_state(self._dire_state)
+
+    @property
+    def radiant_state(self):
+        return acquire_state(self._radiant_state)
+
     async def update_dire_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for dire"""
-        await apply_diff(self.dire_state, message)
+        await apply_diff(self._dire_state, message)
         self.dire_message.write(str(type(message)) + '\n')
         self.dire_message.write(str(message))
         self.dire_message.write('-------\n')
 
     async def update_radiant_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for radiant"""
-        await apply_diff(self.radiant_state, message)
+        await apply_diff(self._radiant_state, message)
         self.radiant_message.write(str(message))    
 
     def receive_message(self, faction: int, player_id: int, message: dict):
@@ -67,8 +75,8 @@ class Dota2Env(Dota2Game):
         
         In a standard self-play Game this would return 10 states
         """
-        dire = acquire_state(self.dire_state)
-        radiant = acquire_state(self.radiant_state)
+        dire = acquire_state(self._dire_state)
+        radiant = acquire_state(self._radiant_state)
         pass
 
     # Action

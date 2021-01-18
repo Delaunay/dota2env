@@ -55,7 +55,7 @@ class Dota2Game:
             dedicated=dedicated
         )
 
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.new_event_loop()
         self.async_tasks = None
         self.state = State()
         self.process = None
@@ -71,11 +71,17 @@ class Dota2Game:
 
     def launch_dota(self):
         # make sure the log is empty so we do not get garbage from the previous run
-        if os.path.exists(self.paths.ipc_recv_handle):
-            os.remove(self.paths.ipc_recv_handle)
+        try:
+            if os.path.exists(self.paths.ipc_recv_handle):
+                os.remove(self.paths.ipc_recv_handle)
+        except Exception as e:
+            log.error(f'Error when removing file {e}')
 
-        if os.path.exists(self.paths.ipc_send_handle):
-            os.remove(self.paths.ipc_send_handle)
+        try:
+            if os.path.exists(self.paths.ipc_send_handle):
+                os.remove(self.paths.ipc_send_handle)
+        except Exception as e:
+            log.error(f'Error when removing file {e}')
 
         self.process = subprocess.Popen(self.dota_args)
 

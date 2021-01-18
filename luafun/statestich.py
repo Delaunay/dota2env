@@ -1,7 +1,9 @@
 import asyncio
+from collections import defaultdict
 import copy
 from dataclasses import dataclass, field
 import math
+from typing import List, Dict
 
 import luafun.game.dota2.state_types as msg
 import luafun.game.dota2.shared as enums
@@ -21,7 +23,7 @@ class GlobalGameState:
     time_spawn_neutral: float = 1 + GAME_START      # every 1 minutes
     time_spawn_bounty: float = GAME_START           # 0:00 and every 5 minutes after
     time_spawn_runes: float = 4 + GAME_START        # 4:00 and every 2 minutes after
-    time_since_enemy_courier: float                 # depecrated?
+    time_since_enemy_courier: float = 0             # depecrated?
     rosh_spawn_min: float = 0
     rosh_spawn_max: float = 0
     rosh_alive: bool = True
@@ -124,8 +126,8 @@ class FactionState:
     # internal data to generate some of the field
     # unit lookup etc...
     _roshan_dead: int = 0
-    _players: dict = field(default_factory=dict)
-    _units: dict = field(default_factory=dict)
+    _players: dict = field(default_factory=lambda:defaultdict(dict))
+    _units: dict = field(default_factory=lambda:defaultdict(dict))
 
 
     # State Management
@@ -179,7 +181,7 @@ async def apply_diff(state, delta: msg.CMsgBotWorldState):
         # ---
 
         # Roshan State
-        if delta.HasField('roshan_killed_events'):
+        for event in delta.roshan_killed_events:
             state._roshan_dead += 1
             rosh_spawn_min = g.game_time + 8 * 60
             rosh_spawn_max = g.game_time + 11 * 60
@@ -206,43 +208,43 @@ async def apply_diff(state, delta: msg.CMsgBotWorldState):
         # ---
 
         # Unit specific Event
-        if delta.HasField('players'):
+        for player in delta.players:
             pass
 
-        if delta.HasField('units'):
+        for unit in delta.units:
             pass
         # ---
 
         # Courier Event
-        if delta.HasField('couriers'):
+        for courier in delta.couriers:
             pass
 
-        if delta.HasField('courier_killed_events'):
+        for courier in delta.courier_killed_events:
             pass
         # -- 
 
         # Tree destruction event
-        if delta.HasField('tree_events'):
+        for tree in delta.tree_events:
             pass
         # -- 
 
         # Damage Event:
-        if delta.HasField('damage_events'):
+        for dmg in delta.damage_events:
             pass
         # --
 
         # Ability Event:
-        if delta.HasField('ability_events'):
+        for ability in delta.ability_events:
             pass
         # --
 
         # Rune info
-        if delta.HasField('rune_infos'):
-            pass 
+        for rune in delta.rune_infos:
+            pass
         # -- 
 
         # Item Drops (Neutral, Roshan)
-        if delta.HasField('dropped_items'):
+        for item in delta.dropped_items:
             pass
         # --
 
