@@ -156,6 +156,7 @@ def test_main():
         asyncio.run(http_inspect(GameMock()))
     except Exception as e:
         log.error(f'Error {str(e)}')
+        log.error(traceback.format_exc())
 
 
 if __name__ == '__main__':

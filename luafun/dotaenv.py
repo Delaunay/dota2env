@@ -3,6 +3,7 @@ that is suitable for machine learning
 """
 import asyncio
 import logging
+import traceback
 
 from luafun.game.game import Dota2Game
 from luafun.statestich import FactionState, apply_diff
@@ -64,14 +65,24 @@ class Dota2Env(Dota2Game):
 
     async def update_dire_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for dire"""
-        await apply_diff(self._dire_state, message)
+        try:
+            await apply_diff(self._dire_state, message)
+        except Exception as e:
+            log.error(f'Error happened during state stiching {e}')
+            log.error(traceback.format_exc())
+
         self.dire_message.write(str(type(message)) + '\n')
         self.dire_message.write(str(message))
         self.dire_message.write('-------\n')
 
     async def update_radiant_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for radiant"""
-        await apply_diff(self._radiant_state, message)
+        try:
+            await apply_diff(self._radiant_state, message)
+        except Exception as e:
+            log.error(f'Error happened during state stiching {e}')
+            log.error(traceback.format_exc())
+
         self.radiant_message.write(str(message))    
 
     def receive_message(self, faction: int, player_id: int, message: dict):

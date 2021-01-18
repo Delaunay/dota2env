@@ -139,8 +139,9 @@ class FactionState:
     # unit lookup etc...
     _roshan_dead: int = 0
     _players: Dict = field(default_factory=lambda:defaultdict(dict))
+    _couriers: Dict = field(default_factory=lambda:defaultdict(dict))
     _units: Dict = field(default_factory=lambda:defaultdict(dict))
-
+    _buildings: Dict = field(default_factory=lambda:defaultdict(dict))
 
     # State Management
     _lock: asyncio.Lock = field(default_factory=asyncio.Lock)
@@ -284,9 +285,26 @@ async def apply_diff(state, delta: msg.CMsgBotWorldState):
                 pdata[field.name] = value 
         
         for unit in delta.units:
-            udata = state._units[unit.handle]
-            unit = json.loads(MessageToJson(unit))
+            # Add Hero info into their own struct
+            # >>> Units that are constant
+            if unit.unit_type == msg.UnitType.HERO:
+                udata = state._players[unit.player_id]
+            
+            # exist for the the entire game
+            elif unit.unit_type == msg.UnitType.COURIER:
+                udata = state._couriers[unit.player_id]
+            
+            # They stay up for most of the game
+            elif unit.unit_type in (msg.UnitType.BUILDING, msg.UnitType.FORT, msg.UnitType.BARRACKS, msg.UnitType.TOWER):
+                udata = state._buildings[unit.handle]
+            # Neutrals + Roshan
 
+            # <<<
+            # CREEP_HERO, LANE_CREEP
+            else:
+                udata = state._units[unit.handle]
+
+            unit = json.loads(MessageToJson(unit, preserving_proto_field_name=True, use_integers_for_enums=True))
             for field, value in unit.items():
                 udata[field] = value
         # ---
