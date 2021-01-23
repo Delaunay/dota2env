@@ -3,14 +3,21 @@ that is suitable for machine learning
 """
 import asyncio
 import logging
+import os
 import traceback
 
 from luafun.game.game import Dota2Game
-from luafun.statestich import FactionState, apply_diff
 import luafun.game.dota2.state_types as msg
 import luafun.game.dota2.shared as enums
 
+from luafun.openai import models, stichers, states
+
 log = logging.getLogger(__name__)
+
+
+registered_states = states
+registered_models = models
+registered_stich = stichers
 
 
 def team_name(faction):
@@ -38,15 +45,26 @@ class Dota2Env(Dota2Game):
     """
     def __init__(self, path, dedicated=True):
         super(Dota2Env, self).__init__(path, dedicated)
-        self._radiant_state = FactionState()
-        self._dire_state = FactionState()
+        # For debugging only
         self.radiant_message = open(self.paths.bot_file('out_radiant.txt'), 'w')
         self.dire_message = open(self.paths.bot_file('out_dire.txt'), 'w')
+
+        # Get factories necessary for our model
+        self.setup_name = 'openai-mid'
+
+        # Function to stich state together
+        self.sticher = stichers[self.setup_name]
+
+        # State per faction
+        self._radiant_state = states[self.setup_name]()
+        self._dire_state = states[self.setup_name]()
 
     def cleanup(self):
         self.radiant_message.close()
         self.dire_message.close()
 
+    # Random Access state getter
+    # waits for the stiching to be finished and fetch the observation
     @property
     async def dire_state_async(self):
         return await _acquire_faction(self._dire_state)
@@ -63,10 +81,11 @@ class Dota2Env(Dota2Game):
     def radiant_state(self):
         return acquire_state(self._radiant_state)
 
+    # For states we should have a queue of state to observe
     async def update_dire_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for dire"""
         try:
-            await apply_diff(self._dire_state, message)
+            await self.sticher(self._dire_state, message)
         except Exception as e:
             log.error(f'Error happened during state stiching {e}')
             log.error(traceback.format_exc())
@@ -78,7 +97,7 @@ class Dota2Env(Dota2Game):
     async def update_radiant_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for radiant"""
         try:
-            await apply_diff(self._radiant_state, message)
+            await self.sticher(self._radiant_state, message)
         except Exception as e:
             log.error(f'Error happened during state stiching {e}')
             log.error(traceback.format_exc())

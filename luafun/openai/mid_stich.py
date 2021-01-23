@@ -344,6 +344,9 @@ async def apply_diff(state, delta: msg.CMsgBotWorldState):
 
         state._e += 1
 
+
+
+
 if __name__ == '__main__':
     # from collections imort defaultdict
     from luafun.utils.python_fix import asdict

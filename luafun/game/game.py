@@ -6,7 +6,7 @@ import subprocess
 import uuid
 
 from luafun.game.config import DotaPaths
-from luafun.game.args import dota2_aguments, PORT_TEAM_RADIANT, PORT_TEAM_DIRE
+from luafun.game.args import DotaOptions
 from luafun.game.modes import DOTA_GameMode
 from luafun.game.http_inspect import http_inspect
 from luafun.game.ipc_recv import ipc_recv
@@ -44,19 +44,9 @@ class Dota2Game:
     """
     def __init__(self, path=None, dedicated=True):
         self.paths = DotaPaths(path)
-        self.game_id = str(uuid.uuid1())
-        self.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_AP)
-        self.game_time_scale = 2
+        self.options = DotaOptions(dedicated=dedicated)
         self.http_server = None
-
-        self.dota_args = [self.paths.executable_path] + dota2_aguments(
-            self.paths,
-            game_id=self.game_id,
-            game_mode=self.game_mode,
-            host_timescale=self.game_time_scale,
-            dedicated=dedicated
-        )
-
+        self.args = None
         self.loop = asyncio.get_event_loop()
         # self.loop = asyncio.new_event_loop()
         # asyncio.set_event_loop(self.loop)
@@ -87,13 +77,15 @@ class Dota2Game:
         except Exception as e:
             log.error(f'Error when removing file {e}')
 
-        self.process = subprocess.Popen(self.dota_args)
+        # save the arguments of the current game for visibility
+        self.args = [self.paths.executable_path] + self.options.args(self.paths)
+        self.process = subprocess.Popen(self.args )
 
     def start_ipc(self):
         self.async_tasks = asyncio.gather(
             # State Capture
-            worldstate_listener(PORT_TEAM_RADIANT, self.update_radiant_state, self),
-            worldstate_listener(PORT_TEAM_DIRE, self.update_dire_state, self),
+            worldstate_listener(self.options.port_radiant, self.update_radiant_state, self),
+            worldstate_listener(self.options.port_dire, self.update_dire_state, self),
 
             # IPC receive
             ipc_recv(self.paths.ipc_recv_handle, self._receive_message, self.state),
