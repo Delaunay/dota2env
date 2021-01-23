@@ -26,6 +26,8 @@ class State:
         self.running = True
 
 
+SECONDS_PER_TICK = 1 / 30
+
 class Dota2Game:
     """Simple interface to listen and send messages to a running dota2 game instance
     This class only stich the different components together to provide a unified API over them
@@ -59,6 +61,15 @@ class Dota2Game:
             TEAM_RADIANT: 0,
             TEAM_DIRE: 0
         }
+
+    @property
+    def deadline(self):
+        """Return the inference time limit"""
+        return SECONDS_PER_TICK * self.options.ticks_per_observation
+
+    @property
+    def running(self):
+        return self.state.running
 
     def is_game_ready(self):
         return self.players[TEAM_RADIANT] + self.players[TEAM_DIRE] == self.bot_count

@@ -9,6 +9,7 @@ class InferenceEngine:
 
     def __init__(self, storage, model):
         self.storage = storage
+        # This is the old policy
         self.model = models
 
     def infer(self, obs):
