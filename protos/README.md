@@ -5,5 +5,5 @@
 * https://github.com/SteamDatabase/GameTracking-Dota2/blob/master/Protobufs/dota_gcmessages_common_bot_script.proto
 
 ```
-protoc --proto_path=. --python_out=../luafun/game/dota2 *
+protoc --proto_path=. --python_out=../luafun/game/dota2 *.go
 ```

@@ -29,23 +29,27 @@ async def worldstate_listener(port, message_handler, game, retries=10):
         return
 
     error_count = 0
+    msg_count = 0
     while True:
-        data = await reader.read(4)
+        msg_size = await reader.read(4)
 
-        if len(data) != 4:
+        if len(msg_size) != 4:
             log.debug('Could not read message length')
             game.stop()
             break
 
         try:
-            n_bytes = unpack("@I", data)[0]
+            n_bytes = unpack("@I", msg_size)[0]
             data = await reader.read(n_bytes)
+
             world_state = CMsgBotWorldState()
             world_state.ParseFromString(data)
+            msg_count += 1
         except Exception as e:
-            log.debug(f'Error when reading world state: {e}')
+            log.debug(f'Error when reading world state: {e} after {msg_count} success')
+            log.debug(f'Size: {n_bytes}  {msg_size} | Message: {data[:10]}')
             error_count += 1
-            continue
+            # raise
 
         # wait finishing processing the state before
         # getting a new one
