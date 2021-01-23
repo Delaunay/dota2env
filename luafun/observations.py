@@ -4,7 +4,13 @@ from luafun.utils.option import option
 
 
 class ObservationSampler:
-    def __init__(self, timestep):
+    """
+    Parameters
+    ----------
+    timestep: int
+        Number of observation needed for our model when sampling
+    """
+    def __init__(self, dataset, timestep):
         pass
 
 

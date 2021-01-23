@@ -3,6 +3,7 @@ from collections import defaultdict
 import logging
 import os
 import subprocess
+import traceback
 import uuid
 
 from luafun.game.config import DotaPaths
@@ -130,6 +131,7 @@ class Dota2Game:
         except Exception as e:
             if self.state.running:
                 log.error(f'Error happened while game was running {e}')
+                log.error(traceback.format_exc())
             else:
                 log.debug(f'Error happened on shutting down {e}')
         

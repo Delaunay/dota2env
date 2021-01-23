@@ -1,7 +1,3 @@
-// (c) Valve
-
-syntax = "proto2";
-
 option optimize_for = SPEED;
 option cc_generic_services = false;
 
@@ -31,6 +27,7 @@ enum DOTA_GameMode {
 	DOTA_GAMEMODE_ALL_DRAFT = 22;
 	DOTA_GAMEMODE_TURBO = 23;
 	DOTA_GAMEMODE_MUTATION = 24;
+	DOTA_GAMEMODE_COACHES_CHALLENGE = 25;
 }
 
 enum DOTA_GameState {
@@ -81,7 +78,17 @@ enum EEvent {
 	EVENT_ID_SINGLES_DAY_2017 = 20;
 	EVENT_ID_FROSTIVUS_2017 = 21;
 	EVENT_ID_INTERNATIONAL_2018 = 22;
-	EVENT_ID_COUNT = 23;
+	EVENT_ID_FROSTIVUS_2018 = 23;
+	EVENT_ID_NEW_BLOOM_2019 = 24;
+	EVENT_ID_INTERNATIONAL_2019 = 25;
+	EVENT_ID_NEW_PLAYER_EXPERIENCE = 26;
+	EVENT_ID_FROSTIVUS_2019 = 27;
+	EVENT_ID_NEW_BLOOM_2020 = 28;
+	EVENT_ID_INTERNATIONAL_2020 = 29;
+	EVENT_ID_TEAM_FANDOM = 30;
+	EVENT_ID_DIRETIDE_2020 = 31;
+	EVENT_ID_SPRING_2021 = 32;
+	EVENT_ID_COUNT = 33;
 }
 
 enum DOTALeaverStatus_t {
@@ -111,6 +118,7 @@ enum Fantasy_Roles {
 	FANTASY_ROLE_CORE = 1;
 	FANTASY_ROLE_SUPPORT = 2;
 	FANTASY_ROLE_OFFLANE = 3;
+	FANTASY_ROLE_MID = 4;
 }
 
 enum Fantasy_Team_Slots {
@@ -185,6 +193,7 @@ enum DOTALowPriorityBanType {
 	DOTA_LOW_PRIORITY_BAN_ABANDON = 0;
 	DOTA_LOW_PRIORITY_BAN_REPORTS = 1;
 	DOTA_LOW_PRIORITY_BAN_SECONDARY_ABANDON = 2;
+	DOTA_LOW_PRIORITY_BAN_PRE_GAME_ROLE = 3;
 }
 
 enum DOTALobbyReadyState {
@@ -212,6 +221,8 @@ enum DOTAJoinLobbyResult {
 	DOTA_JOIN_RESULT_CUSTOM_GAME_INCORRECT_VERSION = 10;
 	DOTA_JOIN_RESULT_TIMEOUT = 11;
 	DOTA_JOIN_RESULT_CUSTOM_GAME_COOLDOWN = 12;
+	DOTA_JOIN_RESULT_BUSY = 13;
+	DOTA_JOIN_RESULT_NO_PLAYTIME = 14;
 }
 
 enum DOTASelectionPriorityRules {
@@ -233,15 +244,6 @@ enum DOTAMatchVote {
 	DOTAMatchVote_NEGATIVE = 2;
 }
 
-enum DOTA_LobbyMemberXPBonus {
-	DOTA_LobbyMemberXPBonus_DEFAULT = 0;
-	DOTA_LobbyMemberXPBonus_BATTLE_BOOSTER = 1;
-	DOTA_LobbyMemberXPBonus_SHARE_BONUS = 2;
-	DOTA_LobbyMemberXPBonus_PARTY = 3;
-	DOTA_LobbyMemberXPBonus_RECRUITMENT = 4;
-	DOTA_LobbyMemberXPBonus_PCBANG = 5;
-}
-
 enum DOTALobbyVisibility {
 	DOTALobbyVisibility_Public = 0;
 	DOTALobbyVisibility_Friends = 1;
@@ -252,16 +254,25 @@ enum EDOTAPlayerMMRType {
 	k_EDOTAPlayerMMRType_Invalid = 0;
 	k_EDOTAPlayerMMRType_GeneralHidden = 1;
 	k_EDOTAPlayerMMRType_GeneralCompetitive = 3;
-	k_EDOTAPlayerMMRType_SoloCompetitive = 4;
+	k_EDOTAPlayerMMRType_SoloCompetitive2019 = 4;
 	k_EDOTAPlayerMMRType_1v1Competitive_UNUSED = 5;
 	k_EDOTAPlayerMMRType_GeneralSeasonalRanked = 6;
 	k_EDOTAPlayerMMRType_SoloSeasonalRanked = 7;
+	k_EDOTAPlayerMMRType_Competitive_Core = 8;
+	k_EDOTAPlayerMMRType_Competitive_Support = 9;
+	k_EDOTAPlayerMMRType_Competitive_Classic = 10;
+}
+
+enum EDOTAMMRBoostType {
+	k_EDOTAMMRBoostType_None = 0;
+	k_EDOTAMMRBoostType_Leader = 1;
+	k_EDOTAMMRBoostType_Follower = 2;
 }
 
 enum MatchType {
 	MATCH_TYPE_CASUAL = 0;
 	MATCH_TYPE_COOP_BOTS = 1;
-	MATCH_TYPE_TEAM_RANKED = 2;
+	MATCH_TYPE_LEGACY_TEAM_RANKED = 2;
 	MATCH_TYPE_LEGACY_SOLO_QUEUE = 3;
 	MATCH_TYPE_COMPETITIVE = 4;
 	MATCH_TYPE_WEEKEND_TOURNEY = 5;
@@ -271,6 +282,8 @@ enum MatchType {
 	MATCH_TYPE_LOWPRI_DEPRECATED = 9;
 	MATCH_TYPE_STEAM_GROUP = 10;
 	MATCH_TYPE_MUTATION = 11;
+	MATCH_TYPE_COACHES_CHALLENGE = 12;
+	MATCH_TYPE_GAUNTLET = 13;
 }
 
 enum DOTABotDifficulty {
@@ -344,6 +357,7 @@ enum EMatchOutcome {
 	k_EMatchOutcome_NotScored_ServerCrash = 66;
 	k_EMatchOutcome_NotScored_NeverStarted = 67;
 	k_EMatchOutcome_NotScored_Canceled = 68;
+	k_EMatchOutcome_NotScored_Suspicious = 69;
 }
 
 enum ELaneType {
@@ -391,6 +405,9 @@ enum ELeagueTier {
 	LEAGUE_TIER_MINOR = 3;
 	LEAGUE_TIER_MAJOR = 4;
 	LEAGUE_TIER_INTERNATIONAL = 5;
+	LEAGUE_TIER_DPC_QUALIFIER = 6;
+	LEAGUE_TIER_DPC_LEAGUE_QUALIFIER = 7;
+	LEAGUE_TIER_DPC_LEAGUE = 8;
 }
 
 enum ELeagueTierCategory {
@@ -420,17 +437,6 @@ enum ELeaguePhase {
 	LEAGUE_PHASE_REGIONAL_QUALIFIER = 1;
 	LEAGUE_PHASE_GROUP_STAGE = 2;
 	LEAGUE_PHASE_MAIN_EVENT = 3;
-}
-
-enum ELeagueFantasyPhase {
-	LEAGUE_FANTASY_PHASE_UNSET = 0;
-	LEAGUE_FANTASY_PHASE_MAIN = 1;
-	LEAGUE_FANTASY_PHASE_QUALIFIER_NA = 2;
-	LEAGUE_FANTASY_PHASE_QUALIFIER_SA = 3;
-	LEAGUE_FANTASY_PHASE_QUALIFIER_EUROPE = 4;
-	LEAGUE_FANTASY_PHASE_QUALIFIER_CIS = 5;
-	LEAGUE_FANTASY_PHASE_QUALIFIER_CHINA = 6;
-	LEAGUE_FANTASY_PHASE_QUALIFIER_SEA = 7;
 }
 
 enum ELeagueAuditAction {
@@ -463,6 +469,8 @@ enum ELeagueAuditAction {
 	LEAGUE_AUDIT_ACTION_NODEGROUP_EDIT = 105;
 	LEAGUE_AUDIT_ACTION_NODEGROUP_POPULATE = 106;
 	LEAGUE_AUDIT_ACTION_NODEGROUP_COMPLETED = 107;
+	LEAGUE_AUDIT_ACTION_NODEGROUP_SET_SECONDARY_ADVANCING = 108;
+	LEAGUE_AUDIT_ACTION_NODEGROUP_SET_TERTIARY_ADVANCING = 109;
 	LEAGUE_AUDIT_ACTION_NODE_CREATE = 200;
 	LEAGUE_AUDIT_ACTION_NODE_DESTROY = 201;
 	LEAGUE_AUDIT_ACTION_NODE_AUTOCREATE = 202;
@@ -527,6 +535,32 @@ enum EDPCFavoriteType {
 	FAVORITE_TYPE_PLAYER = 1;
 	FAVORITE_TYPE_TEAM = 2;
 	FAVORITE_TYPE_LEAGUE = 3;
+}
+
+enum EDPCPushNotification {
+	DPC_PUSH_NOTIFICATION_MATCH_STARTING = 1;
+	DPC_PUSH_NOTIFICATION_PLAYER_LEFT_TEAM = 10;
+	DPC_PUSH_NOTIFICATION_PLAYER_JOINED_TEAM = 11;
+	DPC_PUSH_NOTIFICATION_LEAGUE_RESULT = 20;
+	DPC_PUSH_NOTIFICATION_PREDICTION_MATCHES_AVAILABLE = 30;
+	DPC_PUSH_NOTIFICATION_PREDICTION_RESULT = 31;
+	DPC_PUSH_NOTIFICATION_FANTASY_PLAYER_CLEARED = 40;
+	DPC_PUSH_NOTIFICATION_FANTASY_DAILY_SUMMARY = 41;
+	DPC_PUSH_NOTIFICATION_FANTASY_FINAL_RESULTS = 42;
+}
+
+enum EEventActionScoreMode {
+	k_eEventActionScoreMode_Add = 0;
+	k_eEventActionScoreMode_Min = 1;
+}
+
+enum EOverwatchReportReason {
+	k_EOverwatchReportReason_Unknown = 0;
+	k_EOverwatchReportReason_Cheating = 1;
+	k_EOverwatchReportReason_Feeding = 2;
+	k_EOverwatchReportReason_Griefing = 3;
+	k_EOverwatchReportReason_Suspicious = 4;
+	k_EOverwatchReportReason_AbilityAbuse = 5;
 }
 
 message CDOTAClientHardwareSpecs {
@@ -638,5 +672,15 @@ message CMsgDOTACombatLogEntry {
 	optional bool inflictor_is_stolen_ability = 70;
 	optional uint32 kill_eater_event = 71;
 	optional uint32 unit_status_label = 72;
+	optional bool spell_generated_attack = 73;
+	optional bool at_night_time = 74;
+	optional bool attacker_has_scepter = 75;
 }
 
+message CMsgPendingEventAward {
+	optional .EEvent event_id = 1 [default = EVENT_ID_NONE];
+	optional uint32 action_id = 2;
+	optional uint32 num_to_grant = 3;
+	optional .EEventActionScoreMode score_mode = 4 [default = k_eEventActionScoreMode_Add];
+	optional uint32 audit_action = 5;
+}

@@ -28,6 +28,7 @@ async def worldstate_listener(port, message_handler, game, retries=10):
         log.debug('Failed to connect to the game')
         return
 
+    error_count = 0
     while True:
         data = await reader.read(4)
 
@@ -36,11 +37,15 @@ async def worldstate_listener(port, message_handler, game, retries=10):
             game.stop()
             break
 
-        n_bytes = unpack("@I", data)[0]
-        data = await reader.read(n_bytes)
-
-        world_state = CMsgBotWorldState()
-        world_state.ParseFromString(data)
+        try:
+            n_bytes = unpack("@I", data)[0]
+            data = await reader.read(n_bytes)
+            world_state = CMsgBotWorldState()
+            world_state.ParseFromString(data)
+        except Exception as e:
+            log.debug(f'Error when reading world state: {e}')
+            error_count += 1
+            continue
 
         # wait finishing processing the state before
         # getting a new one

@@ -125,10 +125,12 @@ class Dota2Env(Dota2Game):
 
 
 def main():
+    from luafun.game.modes import DOTA_GameMode
     from luafun.game.ipc_send import new_ipc_message
     logging.basicConfig(level=logging.DEBUG)
 
     game = Dota2Env('F:/SteamLibrary/steamapps/common/dota 2 beta/', False)
+    game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_1V1MID)
 
     with game:
         game.send_message(new_ipc_message())

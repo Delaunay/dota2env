@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import re
+import traceback
 
 from pygtail import Pygtail
 
@@ -33,12 +34,16 @@ async def ipc_recv(logfilename, handler, state, retries=10):
         raise RuntimeError(msg)
     
     while state.running:
-        for line in Pygtail(logfilename):
-            result = IPC_RECV.search(line)
+        try:
+            for line in Pygtail(logfilename):
+                result = IPC_RECV.search(line)
 
-            if result:
-                msg = result.groupdict()
-                handler(msg.get('faction'), msg.get('player'), json.loads(msg.get('message')))
+                if result:
+                    msg = result.groupdict()
+                    handler(msg.get('faction'), msg.get('player'), json.loads(msg.get('message')))
+        except Exception as e:
+            log.debug(f'IPC error {e}') 
+            log.error(traceback.format_exc())
 
         # when we are at the end of the file restart
         await asyncio.sleep(0.01)

@@ -21,6 +21,7 @@ Like in real life you need to
 4. Install Dependencies
     * conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
     * pip install -r requirements.txt
+    * pip install -e .
 5. Run the simulation
 
 [1]: https://www.anaconda.com/products/individual
