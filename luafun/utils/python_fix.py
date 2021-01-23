@@ -33,13 +33,13 @@ def _asdict_inner(obj, dict_factory):
     elif isinstance(obj, (list, tuple)):
         return type(obj)(_asdict_inner(v, dict_factory) for v in obj)
 
-    # Handle default dict correctly
+    # Handle defaultdict correctly
     elif isinstance(obj, defaultdict):
         return type(obj)(
             obj.default_factory,
             ((_asdict_inner(k, dict_factory), _asdict_inner(v, dict_factory)) for k, v in obj.items()))
     # End fix 
-    
+
     elif isinstance(obj, dict):
         return type(obj)(
             (_asdict_inner(k, dict_factory), _asdict_inner(v, dict_factory)) for k, v in obj.items())

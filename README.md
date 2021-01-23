@@ -12,6 +12,19 @@ Like in real life you need to
 2. Choose the correct rewards balance early rewards and late rewards
 3. Encode the action
 
+#  Install
+
+1. Download [Anaconda 3][1]
+2. Start > Anaconda Prompt (anaconda)
+3. git clone https://github.com/Delaunay/LuaFun.git
+4. cd LuaFun
+4. Install Dependencies
+    * conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
+    * pip install -r requirements.txt
+5. Run the simulation
+
+[1]: https://www.anaconda.com/products/individual
+
 
 # The Game
 
