@@ -1,4 +1,3 @@
-import asyncio
 from dataclasses import dataclass
 import logging
 from struct import unpack

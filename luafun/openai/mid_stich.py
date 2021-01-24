@@ -7,8 +7,9 @@ import asyncio
 from collections import defaultdict
 import copy
 from dataclasses import dataclass, field
-import json
 import math
+import os
+import json
 from typing import List, Dict, Any
 
 from google.protobuf.json_format import MessageToJson
@@ -143,7 +144,6 @@ class FactionState:
     _buildings: Dict = field(default_factory=lambda:defaultdict(dict))
 
     # State Management
-    _lock: asyncio.Lock = field(default_factory=asyncio.Lock)
     _s: int = 0
     _e: int = 0 
     _r: int = 0
@@ -172,7 +172,6 @@ class FactionState:
 
     def copy(self):
         return copy.deepcopy(self)
-
 
 
 def time_to_day_night(game_time):
@@ -227,121 +226,125 @@ def time_spawn_neutral(game_time):
     return (1 - (down - int(down))) * 60
 
 
-async def apply_diff(state, delta: msg.CMsgBotWorldState):
-    async with state._lock:
-        state._s += 1
+class Bunch(object):
+  def __init__(self, adict):
+    self.__dict__.update(adict)
+    self.fields = list(adict.keys())
 
-        g = state.global_state
 
-        dota_time = delta.dota_time
+def apply_diff(state, delta: msg.CMsgBotWorldState):
+    state._s += 1
 
-        # Game timings
-        g.game_delta = delta.dota_time - g.game_time
-        g.game_time = delta.dota_time
-        g.glyph_cooldown = delta.glyph_cooldown
-        g.glyph_cooldown_enemy = delta.glyph_cooldown_enemy
-        g.time_of_day = delta.time_of_day
-        g.time_to_next = time_to_day_night(g.game_time)
-        g.time_spawn_runes = time_spawn_runes(g.game_time)
-        g.time_spawn_neutral = time_spawn_neutral(g.game_time)
-        g.time_spawn_bounty = time_spawn_bounty(g.game_time)
-        g.time_spawn_creep = time_spawn_creep(g.game_time)
-        # ---
+    delta = json.loads(delta)
+    g = state.global_state
 
-        # Roshan State
-        for event in delta.roshan_killed_events:
-            state._roshan_dead += 1
-            rosh_spawn_min = g.game_time + 8 * 60
-            rosh_spawn_max = g.game_time + 11 * 60
-            g.rosh_alive = False
-            g.rosh_dead = True
-            g.rosh_cheese = state._roshan_dead > 1
-            g.rosh_refresher = state._roshan_dead > 2 or state._roshan_dead > 3
-            g.rosh_aghs = state._roshan_dead > 2 or state._roshan_dead > 3
+    dota_time = delta['dota_time']
 
-            # TODO: handle the event and update the player which is holding the aegis
-            event = delta.roshan_killed_events[0]
+    # Game timings
+    g.game_delta = dota_time - g.game_time
+    g.game_time = dota_time
+    g.glyph_cooldown = delta['glyph_cooldown']
+    g.glyph_cooldown_enemy = delta['glyph_cooldown_enemy']
+    g.time_of_day = delta['time_of_day']
+    g.time_to_next = time_to_day_night(g.game_time)
+    g.time_spawn_runes = time_spawn_runes(g.game_time)
+    g.time_spawn_neutral = time_spawn_neutral(g.game_time)
+    g.time_spawn_bounty = time_spawn_bounty(g.game_time)
+    g.time_spawn_creep = time_spawn_creep(g.game_time)
+    # ---
 
-        if g.game_time > g.rosh_spawn_max:
-             g.rosh_alive = True
-        # --
+    # Roshan State
+    for event in delta.get('roshan_killed_events', []):
+        state._roshan_dead += 1
+        rosh_spawn_min = g.game_time + 8 * 60
+        rosh_spawn_max = g.game_time + 11 * 60
+        g.rosh_alive = False
+        g.rosh_dead = True
+        g.rosh_cheese = state._roshan_dead > 1
+        g.rosh_refresher = state._roshan_dead > 2 or state._roshan_dead > 3
+        g.rosh_aghs = state._roshan_dead > 2 or state._roshan_dead > 3
 
+        # TODO: handle the event and update the player which is holding the aegis
+        event = delta.roshan_killed_events[0]
+
+    if g.game_time > g.rosh_spawn_max:
+            g.rosh_alive = True
+    # --
+
+    # Item Stock
+    # stock_gem: int = 1
+    # stock_smoke: int = 2
+    # stock_observer: int = 2
+    # stock_sentry: int = 3
+    # stock_raindrop: int = 0
+    # ---
+
+    # Unit specific Event
+    # This the base player data
+    for player in delta.get('players', []):
+        pdata = state._players[player['player_id']]
+
+        for field, value in player.items():
+            pdata[field] = value 
+    
+    for unit in delta.get('units', []):
+        # Add Hero info into their own struct
+        # >>> Units that are constant
+        if unit['unit_type'] == msg.UnitType.HERO:
+            udata = state._players[unit['player_id']]
         
-        # Item Stock
-        # stock_gem: int = 1
-        # stock_smoke: int = 2
-        # stock_observer: int = 2
-        # stock_sentry: int = 3
-        # stock_raindrop: int = 0
-        # ---
-
-        # Unit specific Event
-        # This the base player data
-        for player in delta.players:
-            pdata = state._players[player.player_id]
-
-            for field, value in player.ListFields():
-                pdata[field.name] = value 
+        # exist for the the entire game
+        elif unit['unit_type'] == msg.UnitType.COURIER:
+            udata = state._couriers[unit['player_id']]
         
-        for unit in delta.units:
-            # Add Hero info into their own struct
-            # >>> Units that are constant
-            if unit.unit_type == msg.UnitType.HERO:
-                udata = state._players[unit.player_id]
-            
-            # exist for the the entire game
-            elif unit.unit_type == msg.UnitType.COURIER:
-                udata = state._couriers[unit.player_id]
-            
-            # They stay up for most of the game
-            elif unit.unit_type in (msg.UnitType.BUILDING, msg.UnitType.FORT, msg.UnitType.BARRACKS, msg.UnitType.TOWER):
-                udata = state._buildings[unit.handle]
-            # Neutrals + Roshan
+        # They stay up for most of the game
+        elif unit['unit_type'] in (msg.UnitType.BUILDING, msg.UnitType.FORT, msg.UnitType.BARRACKS, msg.UnitType.TOWER):
+            udata = state._buildings[unit['handle']]
+        # Neutrals + Roshan
 
-            # <<<
-            # CREEP_HERO, LANE_CREEP
-            else:
-                udata = state._units[unit.handle]
+        # <<<
+        # CREEP_HERO, LANE_CREEP
+        else:
+            udata = state._units[unit['handle']]
 
-            unit = json.loads(MessageToJson(unit, preserving_proto_field_name=True, use_integers_for_enums=True))
-            for field, value in unit.items():
-                udata[field] = value
-        # ---
+        for field, value in unit.items():
+            udata[field] = value
+    # ---
 
-        # Courier Event
-        for courier in delta.couriers:
-            pass
+    # Courier Event
+    for courier in delta.get('couriers', []):
+        pass
 
-        for courier in delta.courier_killed_events:
-            pass
-        # -- 
+    for courier in delta.get('courier_killed_events', []):
+        pass
+    # -- 
 
-        # Tree destruction event
-        for tree in delta.tree_events:
-            pass
-        # -- 
+    # Tree destruction event
+    for tree in delta.get('tree_events', []):
+        pass
+    # -- 
 
-        # Damage Event:
-        for dmg in delta.damage_events:
-            pass
-        # --
+    # Damage Event:
+    for dmg in delta.get('damage_events', []):
+        pass
+    # --
 
-        # Ability Event:
-        for ability in delta.ability_events:
-            pass
-        # --
+    # Ability Event:
+    for ability in delta.get('ability_events', []):
+        pass
+    # --
 
-        # Rune info
-        for rune in delta.rune_infos:
-            pass
-        # -- 
+    # Rune info
+    for rune in delta.get('rune_infos', []):
+        pass
+    # -- 
 
-        # Item Drops (Neutral, Roshan)
-        for item in delta.dropped_items:
-            pass
-        # --
+    # Item Drops (Neutral, Roshan)
+    for item in delta.get('dropped_items', []):
+        pass
+    # --
 
-        state._e += 1
+    state._e += 1
 
 
 

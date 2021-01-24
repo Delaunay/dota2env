@@ -1,8 +1,8 @@
-import asyncio
 from collections import defaultdict
 from dataclasses import dataclass, field
 import logging
 import os
+import json
 import multiprocessing as mp
 import subprocess
 import time
@@ -129,15 +129,13 @@ class Dota2Game:
             delta = self.dire_state_delta_queue.get()
             return delta
 
-        log.debug('No delta found')
         return None
 
     def radiant_state_delta(self):
         if not self.radiant_state_delta_queue.empty():
             delta = self.radiant_state_delta_queue.get()
             return delta
-
-        log.debug('No delta found')
+            
         return None
 
     def start_ipc(self):
@@ -233,6 +231,16 @@ class Dota2Game:
                 if not self.ipc_recv_queue.empty():
                     msg = self.ipc_recv_queue.get()
                     self._receive_message(*msg)
+
+                # update game state
+                dire_delta = self.dire_state_delta()
+                rad_delta = self.radiant_state_delta()
+
+                if dire_delta is not None:
+                    self.update_dire_state(dire_delta)
+
+                if rad_delta is not None:
+                    self.update_radiant_state(rad_delta)
                 
         except KeyboardInterrupt:
             pass

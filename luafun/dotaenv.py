@@ -63,29 +63,17 @@ class Dota2Env(Dota2Game):
         self.radiant_message.close()
         self.dire_message.close()
 
-    # Random Access state getter
-    # waits for the stiching to be finished and fetch the observation
-    @property
-    async def dire_state_async(self):
-        return await _acquire_faction(self._dire_state)
-
-    @property
-    async def radiant_state_async(self):
-        return await _acquire_faction(self._radiant_state)
-
-    @property
     def dire_state(self):
-        return acquire_state(self._dire_state)
+        return self._dire_state
 
-    @property
     def radiant_state(self):
-        return acquire_state(self._radiant_state)
+        return self._radiant_state
 
     # For states we should have a queue of state to observe
-    async def update_dire_state(self, message: msg.CMsgBotWorldState):
+    def update_dire_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for dire"""
         try:
-            await self.sticher(self._dire_state, message)
+            self.sticher(self._dire_state, message)
         except Exception as e:
             log.error(f'Error happened during state stiching {e}')
             log.error(traceback.format_exc())
@@ -94,10 +82,10 @@ class Dota2Env(Dota2Game):
         self.dire_message.write(str(message))
         self.dire_message.write('-------\n')
 
-    async def update_radiant_state(self, message: msg.CMsgBotWorldState):
+    def update_radiant_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for radiant"""
         try:
-            await self.sticher(self._radiant_state, message)
+            self.sticher(self._radiant_state, message)
         except Exception as e:
             log.error(f'Error happened during state stiching {e}')
             log.error(traceback.format_exc())

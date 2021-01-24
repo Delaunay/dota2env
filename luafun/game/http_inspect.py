@@ -18,7 +18,10 @@ class GameInspector(HttpServer):
         self.rpc_recv = rpc_recv
         self.rpc_send = rpc_send
 
-        self.routes['/dire_state_delta'] = self.show_dire_state
+        self.routes['/dire_state_delta'] = self.getattr('dire_state_delta')
+        self.routes['/radiant_state_delta'] = self.getattr('radiant_state_delta')
+        self.routes['/dire_state'] = self.getattr('dire_state')
+        self.routes['/radiant_state'] = self.getattr('dire_state')
 
     def fetch(self):
         while self.running:
@@ -29,14 +32,19 @@ class GameInspector(HttpServer):
         
         return None
 
-    def show_dire_state(self, _):
-        self.rpc_send.put(dict(attr='dire_state_delta'))
-        reply = self.fetch()
+    def getattr(self, attr_name):
+        def rpc_attr(_):
+            self.rpc_send.put(dict(attr=attr_name))
+            reply = self.fetch()
 
-        if reply is None:
-            return self.html('could not fetch reply')
-        
-        return self.html(f'<pre>{reply}</pre>')
+            if reply is None:
+                return self.html('could not fetch reply')
+            
+            if not isinstance(reply, (str, dict)):
+                reply = json.dumps(asdict(reply), indent=2)
+
+            return self.html(f'<pre>{reply}</pre>')
+        return rpc_attr
 
 
 def _http_inspect(state, rpc_recv, rpc_send, level):
