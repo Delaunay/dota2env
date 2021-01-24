@@ -131,10 +131,11 @@ def main():
 
     game = Dota2Env('F:/SteamLibrary/steamapps/common/dota 2 beta/', False)
     #game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_1V1MID)
-    game.options.ticks_per_observation = 30
+    # game.options.ticks_per_observation = 30
     # TODO: This is buggy I think python is receiving too many messages
     # in that case and the buffer is not big enough
-    # game.options.ticks_per_observation = 4
+    game.options.ticks_per_observation = 4
+    game.options.host_timescale = 1
 
     with game:
         game.send_message(new_ipc_message())

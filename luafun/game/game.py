@@ -1,5 +1,6 @@
 import asyncio
 from collections import defaultdict
+from dataclasses import dataclass, field
 import logging
 import os
 import subprocess
@@ -25,6 +26,20 @@ class State:
     """
     def __init__(self):
         self.running = True
+
+
+@dataclass
+class WorldConnectionStats:
+    message_size: int = 0
+    success: int = 0
+    error: int = 0
+    reconnect: int = 0
+    double_read: int =0
+
+@dataclass
+class Stats:
+    radiant: WorldConnectionStats = field(default_factory=WorldConnectionStats)
+    dire: WorldConnectionStats = field(default_factory=WorldConnectionStats)
 
 
 SECONDS_PER_TICK = 1 / 30
@@ -58,10 +73,12 @@ class Dota2Game:
         self.process = None
         self.reply_count = defaultdict(int)
         self.bot_count = 10
+        self.stats = Stats()
         self.players = {
             TEAM_RADIANT: 0,
             TEAM_DIRE: 0
         }
+
 
     @property
     def deadline(self):
@@ -96,8 +113,8 @@ class Dota2Game:
     def start_ipc(self):
         self.async_tasks = asyncio.gather(
             # State Capture
-            worldstate_listener(self.options.port_radiant, self.update_radiant_state, self),
-            worldstate_listener(self.options.port_dire, self.update_dire_state, self),
+            worldstate_listener(self.options.port_radiant, self.update_radiant_state, self, self.stats.radiant),
+            worldstate_listener(self.options.port_dire, self.update_dire_state, self, self.stats.dire),
 
             # IPC receive
             ipc_recv(self.paths.ipc_recv_handle, self._receive_message, self.state),
