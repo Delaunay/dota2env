@@ -13,7 +13,7 @@ class DOTA_GameMode(IntEnum):
 	DOTA_GAMEMODE_REVERSE_CM = 8    #  Reverse Captains Mode
 	DOTA_GAMEMODE_XMAS = 9          #
 	DOTA_GAMEMODE_TUTORIAL = 10     #
-	DOTA_GAMEMODE_MO = 11           #  Melee Only ?
+	DOTA_GAMEMODE_MO = 11           #  Mid Only ?
 	DOTA_GAMEMODE_LP = 12           #  Least Played
 	DOTA_GAMEMODE_POOL1 = 13        #  Limited Heroes ?
 	DOTA_GAMEMODE_FH = 14           #
@@ -27,3 +27,4 @@ class DOTA_GameMode(IntEnum):
 	DOTA_GAMEMODE_ALL_DRAFT = 22    #  Ranked All Pick
 	DOTA_GAMEMODE_TURBO = 23        #
 	DOTA_GAMEMODE_MUTATION = 24     #
+	DOTA_GAMEMODE_COACHES_CHALLENGE = 25

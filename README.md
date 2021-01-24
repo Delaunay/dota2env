@@ -12,6 +12,11 @@ Like in real life you need to
 2. Choose the correct rewards balance early rewards and late rewards
 3. Encode the action
 
+# Platform
+
+* works on windows
+* should work on linux
+
 #  Install
 
 1. Download [Anaconda 3][1]
@@ -25,6 +30,7 @@ Like in real life you need to
 5. Run the simulation
 
 [1]: https://www.anaconda.com/products/individual
+
 
 
 # The Game

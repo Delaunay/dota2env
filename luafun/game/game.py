@@ -60,14 +60,16 @@ class Dota2Game:
     * ipc_send: send message to each bot (through a generated lua file)
     * http server: used to inspect the game in realitime
 
+    6 Processes are created when launching the environment
 
     .. code-block::
 
-        DEBUG:luafun.game.game:Main Process             : 29824 <= 1% CPU
-        DEBUG:luafun.game.states:WorldListener-Dire     : 26272 <= 4% CPU
-        DEBUG:luafun.game.states:WorldListener-Radiant  : 33228 <= 4% CPU
-        DEBUG:luafun.game.ipc_recv:IPC-recv             : 28848 <= 0% CPU
-        DEBUG:luafun.game.http_inspect:HTTP-server      : 30424 <= 0% CPU
+        1) Main Process             : 29824 | 1% CPU | stich state together
+        2) WorldListener-Dire       : 26272 | 4% CPU | retrieve game state
+        3) WorldListener-Radiant    : 33228 | 4% CPU | retrieve game state
+        4) IPC-recv                 : 28848 | 0% CPU | Read Game logs for bot errors
+        5) HTTP-server              : 30424 | 0% CPU | Debug Process
+        6) Multiprocess Manager
 
     Notes
     -----
