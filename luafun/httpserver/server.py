@@ -83,14 +83,18 @@ class HttpServer:
         return self.html(f'<ul>Routes {routes}</ul><pre>{json.dumps(asdict(request), indent=2)}</pre>')
 
     def process_request(self, client):
-        log.debug('Read data')
         data = client.recv(1024)
         message = data.decode()
 
-        request = parse_request(message)
-        log.debug('>>> Request')
-        log.debug(request)
-        log.debug('Request <<<')
+        if message == '':
+            return
+
+        try:
+            request = parse_request(message)
+        except Exception as err:
+            log.debug(f'Error {err}')
+            log.debug(message)
+            return 
 
         route_handler = self.routes.get(request.uri, self.default_route)
         reply = route_handler(request)
@@ -104,7 +108,6 @@ class HttpServer:
 
         reply = f'{header}{reply}'.encode('utf-8')
         client.send(reply)
-        log.debug('Reply written')
         client.close()
 
     def _run(self):
@@ -113,8 +116,7 @@ class HttpServer:
         for s in readable:
             if s is self.sock:
                 client, client_address = s.accept()
-                client.setblocking(0)
-
+                client.setblocking(1)
                 self.process_request(client)
 
     def run(self):

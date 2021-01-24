@@ -77,8 +77,8 @@ class Dota2Game:
         self.dire_state_process = None
         self.radiant_state_process = None
 
-        self.dire_state_delta = None
-        self.radiant_state_delta = None
+        self.dire_state_delta_queue = None
+        self.radiant_state_delta_queue = None
 
         self.ipc_recv_process = None
         self.ipc_recv_queue = None
@@ -124,6 +124,22 @@ class Dota2Game:
         self.args = [self.paths.executable_path] + self.options.args(self.paths)
         self.process = subprocess.Popen(self.args)
 
+    def dire_state_delta(self):
+        if not self.dire_state_delta_queue.empty():
+            delta = self.dire_state_delta_queue.get()
+            return delta
+
+        log.debug('No delta found')
+        return None
+
+    def radiant_state_delta(self):
+        if not self.radiant_state_delta_queue.empty():
+            delta = self.radiant_state_delta_queue.get()
+            return delta
+
+        log.debug('No delta found')
+        return None
+
     def start_ipc(self):
         self.manager = mp.Manager()
         self.state = self.manager.dict()
@@ -131,11 +147,11 @@ class Dota2Game:
         level = logging.DEBUG
 
         # Dire State
-        self.dire_state_delta = self.manager.Queue()
+        self.dire_state_delta_queue = self.manager.Queue()
         self.dire_state_process = world_listener_process(
             '127.0.0.1',
             self.options.port_dire,
-            self.dire_state_delta,
+            self.dire_state_delta_queue,
             self.state,
             None,
             'Dire',
@@ -143,11 +159,11 @@ class Dota2Game:
         )
 
         # Radiant State
-        self.radiant_state_delta = self.manager.Queue()
+        self.radiant_state_delta_queue = self.manager.Queue()
         self.radiant_state_process = world_listener_process(
             '127.0.0.1',
             self.options.port_radiant,
-            self.radiant_state_delta,
+            self.radiant_state_delta_queue,
             self.state,
             None,
             'Radiant',
@@ -201,10 +217,22 @@ class Dota2Game:
 
                     attr = msg.get('attr')
                     args = msg.get('args', [])
-                    kwargs = msg.get('kwargs'. dict())
+                    kwargs = msg.get('kwargs', dict())
 
-                    result = getattr(self, attr)(*args, **kwargs)
+                    result = dict(error=f'Object does not have attribute {attr}')
+
+                    if hasattr(self, attr):
+                        result = getattr(self, attr)(*args, **kwargs)
+
+                    if result is None:
+                        result = dict(msg='none')
+                    
                     self.http_rpc_send.put(result)
+
+                # handle IPC from bots
+                if not self.ipc_recv_queue.empty():
+                    msg = self.ipc_recv_queue.get()
+                    self._receive_message(*msg)
                 
         except KeyboardInterrupt:
             pass

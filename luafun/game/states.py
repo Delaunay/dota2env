@@ -83,8 +83,7 @@ class SyncWorldListener:
                     msg, 
                     preserving_proto_field_name=True, 
                     use_integers_for_enums=True)
-                
-                # json.loads()
+
                 self.queue.put(json_msg)
 
         for err in error:
