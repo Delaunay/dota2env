@@ -122,4 +122,5 @@ def world_listener_process(host, port, queue, state, stats, name, level):
         args=(host, port, queue, state, stats, level)
     )
     p.start()
+    log.debug(f'WorldListener-{name}: {p.pid}')
     return p

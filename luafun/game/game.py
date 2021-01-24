@@ -58,6 +58,16 @@ class Dota2Game:
     * world state listenner: receive state update about dire/radiant from the game itself
     * ipc_recv: receive message from each bot (through the console log)
     * ipc_send: send message to each bot (through a generated lua file)
+    * http server: used to inspect the game in realitime
+
+
+    .. code-block::
+
+        DEBUG:luafun.game.game:Main Process             : 29824 <= 1% CPU
+        DEBUG:luafun.game.states:WorldListener-Dire     : 26272 <= 4% CPU
+        DEBUG:luafun.game.states:WorldListener-Radiant  : 33228 <= 4% CPU
+        DEBUG:luafun.game.ipc_recv:IPC-recv             : 28848 <= 0% CPU
+        DEBUG:luafun.game.http_inspect:HTTP-server      : 30424 <= 0% CPU
 
     Notes
     -----
@@ -93,6 +103,8 @@ class Dota2Game:
             TEAM_RADIANT: 0,
             TEAM_DIRE: 0
         }
+
+        log.debug(f'Main Process: {os.getpid()}')
 
     @property
     def deadline(self):
@@ -135,7 +147,7 @@ class Dota2Game:
         if not self.radiant_state_delta_queue.empty():
             delta = self.radiant_state_delta_queue.get()
             return delta
-            
+
         return None
 
     def start_ipc(self):

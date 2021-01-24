@@ -59,4 +59,5 @@ def http_inspect(state, rpc_recv, rpc_send, level):
         args=(state, rpc_recv, rpc_send, level)
     )
     p.start()
+    log.debug(f'HTTP-server: {p.pid}')
     return p

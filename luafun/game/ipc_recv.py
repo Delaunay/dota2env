@@ -19,6 +19,7 @@ class IPCRecv:
         self.logfilename = logfilename
         self.queue = queue
         self.state = state
+        self.got_messages = False
 
         # remove offset from previous game
         try:
@@ -45,10 +46,12 @@ class IPCRecv:
             raise RuntimeError(msg)
 
     def _run(self):
+        self.got_messages = False
         for line in Pygtail(self.logfilename):
             result = IPC_RECV.search(line)
 
             if result:
+                self.got_messages = True
                 msg = result.groupdict()
                 self.queue.put((msg.get('faction'), msg.get('player'), json.loads(msg.get('message'))))
 
@@ -56,8 +59,12 @@ class IPCRecv:
         while self.running:
             try:
                 self._run()
+
+                if not self.got_messages:
+                    time.sleep(0.13)
             
             except Exception as e:
+                time.sleep(0.01)
                 log.debug(f'IPC error {e}') 
                 log.error(traceback.format_exc())
 
@@ -80,5 +87,7 @@ def ipc_recv(logfilename, queue, state, level, retries=10):
         target=_ipc_recv,
         args=(logfilename, queue, state, level, retries)
     )
+   
     p.start()
+    log.debug(f'IPC-recv: {p.pid}')
     return p
