@@ -72,6 +72,9 @@ class Dota2Game:
     Notes
     -----
     Type  ``jointeam spec`` in the dota2 console to observe the game
+
+    We use multiprocess, asyncio was not given the required performance.
+    A huge part of performance is used to receive messages from the game itself
     """
     def __init__(self, path=None, dedicated=True):
         self.paths = DotaPaths(path)
