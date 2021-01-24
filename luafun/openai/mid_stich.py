@@ -11,7 +11,6 @@ import json
 import math
 from typing import List, Dict, Any
 
-
 from google.protobuf.json_format import MessageToJson
 
 import luafun.game.dota2.state_types as msg

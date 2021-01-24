@@ -3,7 +3,9 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 import logging
 import os
+import multiprocessing as mp
 import subprocess
+import time
 import traceback
 import uuid
 
@@ -14,7 +16,7 @@ from luafun.game.http_inspect import http_inspect
 from luafun.game.ipc_recv import ipc_recv
 from luafun.game.ipc_send import ipc_send, TEAM_RADIANT, TEAM_DIRE
 import luafun.game.dota2.state_types as msg
-from luafun.game.states import worldstate_listener
+from luafun.game.states import world_listener_process
 
 
 log = logging.getLogger(__name__)
@@ -34,7 +36,8 @@ class WorldConnectionStats:
     success: int = 0
     error: int = 0
     reconnect: int = 0
-    double_read: int =0
+    double_read: int = 0
+
 
 @dataclass
 class Stats:
@@ -63,22 +66,33 @@ class Dota2Game:
     def __init__(self, path=None, dedicated=True):
         self.paths = DotaPaths(path)
         self.options = DotaOptions(dedicated=dedicated)
-        self.http_server = None
         self.args = None
-        self.loop = asyncio.get_event_loop()
-        # self.loop = asyncio.new_event_loop()
-        # asyncio.set_event_loop(self.loop)
-        self.async_tasks = None
+
         self.state = State()
+
         self.process = None
         self.reply_count = defaultdict(int)
+        self.manager = None
+
+        self.dire_state_process = None
+        self.radiant_state_process = None
+
+        self.dire_state_delta = None
+        self.radiant_state_delta = None
+
+        self.ipc_recv_process = None
+        self.ipc_recv_queue = None
+
+        self.http_server = None
+        self.http_rpc_send = None
+        self.http_rpc_recv = None
+
         self.bot_count = 10
         self.stats = Stats()
         self.players = {
             TEAM_RADIANT: 0,
             TEAM_DIRE: 0
         }
-
 
     @property
     def deadline(self):
@@ -87,7 +101,7 @@ class Dota2Game:
 
     @property
     def running(self):
-        return self.state.running
+        return self.state['running']
 
     def is_game_ready(self):
         return self.players[TEAM_RADIANT] + self.players[TEAM_DIRE] == self.bot_count
@@ -108,19 +122,55 @@ class Dota2Game:
 
         # save the arguments of the current game for visibility
         self.args = [self.paths.executable_path] + self.options.args(self.paths)
-        self.process = subprocess.Popen(self.args )
+        self.process = subprocess.Popen(self.args)
 
     def start_ipc(self):
-        self.async_tasks = asyncio.gather(
-            # State Capture
-            worldstate_listener(self.options.port_radiant, self.update_radiant_state, self, self.stats.radiant),
-            worldstate_listener(self.options.port_dire, self.update_dire_state, self, self.stats.dire),
+        self.manager = mp.Manager()
+        self.state = self.manager.dict()
+        self.state['running'] = True
+        level = logging.DEBUG
 
-            # IPC receive
-            ipc_recv(self.paths.ipc_recv_handle, self._receive_message, self.state),
+        # Dire State
+        self.dire_state_delta = self.manager.Queue()
+        self.dire_state_process = world_listener_process(
+            '127.0.0.1',
+            self.options.port_dire,
+            self.dire_state_delta,
+            self.state,
+            None,
+            'Dire',
+            level
+        )
 
-            # Debug HTTP server, so state can be inspected at runtime
-            http_inspect(self)
+        # Radiant State
+        self.radiant_state_delta = self.manager.Queue()
+        self.radiant_state_process = world_listener_process(
+            '127.0.0.1',
+            self.options.port_radiant,
+            self.radiant_state_delta,
+            self.state,
+            None,
+            'Radiant',
+            level
+        )
+
+        # IPC receive
+        self.ipc_recv_queue = self.manager.Queue()
+        self.ipc_recv_process = ipc_recv(
+            self.paths.ipc_recv_handle, 
+            self.ipc_recv_queue, 
+            self.state,
+            level    
+        )
+
+        # HTTP server
+        self.http_rpc_recv = self.manager.Queue()
+        self.http_rpc_send = self.manager.Queue()
+        self.http_server = http_inspect(
+            self.state,
+            self.http_rpc_send,
+            self.http_rpc_recv,
+            level
         )
 
     def stop(self):
@@ -130,29 +180,37 @@ class Dota2Game:
         -----
         On windows the dota2 game is not stopped but the underlying python processes are
         """
-        self.state.running = False
+        self.state['running'] = False
 
-        # Stop HTTP server
-        if self.http_server is not None:
-            log.debug('Stopping HTTP server')
-        
-            if hasattr(self.http_server, 'cancel'):
-                self.http_server.cancel()
-            else:
-                self.http_server.close()
+        if self.process.poll() is None:
+            self.process.terminate()
 
     def wait(self):
-        """Wait for the asyncio coroutine to finish"""
-        try:
-            self.loop.run_until_complete(self.async_tasks)
-        except Exception as e:
-            if self.state.running:
-                log.error(f'Error happened while game was running {e}')
-                log.error(traceback.format_exc())
-            else:
-                log.debug(f'Error happened on shutting down {e}')
-        
+        """Wait for the game to finish, this is used for debugging exclusively"""
+        try: 
+            while self.process.poll() is None:
+                time.sleep(0.01)
 
+                # Process event
+                if not self.running:
+                    self.stop()
+
+                # handle debug HTTP request
+                if not self.http_rpc_recv.empty():
+                    msg = self.http_rpc_recv.get()
+
+                    attr = msg.get('attr')
+                    args = msg.get('args', [])
+                    kwargs = msg.get('kwargs'. dict())
+
+                    result = getattr(self, attr)(*args, **kwargs)
+                    self.http_rpc_send.put(result)
+                
+        except KeyboardInterrupt:
+            pass
+
+        self.stop()
+    
     def _receive_message(self, faction: int, player_id: int, message: dict):
         # error processing
         error = message.get('E')
@@ -183,11 +241,11 @@ class Dota2Game:
         """Receive a message directly from the bot"""
         print(f'{faction} {player_id} {message}')
 
-    async def update_dire_state(self, messsage: msg.CMsgBotWorldState):
+    def update_dire_state(self, messsage: msg.CMsgBotWorldState):
         """Receive a state diff from the game for dire"""
         pass
 
-    async def update_radiant_state(self, message: msg.CMsgBotWorldState):
+    def update_radiant_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for radiant"""
         pass
 
@@ -206,10 +264,15 @@ class Dota2Game:
         return self
     
     def __exit__(self, exception_type, exception_value, exception_traceback):
+        self.stop()
+
+        self.dire_state_process.join()
+        self.radiant_state_process.join()
+        self.ipc_recv_process.join()
+        self.http_server.join()
+
         self.cleanup()
         log.debug("Game has finished")
-        if self.process.poll() is None:
-            self.process.terminate()
 
 
 def main():

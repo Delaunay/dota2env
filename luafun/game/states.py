@@ -1,104 +1,126 @@
-import asyncio
-from dataclasses import dataclass
 import logging
+import select
+import socket
+import multiprocessing as mp
 from struct import unpack
 import traceback
+
+from google.protobuf.json_format import MessageToJson
 
 from luafun.game.dota2.dota_gcmessages_common_bot_script_pb2 import CMsgBotWorldState
 
 log = logging.getLogger(__name__)
 
 
-LIMIT = 2 ** 25   # 32 Mo
+class SyncWorldListener:
+    """Connect to the dota2 game and save the messages in a queue to be read"""
 
+    def __init__(self, host, port, queue, state, stats):
+        self.host = host
+        self.port = port
+        self.queue = queue
+        self.sock = None
+        self.state = state
+        self.stats = stats
 
-async def connect(port, retries):
-    reader = None
-    writer = None
+    @property
+    def running(self):
+        return self.state['running']
 
-    for i in range(retries):
-        try:
-            await asyncio.sleep(0.5)
-            reader, writer = await asyncio.open_connection('127.0.0.1', port, limit=LIMIT)
-            log.debug(f'Connection established after {i} retries')
-        except ConnectionRefusedError:
-            pass
+    def connect(self, retries=10):
+        for i in range(retries):
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.setblocking(True)
+                s.connect((self.host, self.port))
+                s.setblocking(True)
+
+                log.debug(f'Connection established after {i} retries')
+                return s
+
+            except ConnectionRefusedError:
+                if not self.running:
+                    return None
+
         else:
-            break
+            log.debug('Could not establish connection')
 
-    return reader, writer
+        return None
 
-# need to move away from asyncio and use multiprocess instead I think
-async def worldstate_listener(port, message_handler, game, stats, retries=10):
-    """Dota2 send us struct with what changed in the world
-    we need to stitch them together to get the whole picture
-    """
+    def read_message(self, read):
+        chunks = []
+        bytes_recv = 0
 
-    reader, writer = await connect(port, retries)
-
-    if reader is None:
-        log.debug('Failed to connect to the game')
-        return
-
-    error_state = False
-
-    while True:
-        msg_size = await reader.read(4)
-
-        # len(msg_size) != 4
+        msg_size = read.recv(4)
         if msg_size == b'':
-            # why are we getting disconnected 
-            # Re-open the connection
-            await asyncio.sleep(game.deadline/2)
-            stats.reconnect += 1
-            log.debug('Reconnecting')
-            writer.close()
-            reader, writer = await connect(port, retries)
-            continue
+            return None
 
-        if error_state:
-            error_state = False
-            log.debug('Recovered from error')
+        msg_len = int(unpack("@I", msg_size)[0])
 
-        try:
-            n_bytes = int(unpack("@I", msg_size)[0])
+        while bytes_recv < msg_len:
+            chunk = read.recv(min(msg_len - bytes_recv, 8192))
 
-            # this blocks the thread too much
-            # read_bytes = b''
-            # while len(read_bytes) < n_bytes:
-            #     next_piece = await reader.read(n_bytes - len(read_bytes))
-            #     read_bytes += next_piece
+            if chunk == b'':
+                log.debug('Could not read message')
+                return None
 
-            read_bytes = await reader.read(n_bytes)
+            chunks.append(chunk)
+            bytes_recv = bytes_recv + len(chunk)
 
-            # this is a very strange behaviour when ticks_per_observation=4
-            # I think asyncio is probably too slow for somereason
-            if len(read_bytes) != n_bytes:
-                rb = await reader.read(n_bytes - len(read_bytes))
-                read_bytes += rb
-                stats.double_read += 1
+        msg = b''.join(chunks)
+        world_state = CMsgBotWorldState()
+        world_state.ParseFromString(msg)
+        return world_state
+
+    def _run(self):
+        readable, _, error = select.select([self.sock], [], [self.sock], 0.250)
+
+        for read in readable:
+            msg = self.read_message(read)
+
+            if msg is not None:
+                json_msg = MessageToJson(
+                    msg, 
+                    preserving_proto_field_name=True, 
+                    use_integers_for_enums=True)
                 
-                if len(read_bytes) != n_bytes:
-                    log.debug(f'Could not read the full message {len(read_bytes)} != {n_bytes}')
-                    stats.error += 1
-                    continue
+                # json.loads()
+                self.queue.put(json_msg)
 
-            data = read_bytes
-            world_state = CMsgBotWorldState()
-            world_state.ParseFromString(data)
+        for err in error:
+            err.close()
+            s = self.connect()
 
-            stats.success += 1
-            stats.message_size = max(stats.message_size, n_bytes)
+    def run(self):
+        self.sock = self.connect()
 
-        except Exception as e:
-            log.debug(f'Error when reading world state: {e} after {stats.success} success {stats.error} errors')
-            log.debug(f'Max {stats.message_size} | Size {msg_size} {n_bytes} | Message: {data[:10]}')
-            log.error(traceback.format_exc())
-            stats.error += 1
-            raise
+        while self.running:
+            try:
+                self._run()
 
-        # wait finishing processing the state before
-        # getting a new one
-        await message_handler(world_state)
+            except ConnectionResetError:
+                # dota2 proabaly shutdown
+                self.state['running'] = False
 
-    log.debug('World state listener shutting down')
+            except Exception as err:
+                if self.running:
+                    log.error(traceback.format_exc())
+
+        self.sock.close()
+        log.debug('World state listener shutting down')
+
+
+def sync_world_listener(host, port, queue, state, stats, level):
+    logging.basicConfig(level=level)
+    wl = SyncWorldListener(host, port, queue, state, stats)
+    wl.run()
+
+
+def world_listener_process(host, port, queue, state, stats, name, level):
+    p = mp.Process(
+        name=f'WorldListener-{name}',
+        target=sync_world_listener,
+        args=(host, port, queue, state, stats, level)
+    )
+    p.start()
+    return p
