@@ -82,6 +82,77 @@ local function receive_message()
     return nil
 end
 
+-- Action Enum
+-- Keep in sync with action.py
+AMoveToLocation                = 0   -- ( vLocation )
+AMoveDirectly                  = 1   -- ( vLocation )
+AMoveToUnit                    = 2   -- ( hUnit )
+AAttackUnit                    = 3   -- ( hUnit, bOnce = True )
+AAttackMove                    = 4   -- ( vLocation )
+AUseAbility                    = 5   -- ( hAbility )
+AUseAbilityOnEntity            = 6   -- ( hAbility, hTarget )
+AUseAbilityOnLocation          = 7   -- ( hAbility, vLocation )
+AUseAbilityOnTree              = 8   -- ( hAbility, iTree )
+APickUpRune                    = 9   -- ( nRune )
+APickUpItem                    = 10  -- ( hItem )
+ADropItem                      = 11  -- ( hItem, vLocation )
+ADelay                         = 12  -- ( fDelay )
+APurchaseItem                  = 13  -- ( sItemName )
+ASellItem                      = 14  -- ( hItem )
+ADisassembleItem               = 15  -- ( hItem )
+ASetItemCombineLock            = 16  -- ( hItem, bLocked )
+ASwapItems                     = 17  -- ( index1, index2 )
+ABuyback                       = 18  -- ()
+AGlyph                         = 19  -- ()
+ALevelAbility                  = 20  -- ( sAbilityName )
+ATakeOutpost                   = 21  -- ()
+ACourierBurst                  = 22
+ACourierEnemySecret            = 23
+ACourierReturn                 = 24
+ACourierSecret                 = 25
+ACourierTakeStash              = 26
+ACourierTransfert              = 27
+NotUsed1 = 28
+NotUsed2 = 29
+NotUsed3 = 30
+NotUsed4 = 31
+
+-- Map the action ID to its function
+local ActionHandler = {
+    MoveToLocation                = function() end,
+    MoveDirectly                  = function() end,
+    MoveToUnit                    = function() end,
+    AttackUnit                    = function() end,
+    AttackMove                    = function() end,
+    UseAbility                    = function() end,
+    UseAbilityOnEntity            = function() end,
+    UseAbilityOnLocation          = function() end,
+    UseAbilityOnTree              = function() end,
+    PickUpRune                    = function() end,
+    PickUpItem                    = function() end,
+    DropItem                      = function() end,
+    Delay                         = function() end,
+    PurchaseItem                  = function() end,
+    SellItem                      = function() end,
+    DisassembleItem               = function() end,
+    SetItemCombineLock            = function() end,
+    SwapItems                     = function() end,
+    Buyback                       = function() end,
+    Glyph                         = function() end,
+    LevelAbility                  = function() end,
+    TakeOutpost                   = function() end,
+    CourierBurst                  = function() end,
+    CourierEnemySecret            = function() end,
+    CourierReturn                 = function() end,
+    CourierSecret                 = function() end,
+    CourierTakeStash              = function() end,
+    CourierTransfert              = function() end,
+    NotUsed1                      = function() end,
+    NotUsed2                      = function() end,
+    NotUsed3                      = function() end,
+    NotUsed4                      = function() end,
+}
+
 local function get_constant()
     local x_min, y_min, x_max, y_max = GetWorldBounds()
 
