@@ -82,6 +82,33 @@ local function receive_message()
     return nil
 end
 
+local function get_constant()
+    local x_min, y_min, x_max, y_max = GetWorldBounds()
+
+    -- int GetHeightLevel( vLocation ) 
+    -- bool IsLocationVisible( vLocation ) 
+    -- bool IsLocationPassable( vLocation ) 
+
+    -- GetNeutralSpawners() 
+
+    -- GetDroppedItemList() 
+
+    -- vector GetTreeLocation( nTree ) 
+
+    -- vector GetRuneSpawnLocation( nRuneLoc ) 
+
+    -- vector GetShopLocation( nTeam, nShop ) 
+
+
+    -- GetNearbyTrees 
+    -- GetNearbyHeroes
+    -- GetNearbyCreeps
+    -- GetNearbyLaneCreeps
+    -- GetNearbyNeutralCreeps
+    -- GetNearbyTowers
+    -- GetNearbyBarracks
+end
+
 -- From the original dotaservice
 local function get_player_info()
     local player_ids = {}
