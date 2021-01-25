@@ -188,10 +188,10 @@ class Dota2Game:
         # IPC receive
         self.ipc_recv_queue = self.manager.Queue()
         self.ipc_recv_process = ipc_recv(
-            self.paths.ipc_recv_handle, 
-            self.ipc_recv_queue, 
+            self.paths.ipc_recv_handle,
+            self.ipc_recv_queue,
             self.state,
-            level    
+            level
         )
 
         # HTTP server
@@ -206,7 +206,7 @@ class Dota2Game:
 
     def stop(self):
         """Stop the game in progress
-        
+
         Notes
         -----
         On windows the dota2 game is not stopped but the underlying python processes are
@@ -216,9 +216,46 @@ class Dota2Game:
         if self.process.poll() is None:
             self.process.terminate()
 
+    def _handle_http_rpc(self):
+        # handle debug HTTP request
+        if self.http_rpc_recv.empty():
+            return
+
+        msg = self.http_rpc_recv.get()
+        attr = msg.get('attr')
+        args = msg.get('args', [])
+        kwargs = msg.get('kwargs', dict())
+
+        result = dict(error=f'Object does not have attribute {attr}')
+
+        if hasattr(self, attr):
+            result = getattr(self, attr)(*args, **kwargs)
+
+        if result is None:
+            result = dict(msg='none')
+
+        self.http_rpc_send.put(result)
+
+    def _handle_ipc(self):
+        if self.ipc_recv_queue.empty():
+            return
+
+        msg = self.ipc_recv_queue.get()
+        self._receive_message(*msg)
+
+    def _handle_state(self):
+        dire_delta = self.dire_state_delta()
+        rad_delta = self.radiant_state_delta()
+
+        if dire_delta is not None:
+            self.update_dire_state(dire_delta)
+
+        if rad_delta is not None:
+            self.update_radiant_state(rad_delta)
+
     def wait(self):
         """Wait for the game to finish, this is used for debugging exclusively"""
-        try: 
+        try:
             while self.process.poll() is None:
                 time.sleep(0.01)
 
@@ -226,44 +263,21 @@ class Dota2Game:
                 if not self.running:
                     self.stop()
 
-                # handle debug HTTP request
-                if not self.http_rpc_recv.empty():
-                    msg = self.http_rpc_recv.get()
+                winner = self.state.get('win')
+                if winner is not None:
+                    log.debug(f'{winner} won')
+                    self.stop()
+                # ---
 
-                    attr = msg.get('attr')
-                    args = msg.get('args', [])
-                    kwargs = msg.get('kwargs', dict())
+                self._handle_http_rpc()
+                self._handle_ipc()
+                self._handle_state()
 
-                    result = dict(error=f'Object does not have attribute {attr}')
-
-                    if hasattr(self, attr):
-                        result = getattr(self, attr)(*args, **kwargs)
-
-                    if result is None:
-                        result = dict(msg='none')
-                    
-                    self.http_rpc_send.put(result)
-
-                # handle IPC from bots
-                if not self.ipc_recv_queue.empty():
-                    msg = self.ipc_recv_queue.get()
-                    self._receive_message(*msg)
-
-                # update game state
-                dire_delta = self.dire_state_delta()
-                rad_delta = self.radiant_state_delta()
-
-                if dire_delta is not None:
-                    self.update_dire_state(dire_delta)
-
-                if rad_delta is not None:
-                    self.update_radiant_state(rad_delta)
-                
         except KeyboardInterrupt:
             pass
 
         self.stop()
-    
+
     def _receive_message(self, faction: int, player_id: int, message: dict):
         # error processing
         error = message.get('E')
@@ -315,7 +329,7 @@ class Dota2Game:
         self.start_ipc()
         log.debug("Game has started")
         return self
-    
+
     def __exit__(self, exception_type, exception_value, exception_traceback):
         self.stop()
 
@@ -336,7 +350,7 @@ def main():
 
     with game:
         game.send_message(new_ipc_message())
-    
+
         game.wait()
 
     print('Done')

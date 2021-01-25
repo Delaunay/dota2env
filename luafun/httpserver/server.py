@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import logging
 from struct import unpack
 import select
@@ -16,7 +16,7 @@ from luafun.utils.options import option
 log = logging.getLogger(__name__)
 
 
-@dataclass 
+@dataclass
 class HTTPRequest:
     method: str
     version: str
@@ -48,6 +48,46 @@ def parse_request(message):
         uri,
         header_dict,
         body)
+
+
+@dataclass
+class HTTPResponse:
+    status: int = 200
+    headers: dict = field(default_factory=dict)
+    body: bytes = b''
+
+    def setbody(self, data, content_type):
+        if isinstance(data, str):
+            data = data.encode('utf-8')
+
+        self.body = data
+        self.headers['Content-Type'] = content_type
+        self.headers['Content-Length'] = len(data)
+        self.headers['Expires'] = 'Wed, 21 Oct 2015 07:28:00 GMT'
+
+    def set_html(self, data):
+        self.setbody(data, 'text/html;charset=utf-8')
+
+    def set_css(self, data):
+        self.setbody(data, 'text/css;charset=utf-8')
+
+    def set_js(self, data):
+        self.setbody(data, 'text/javascript;charset=utf-8')
+
+    def set_img(self, data):
+        self.setbody(data, 'image/png')
+
+    def tobytes(self):
+        data = [
+            f'HTTP/1.1 {self.status} {HTTP_STATUS[self.status]}',
+        ]
+
+        for k, v in self.headers.items():
+            data.append(f'{k}: {v}')
+
+        data.append('')
+        data.append(self.body.decode('utf-8'))
+        return '\r\n'.join(data).encode('utf-8')
 
 
 class HttpServer:
@@ -82,7 +122,7 @@ class HttpServer:
         self.sock = socket.create_server((host, port))
         log.debug(f'Listening to {host}:{port}')
         # self.inputs.append(self.sock)
-        
+
     @property
     def running(self):
         return self.state['running']
@@ -119,16 +159,10 @@ class HttpServer:
         route_handler = self.routes.get(request.uri, self.default_route)
         reply = route_handler(request)
 
-        header = f"""HTTP/1.1 200 OK\r
-        |Content-Length: {len(reply.encode("utf-8"))}\r
-        |Content-Type: text/html;charset=utf-8\r
-        |Expires: Wed, 21 Oct 2015 07:28:00 GMT\r
-        |\r
-        |""".replace('        |', '')
+        response = HTTPResponse()
+        response.set_html(reply)
 
-        reply = f'{header}{reply}'.encode('utf-8')
-        # print(reply.decode('utf-8'))
-        client.send(reply)
+        client.send(response.tobytes())
         client.close()
 
     def _run(self):
@@ -142,7 +176,7 @@ class HttpServer:
 
     def run(self):
         self.connect()
-    
+
         while self.running:
             try:
                 self._run()
@@ -151,6 +185,82 @@ class HttpServer:
 
         log.debug('http server shuting down')
         self.sock.close()
+
+
+HTTP_STATUS = {
+    # 1×× Informational
+    100: 'Continue',
+    101: 'Switching Protocols',
+    102: 'Processing',
+
+    # 2×× Success
+    200: 'OK',
+    201: 'Created',
+    202: 'Accepted',
+    203: 'Non-authoritative Information',
+    204: 'No Content',
+    205: 'Reset Content',
+    206: 'Partial Content',
+    207: 'Multi-Status',
+    208: 'Already Reported',
+    226: 'IM Used',
+
+    # 3×× Redirection
+    300: 'Multiple Choices',
+    301: 'Moved Permanently',
+    302: 'Found',
+    303: 'See Other',
+    304: 'Not Modified',
+    305: 'Use Proxy',
+    307: 'Temporary Redirect',
+    308: 'Permanent Redirect',
+
+    # 4×× Client Error
+    400: 'Bad Request',
+    401: 'Unauthorized',
+    402: 'Payment Required',
+    403: 'Forbidden',
+    404: 'Not Found',
+    405: 'Method Not Allowed',
+    406: 'Not Acceptable',
+    407: 'Proxy Authentication Required',
+    408: 'Request Timeout',
+    409: 'Conflict',
+    410: 'Gone',
+    411: 'Length Required',
+    412: 'Precondition Failed',
+    413: 'Payload Too Large',
+    414: 'Request-URI Too Long',
+    415: 'Unsupported Media Type',
+    416: 'Requested Range Not Satisfiable',
+    417: 'Expectation Failed',
+    # 418 I'm a teapot
+    421: 'Misdirected Request',
+    422: 'Unprocessable Entity',
+    423: 'Locked',
+    424: 'Failed Dependency',
+    426: 'Upgrade Required',
+    428: 'Precondition Required',
+    429: 'Too Many Requests',
+    431: 'Request Header Fields Too Large',
+    444: 'Connection Closed Without Response',
+    451: 'Unavailable For Legal Reasons',
+    499: 'Client Closed Request',
+
+    # 5×× Server Error
+    500: 'Internal Server Error',
+    501: 'Not Implemented',
+    502: 'Bad Gateway',
+    503: 'Service Unavailable',
+    504: 'Gateway Timeout',
+    505: 'HTTP Version Not Supported',
+    506: 'Variant Also Negotiates',
+    507: 'Insufficient Storage',
+    508: 'Loop Detected',
+    510: 'Not Extended',
+    511: 'Network Authentication Required',
+    599: 'Network Connect Timeout Error',
+}
 
 
 if __name__ == '__main__':
