@@ -57,6 +57,9 @@ class HTTPResponse:
     body: bytes = b''
 
     def setbody(self, data, content_type):
+        if data is None:
+            return
+
         if isinstance(data, str):
             data = data.encode('utf-8')
 

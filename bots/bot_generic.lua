@@ -123,6 +123,52 @@ local NotUsed2 = 29
 local NotUsed3 = 30
 local NotUsed4 = 31
 
+
+local function _get_world_size()
+    local x_min, y_min, x_max, y_max = GetWorldBounds()
+    send_message({I = {
+        name='WorldBounds',
+        x_min=x_min,
+        y_min=y_min,
+        x_max=x_max,
+        y_max=y_max,
+    }})
+end
+
+local function _get_trees()
+    -- Trees
+    -- -----
+    for i= 0,2500
+    do
+        local loc = GetTreeLocation(i)
+        local tree = {i, loc.x, loc.y, loc.z}
+        send_message({I = tree})
+    end
+
+end
+
+-- Dump a bunch of useful information
+local function get_info()
+    -- int GetHeightLevel( vLocation )
+    -- bool IsLocationVisible( vLocation )
+    -- bool IsLocationPassable( vLocation )
+    -- GetNeutralSpawners()
+    -- GetDroppedItemList()
+    -- vector GetTreeLocation( nTree )
+    -- vector GetRuneSpawnLocation( nRuneLoc )
+    -- vector GetShopLocation( nTeam, nShop )
+
+    -- Useful for making a minimap of the vision
+    ---------
+    -- GetNearbyTrees
+    -- GetNearbyHeroes
+    -- GetNearbyCreeps
+    -- GetNearbyLaneCreeps
+    -- GetNearbyNeutralCreeps
+    -- GetNearbyTowers
+    -- GetNearbyBarracks
+end
+
 -- TODO check how to get the bot courier
 local hCourier = GetCourier(0)
 local bot = GetBot()
@@ -131,19 +177,19 @@ local bot = GetBot()
 -- This is all the actions the bots can make
 local function get_action_table()
     local actionHandler = {}
-    actionHandler[AMoveToLocation]       = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_MoveToLocation(Vector(vLoc[1], vLoc[2], vLoc[3])) end
-    actionHandler[AMoveDirectly]         = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_MoveDirectly(Vector(vLoc[1], vLoc[2], vLoc[3])) end
-    actionHandler[AMoveToUnit]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_MoveToUnit(Vector(vLoc[1], vLoc[2], vLoc[3])) end
-    actionHandler[AAttackUnit]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_AttackUnit(Vector(vLoc[1], vLoc[2], vLoc[3]), true) end
-    actionHandler[AAttackMove]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_AttackMove(Vector(vLoc[1], vLoc[2], vLoc[3])) end
-    actionHandler[AUseAbility]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_UseAbility(Vector(vLoc[1], vLoc[2], vLoc[3])) end
+    actionHandler[AMoveToLocation]       = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_MoveToLocation(vLoc) end
+    actionHandler[AMoveDirectly]         = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_MoveDirectly(vLoc) end
+    actionHandler[AMoveToUnit]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_MoveToUnit(vLoc) end
+    actionHandler[AAttackUnit]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_AttackUnit(vLoc, true) end
+    actionHandler[AAttackMove]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_AttackMove(vLoc) end
+    actionHandler[AUseAbility]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_UseAbility(vLoc) end
     actionHandler[AUseAbilityOnEntity]   = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_UseAbilityOnEntity(hAbility, hTarget) end
-    actionHandler[AUseAbilityOnLocation] = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_UseAbilityOnLocation(hAbility, Vector(vLoc[1], vLoc[2], vLoc[3])) end
+    actionHandler[AUseAbilityOnLocation] = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_UseAbilityOnLocation(hAbility, vLoc) end
     actionHandler[AUseAbilityOnTree]     = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_UseAbilityOnTree(hAbility, iTree) end
     actionHandler[APickUpRune]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_PickUpRune(nRune) end
     actionHandler[APickUpItem]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_PickUpItem(hItem) end
-    actionHandler[ADropItem]             = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_DropItem(hItem, Vector(vLoc[1], vLoc[2], vLoc[3])) end
-    actionHandler[ADelay]                = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_Delay(Vector(vLoc[1], vLoc[2], vLoc[3])) end
+    actionHandler[ADropItem]             = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_DropItem(hItem, vLoc) end
+    actionHandler[ADelay]                = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_Delay(vLoc) end
     actionHandler[APurchaseItem]         = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_PurchaseItem(sItem) end
     actionHandler[ASellItem]             = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_SellItem(hItem) end
     actionHandler[ADisassembleItem]      = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_DisassembleItem(hItem) end
@@ -162,30 +208,12 @@ local function get_action_table()
     actionHandler[NotUsed1]              = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return "" end
     actionHandler[NotUsed2]              = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return "" end
     actionHandler[NotUsed3]              = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return "" end
-    actionHandler[NotUsed4]              = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return "" end
+    -- used for debug print
+    actionHandler[NotUsed4]              = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return get_info() end
     return actionHandler
 end
 
 local action_table = get_action_table()
-
-local function get_constant()
-    local x_min, y_min, x_max, y_max = GetWorldBounds()
-    -- int GetHeightLevel( vLocation )
-    -- bool IsLocationVisible( vLocation )
-    -- bool IsLocationPassable( vLocation )
-    -- GetNeutralSpawners()
-    -- GetDroppedItemList()
-    -- vector GetTreeLocation( nTree )
-    -- vector GetRuneSpawnLocation( nRuneLoc )
-    -- vector GetShopLocation( nTeam, nShop )
-    -- GetNearbyTrees
-    -- GetNearbyHeroes
-    -- GetNearbyCreeps
-    -- GetNearbyLaneCreeps
-    -- GetNearbyNeutralCreeps
-    -- GetNearbyTowers
-    -- GetNearbyBarracks
-end
 
 -- From the original dotaservice
 local function get_player_info()
@@ -243,6 +271,12 @@ local function execute_rpc(message)
         return
     end
 
+    -- Fix argument type
+    if vLoc ~= nil then
+        vLoc = Vector(vLoc[1], vLoc[2], vLoc[3])
+    end
+
+    -- Execute actions
     fun(vLoc,
         hUnit,
         hAbility,

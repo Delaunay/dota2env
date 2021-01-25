@@ -24,6 +24,23 @@ class GameInspector(HttpServer):
         self.routes['/dire_state'] = self.getattr('dire_state', 'state.html')
         self.routes['/radiant_state'] = self.getattr('dire_state', 'state.html')
         self.routes['/send_move_action'] = self.send_move_action
+        self.routes['/get_info'] = self.send_get_info
+
+    def send_get_info(self, request):
+        # here
+        b = IPCMessageBuilder()
+        p = b.player(0)
+        p.MoveToLocation([0, 0])
+        p.act[0] = 31
+
+        m = b.build()
+        # done
+
+        log.debug(f'Sending message {m}')
+        self.rpc_send.put(dict(attr='send_message', args=[m]))
+        obj = self.fetch()
+        # --
+        return self.default_route(request)
 
     def send_move_action(self, request):
         # here

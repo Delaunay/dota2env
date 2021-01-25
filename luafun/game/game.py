@@ -113,6 +113,9 @@ class Dota2Game:
             TEAM_DIRE: 0
         }
 
+        self.cache = dict()
+        self.store = open('exporting_trees.json', 'w')
+
         log.debug(f'Main Process: {os.getpid()}')
 
     @property
@@ -306,6 +309,19 @@ class Dota2Game:
                 self.reply_count.pop(ack)
             return
 
+        # Message Info
+        info = message.get('I')
+        if info is not None:
+            tid = info[0]
+
+            if tid not in self.cache:
+                self.store.write(json.dumps(info))
+                self.store.write('\n')
+                self.cache[tid] = True
+                log.debug(info)
+
+            return
+
         self.receive_message(faction, player_id, message)
 
     def receive_message(self, faction: int, player_id: int, message: dict):
@@ -341,6 +357,10 @@ class Dota2Game:
         self.radiant_state_process.join()
         self.ipc_recv_process.join()
         self.http_server.join()
+
+        # ---
+        self.store.close()
+        # --
 
         self.cleanup()
         log.debug("Game has finished")
