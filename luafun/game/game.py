@@ -16,6 +16,7 @@ from luafun.game.http_inspect import http_inspect
 from luafun.game.ipc_recv import ipc_recv
 from luafun.game.ipc_send import ipc_send, TEAM_RADIANT, TEAM_DIRE
 import luafun.game.dota2.state_types as msg
+from luafun.game.extractor import Extractor
 from luafun.game.states import world_listener_process
 
 
@@ -113,9 +114,7 @@ class Dota2Game:
             TEAM_DIRE: 0
         }
 
-        self.cache = dict()
-        self.store = open('exporting_trees.json', 'w')
-
+        self.extractor = Extractor()
         log.debug(f'Main Process: {os.getpid()}')
 
     @property
@@ -223,6 +222,9 @@ class Dota2Game:
         if self.process.poll() is None:
             self.process.terminate()
 
+        if self.extractor:
+            self.extractor.close()
+
     def _handle_http_rpc(self):
         # handle debug HTTP request
         if self.http_rpc_recv.empty():
@@ -311,16 +313,8 @@ class Dota2Game:
 
         # Message Info
         info = message.get('I')
-        if info is not None:
-            tid = info[0]
-
-            if tid not in self.cache:
-                self.store.write(json.dumps(info))
-                self.store.write('\n')
-                self.cache[tid] = True
-                log.debug(info)
-
-            return
+        if self.extractor and info is not None:
+            self.extractor.save(message)
 
         self.receive_message(faction, player_id, message)
 
@@ -357,10 +351,6 @@ class Dota2Game:
         self.radiant_state_process.join()
         self.ipc_recv_process.join()
         self.http_server.join()
-
-        # ---
-        self.store.close()
-        # --
 
         self.cleanup()
         log.debug("Game has finished")

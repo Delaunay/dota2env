@@ -25,9 +25,17 @@ SIZE = (
 )
 
 # Trees
-TREE = load_source_file('trees.json')
-TREE_COUNT = len(TREE)
+TREES = load_source_file('resources/trees.json')
+TREE_COUNT = len(TREES)
 
+RUNES = load_source_file('resources/runes.json')
+RUNE_COUNT = len(RUNES)
+
+SHOPS = load_source_file('resources/shops.json')
+SHOP_COUNT = len(SHOPS)
+
+NEUTRALS = load_source_file('resources/neutrals.json')
+NEUTRAL_COUNT = len(NEUTRALS)
 
 # Collision in dota is standardized
 # so there is only a few shapes to worry about

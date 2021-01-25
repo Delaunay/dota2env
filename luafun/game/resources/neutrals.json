@@ -1,0 +1,20 @@
+[
+[2, "small", "normal", "NEUTRALS"],
+[2, "small", "normal", "NEUTRALS"],
+[2, "large", "NEUTRALS"],
+[2, "large", "fast", "NEUTRALS"],
+[2, "medium", "fast", "NEUTRALS"],
+[2, "medium", "fast", "NEUTRALS"],
+[2, "large", "normal", "NEUTRALS"],
+[2, "large", "normal", "NEUTRALS"],
+[2, "ancient", "slow", "NEUTRALS"],
+[3, "medium", "normal", "NEUTRALS"],
+[3, "large", "fast", "NEUTRALS"],
+[3, "small", "slow", "NEUTRALS"],
+[3, "large", "slow", "NEUTRALS"],
+[3, "large", "fast", "NEUTRALS"],
+[3, "large", "normal", "NEUTRALS"],
+[3, "small", "fast", "NEUTRALS"],
+[3, "medium", "fast", "NEUTRALS"],
+[3, "ancient", "normal", "NEUTRALS"]
+]

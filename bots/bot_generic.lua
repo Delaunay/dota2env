@@ -127,24 +127,62 @@ local NotUsed4 = 31
 local function _get_world_size()
     local x_min, y_min, x_max, y_max = GetWorldBounds()
     send_message({I = {
-        name='WorldBounds',
         x_min=x_min,
         y_min=y_min,
         x_max=x_max,
         y_max=y_max,
-    }})
+    }, T = 'BOUNDS'})
 end
 
 local function _get_trees()
-    -- Trees
-    -- -----
     for i= 0,2500
     do
         local loc = GetTreeLocation(i)
         local tree = {i, loc.x, loc.y, loc.z}
-        send_message({I = tree})
+        send_message({I = tree, T = 'TREE'})
     end
+end
 
+local function _get_runes()
+    for i = 0,10
+    do
+        local loc = GetRuneSpawnLocation(i)
+        local runes = {i, loc.x, loc.y, loc.z}
+        send_message({I = runes, T = 'RUNE'})
+    end
+end
+
+
+local function _get_shop()
+    for team = 0,4
+    do
+        for shop = 0,10
+        do
+            local loc = GetShopLocation(team, shop)
+            local runes = {team + shop * 10, team, shop, loc.x, loc.y, loc.z}
+            send_message({I = runes, T = 'SHOP'})
+        end
+    end
+end
+
+local function _get_neutrals()
+    local neutrals = GetNeutralSpawners()
+
+    -- Looks useless
+    -- {
+    --      speed =  'normal',
+    --      team =  2 ,
+    --      type  =  'small'
+    -- }
+
+    for _, data in pairs(neutrals) do
+        local speed = data.speed
+        local team = data.team
+        local type = data.type
+
+        local result = {team, type, speed}
+        send_message({I = result, T = 'NEUTRALS'})
+    end
 end
 
 -- Dump a bunch of useful information
@@ -152,11 +190,10 @@ local function get_info()
     -- int GetHeightLevel( vLocation )
     -- bool IsLocationVisible( vLocation )
     -- bool IsLocationPassable( vLocation )
-    -- GetNeutralSpawners()
-    -- GetDroppedItemList()
-    -- vector GetTreeLocation( nTree )
-    -- vector GetRuneSpawnLocation( nRuneLoc )
-    -- vector GetShopLocation( nTeam, nShop )
+
+    _get_neutrals()
+
+     -- GetDroppedItemList()
 
     -- Useful for making a minimap of the vision
     ---------
