@@ -35,8 +35,15 @@ def ipc_send(f2, data):
 
     f1 = f2 + '_tmp'
 
-    if os.path.exists(f2):
-        os.remove(f2)
+    # Remove old file so we can override it
+    while True:
+        try:
+            if os.path.exists(f2):
+                os.remove(f2)
+            break
+        except PermissionError:
+            pass
+    # --
 
     # Keep track of the message id we are sending
     uid += 1

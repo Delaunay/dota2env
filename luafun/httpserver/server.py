@@ -127,9 +127,9 @@ class HttpServer:
     def running(self):
         return self.state['running']
 
-    def stop_server(self, _):
+    def stop_server(self, request):
         self.state['running'] = False
-        return self.html('<pre>Stopping the server</pre>')
+        return self.default_route(request)
 
     def html(self, body):
         return f'<html><head></head><body>{body}</body></html>'

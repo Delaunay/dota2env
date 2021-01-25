@@ -7,6 +7,7 @@ import json
 
 from luafun.httpserver.server import HttpServer
 from luafun.utils.python_fix import asdict
+from luafun.game.action import IPCMessageBuilder
 
 
 log = logging.getLogger(__name__)
@@ -22,6 +23,22 @@ class GameInspector(HttpServer):
         self.routes['/radiant_state_delta'] = self.getattr('radiant_state_delta')
         self.routes['/dire_state'] = self.getattr('dire_state', 'state.html')
         self.routes['/radiant_state'] = self.getattr('dire_state', 'state.html')
+        self.routes['/send_move_action'] = self.send_move_action
+
+    def send_move_action(self, request):
+        # here
+        b = IPCMessageBuilder()
+        p = b.player(0)
+        p.MoveToLocation([0, 0])
+        m = b.build()
+        # done
+
+        log.debug(f'Sending message {m}')
+        self.rpc_send.put(dict(attr='send_message', args=[m]))
+        obj = self.fetch()
+        # --
+
+        return self.default_route(request)
 
     def fetch(self):
         while self.running:
@@ -29,7 +46,7 @@ class GameInspector(HttpServer):
                 return self.rpc_recv.get(timeout=0.250)
             except Exception as err:
                 log.error(f'Error {err}')
-        
+
         return None
 
     def getattr(self, attr_name, template=None):
@@ -39,7 +56,7 @@ class GameInspector(HttpServer):
 
             if obj is None:
                 return self.html('could not fetch reply')
-            
+
             if not isinstance(obj, (str, dict)):
                 reply = json.dumps(asdict(obj), indent=2)
 
@@ -60,7 +77,7 @@ def _http_inspect(state, rpc_recv, rpc_send, level):
 
 def http_inspect(state, rpc_recv, rpc_send, level):
     p = mp.Process(
-        target=_http_inspect, 
+        target=_http_inspect,
         args=(state, rpc_recv, rpc_send, level)
     )
     p.start()

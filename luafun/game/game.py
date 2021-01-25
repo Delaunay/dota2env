@@ -22,14 +22,6 @@ from luafun.game.states import world_listener_process
 log = logging.getLogger(__name__)
 
 
-class State:
-    """Simple Object used to propagate game state through the infra to stop components from running forever
-    when the game finishes
-    """
-    def __init__(self):
-        self.running = True
-
-
 @dataclass
 class WorldConnectionStats:
     message_size: int = 0
@@ -47,10 +39,23 @@ class Stats:
 
 SECONDS_PER_TICK = 1 / 30
 
+TEAM_NAMES = {
+    TEAM_RADIANT: 'Radiant',
+    str(TEAM_RADIANT): 'Radiant',
+    TEAM_DIRE: 'Dire',
+    str(TEAM_DIRE): 'Dire',
+}
+
+
+def team_name(v):
+    return str(TEAM_NAMES.get(v))
+
+
 class Dota2Game:
     """Simple interface to listen and send messages to a running dota2 game instance
     This class only stich the different components together to provide a unified API over them
     You should subclass this to implement the desired behaviour
+    No ML related feature there
 
     Components
     ----------
@@ -83,8 +88,7 @@ class Dota2Game:
         self.options = DotaOptions(dedicated=dedicated)
         self.args = None
 
-        self.state = State()
-
+        self.state = None
         self.process = None
         self.reply_count = defaultdict(int)
         self.manager = None
