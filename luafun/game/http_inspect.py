@@ -20,8 +20,8 @@ class GameInspector(HttpServer):
 
         self.routes['/dire_state_delta'] = self.getattr('dire_state_delta')
         self.routes['/radiant_state_delta'] = self.getattr('radiant_state_delta')
-        self.routes['/dire_state'] = self.getattr('dire_state')
-        self.routes['/radiant_state'] = self.getattr('dire_state')
+        self.routes['/dire_state'] = self.getattr('dire_state', 'state.html')
+        self.routes['/radiant_state'] = self.getattr('dire_state', 'state.html')
 
     def fetch(self):
         while self.running:
@@ -32,18 +32,23 @@ class GameInspector(HttpServer):
         
         return None
 
-    def getattr(self, attr_name):
+    def getattr(self, attr_name, template=None):
         def rpc_attr(_):
             self.rpc_send.put(dict(attr=attr_name))
-            reply = self.fetch()
+            obj = self.fetch()
 
-            if reply is None:
+            if obj is None:
                 return self.html('could not fetch reply')
             
-            if not isinstance(reply, (str, dict)):
-                reply = json.dumps(asdict(reply), indent=2)
+            if not isinstance(obj, (str, dict)):
+                reply = json.dumps(asdict(obj), indent=2)
 
-            return self.html(f'<pre>{reply}</pre>')
+            if template is None:
+                return self.html(f'<pre>{reply}</pre>')
+            else:
+                t = self.env.get_template(template)
+                return t.render(obj=obj, code=reply)
+
         return rpc_attr
 
 

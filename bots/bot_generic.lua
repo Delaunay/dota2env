@@ -121,6 +121,7 @@ NotUsed4 = 31
 hCourier = GetCourier(0) 
 
 -- Map the action ID to its function
+-- This is all the actions the bots can make
 local ActionHandler = {
     AMoveToLocation                = function(vLocation, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return Action_MoveToLocation(vLocation) end,
     AMoveDirectly                  = function(vLocation, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return Action_MoveDirectly(vLocation) end,

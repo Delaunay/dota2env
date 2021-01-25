@@ -2,9 +2,12 @@ from dataclasses import dataclass
 import logging
 from struct import unpack
 import select
+import os
 import socket
 import traceback
 import json
+
+from jinja2 import Environment, PackageLoader, select_autoescape
 
 from luafun.utils.python_fix import asdict
 from luafun.utils.options import option
@@ -54,6 +57,23 @@ class HttpServer:
             '/stop': self.stop_server
         }
         # self.inputs = []
+        self.env = Environment(
+            loader=PackageLoader('luafun.httpserver', 'templates'),
+            autoescape=select_autoescape(['html', 'xml'])
+        )
+
+    #     self.static_files = dict()
+    #     self.load_static_files()
+    #     self.folder = None
+
+    # def load_static_files(self):
+    #     self.folder = os.path.join(os.path.dirname(__file__), 'static')
+
+    #     for f in os.listdir(os.path.join(self.folder, 'css')):
+    #         self.static_files.add(os.path.hoin('css', f))
+
+    #     for f in os.listdir(os.path.join(self.folder, 'js')):
+    #         self.static_files.add(os.path.hoin('js', f))
 
     def connect(self):
         port = option('debug.port', 8080, int)
@@ -75,11 +95,12 @@ class HttpServer:
         return f'<html><head></head><body>{body}</body></html>'
 
     def default_route(self, request):
-        routes = []
-        for k in self.routes:
-            routes.append(f'<li><a href="{k}">{k}</a></li>')
-        routes = ''.join(routes)
-        return self.html(f'<ul>Routes {routes}</ul><pre>{json.dumps(asdict(request), indent=2)}</pre>')
+        page = self.env.get_template('routes.html')
+        return page.render(
+            title='Routes',
+            routes=self.routes,
+            headers=json.dumps(asdict(request), indent=2)
+        )
 
     def process_request(self, client):
         data = client.recv(1024)
@@ -93,7 +114,7 @@ class HttpServer:
         except Exception as err:
             log.debug(f'Error {err}')
             log.debug(message)
-            return 
+            return
 
         route_handler = self.routes.get(request.uri, self.default_route)
         reply = route_handler(request)
@@ -106,6 +127,7 @@ class HttpServer:
         |""".replace('        |', '')
 
         reply = f'{header}{reply}'.encode('utf-8')
+        # print(reply.decode('utf-8'))
         client.send(reply)
         client.close()
 

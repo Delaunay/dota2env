@@ -1,1 +1,3 @@
 protobuf
+Jinja2
+Pygtail

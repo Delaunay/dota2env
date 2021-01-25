@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+<h1>Routes</h1>
+<ul>
+    {% for key, value in routes.items() %}
+    <li><a href="{{ key|e }}">{{ key|e }}</a></li>
+    {% endfor %}
+</ul>
+
+<pre>
+{{ headers }}
+</pre>
+{% endblock %}
