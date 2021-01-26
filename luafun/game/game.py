@@ -107,6 +107,9 @@ class Dota2Game:
         self.http_rpc_send = None
         self.http_rpc_recv = None
 
+
+        self.ready = False
+        self.pending_ready = True
         self.bot_count = 10
         self.stats = Stats()
         self.players = {
@@ -145,7 +148,7 @@ class Dota2Game:
 
         # save the arguments of the current game for visibility
         self.args = [self.paths.executable_path] + self.options.args(self.paths)
-        self.process = subprocess.Popen(self.args)
+        self.process = subprocess.Popen(self.args) # , stdin=subprocess.PIPE
 
     def dire_state_delta(self):
         if not self.dire_state_delta_queue.empty():
@@ -282,6 +285,12 @@ class Dota2Game:
                 self._handle_ipc()
                 self._handle_state()
 
+                if self.pending_ready and self.ready:
+                    self.pending_ready = False
+                    # I wish something like this was possible
+                    # out, err = self.process.communicate(b'jointeam spec')
+                    # log.debug(f'{out} {err}')
+
         except KeyboardInterrupt:
             pass
 
@@ -309,6 +318,7 @@ class Dota2Game:
             if self.reply_count[ack] == self.bot_count:
                 log.debug(f'(uid: {ack}) message received by all {self.bot_count} bots')
                 self.reply_count.pop(ack)
+                self.ready = True
             return
 
         # Message Info

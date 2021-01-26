@@ -13,3 +13,4 @@ console.log*
 luafun.egg-info/
 .vscode/
 exported.json
+*~

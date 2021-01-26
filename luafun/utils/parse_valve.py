@@ -226,18 +226,18 @@ if __name__ == '__main__':
     p = Parser('C:/Users/Newton/work/luafun/resources/npc_abilities.txt')
     p.parse()
 
-    import json
+    # import json
 
-    print(json.dumps(p.root['DOTAAbilities']['antimage_mana_break'], indent=2))
-    print(p.ability_spec)
-    print(len(p.ability_spec))
+    # print(json.dumps(p.root['DOTAAbilities']['antimage_mana_break'], indent=2))
+    # print(p.ability_spec)
+    # print(len(p.ability_spec))
 
-    reused_comp = 0
-    for k, c in p.ability_spec.items():
-        if c > 1:
-            print(k, c)
-            reused_comp += 1
+    # reused_comp = 0
+    # for k, c in p.ability_spec.items():
+    #     if c > 1:
+    #         print(k, c)
+    #         reused_comp += 1
 
-    print(reused_comp)
-    print(len(p.ability_spec))
-    print(len(p.root['DOTAAbilities']))
+    # print(reused_comp)
+    # print(len(p.ability_spec))
+    # print(len(p.root['DOTAAbilities']))

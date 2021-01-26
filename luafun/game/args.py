@@ -52,7 +52,10 @@ class DotaOptions:
             # do not bind the ip
             '-noip',
             # WatchDog will quit the game if e.g. the lua api takes a few seconds.
-            '-nowatchdog', 
+            '-nowatchdog',
+            # looked like the cmd args where console command so tried to execute that one
+            # in hope of making us spectator at the start of the game but no dice
+            # '-jointeam', 'spec',
             # Relates to steam client.
             '+clientport', '{}'.format(self.client_port),
             '+dota_1v1_skip_strategy', '1',
