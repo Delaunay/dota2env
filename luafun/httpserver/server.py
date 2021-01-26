@@ -104,19 +104,25 @@ class HttpServer:
             loader=PackageLoader('luafun.httpserver', 'templates'),
             autoescape=select_autoescape(['html', 'xml'])
         )
+        self.static_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
 
-    #     self.static_files = dict()
-    #     self.load_static_files()
-    #     self.folder = None
+    def load_static_file(self, uri):
+        filename = self.static_folder + uri
 
-    # def load_static_files(self):
-    #     self.folder = os.path.join(os.path.dirname(__file__), 'static')
+        if not (os.path.exists(filename) and os.path.isfile(filename)):
+            return None
 
-    #     for f in os.listdir(os.path.join(self.folder, 'css')):
-    #         self.static_files.add(os.path.hoin('css', f))
+        with open(filename, 'r') as f:
+            data = f.read()
 
-    #     for f in os.listdir(os.path.join(self.folder, 'js')):
-    #         self.static_files.add(os.path.hoin('js', f))
+        response = HTTPResponse()
+        if filename.endswith('.css'):
+            response.set_css(data)
+
+        if filename.endswith('.js'):
+            response.set_js(data)
+
+        return response
 
     def connect(self):
         port = option('debug.port', 8080, int)
@@ -159,9 +165,13 @@ class HttpServer:
             log.debug(message)
             return
 
+        data = self.load_static_file(request.uri)
+        if data is not None:
+            client.send(data.tobytes())
+            return
+
         route_handler = self.routes.get(request.uri, self.default_route)
         reply = route_handler(request)
-
         response = HTTPResponse()
         response.set_html(reply)
 
