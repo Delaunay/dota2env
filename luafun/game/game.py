@@ -12,7 +12,7 @@ import uuid
 from luafun.game.config import DotaPaths
 from luafun.game.args import DotaOptions
 from luafun.game.modes import DOTA_GameMode
-from luafun.game.http_inspect import http_inspect
+from luafun.game.inspect import http_inspect
 from luafun.game.ipc_recv import ipc_recv
 from luafun.game.ipc_send import ipc_send, TEAM_RADIANT, TEAM_DIRE
 import luafun.game.dota2.state_types as msg
@@ -356,6 +356,7 @@ class Dota2Game:
 
     def __exit__(self, exception_type, exception_value, exception_traceback):
         self.stop()
+        self.http_server.terminate()
 
         self.dire_state_process.join()
         self.radiant_state_process.join()
