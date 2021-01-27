@@ -43,8 +43,8 @@ class Dota2Env(Dota2Game):
 
     Although leaving it inconsistent could be an interesting experiment
     """
-    def __init__(self, path, dedicated=True):
-        super(Dota2Env, self).__init__(path, dedicated)
+    def __init__(self, path, dedicated=True, config=None):
+        super(Dota2Env, self).__init__(path, dedicated, config=config)
         # For debugging only
         self.radiant_message = open(self.paths.bot_file('out_radiant.txt'), 'w')
         self.dire_message = open(self.paths.bot_file('out_dire.txt'), 'w')
@@ -90,17 +90,17 @@ class Dota2Env(Dota2Game):
             log.error(f'Error happened during state stiching {e}')
             log.error(traceback.format_exc())
 
-        self.radiant_message.write(str(message))    
+        self.radiant_message.write(str(message))
 
     def receive_message(self, faction: int, player_id: int, message: dict):
         """We only use log to get errors back if any"""
         pass
-    
+
     # Training data
     def generate_bot_state(self):
         """Generate the states of our bots. The state is the faction state augmented with
         player specific information
-        
+
         In a standard self-play Game this would return 10 states
         """
         dire = acquire_state(self._dire_state)
@@ -112,19 +112,19 @@ class Dota2Env(Dota2Game):
         pass
 
 
-def main():
+def main(config=None):
     from luafun.game.modes import DOTA_GameMode
     from luafun.game.ipc_send import new_ipc_message
     logging.basicConfig(level=logging.DEBUG)
 
-    game = Dota2Env('F:/SteamLibrary/steamapps/common/dota 2 beta/', False)
+    game = Dota2Env('F:/SteamLibrary/steamapps/common/dota 2 beta/', False, config=config)
     game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_AP)
     game.options.ticks_per_observation = 4
     game.options.host_timescale = 2
 
     with game:
         game.send_message(new_ipc_message())
-    
+
         game.wait()
 
     print('Done')

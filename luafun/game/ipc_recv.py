@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 import json
 import logging
 import os
@@ -52,6 +53,7 @@ class IPCRecv:
         win = None
 
         for line in Pygtail(self.logfilename):
+            self.state['ipc_recv'] = datetime.utcnow()
             result = IPC_RECV.search(line)
 
             # this happens 99.99% of times so we do it first

@@ -1,32 +1,28 @@
-import json
-
-from luafun.utils.python_fix import asdict
+import logging
 
 from rpcjs.page import Page
 
+log = logging.getLogger(__name__)
+
 
 class BasePage(Page):
-    def __init__(self, rpc_recv, rpc_send):
-        self.rpc_recv = rpc_recv
-        self.rpc_send = rpc_send
+    def __init__(self, app):
+        self.app = app
+        self.rpc_recv = app.rpc_recv
+        self.rpc_send = app.rpc_send
+        self.state = app.state
+        self.env = app.env
 
     def fetch(self):
         """Get the result of the rpc call"""
-        try:
-            return self.rpc_recv.get(timeout=0.250)
-        except Exception as err:
-            log.error(f'Error {err}')
+        while self.state['running']:
+            try:
+                return self.rpc_recv.get(timeout=0.250)
+            except Exception as err:
+                log.error(f'Error {err}')
         return None
 
     def getattr(self, attr_name):
         """Fetch a gamr attribute using the queues"""
         self.rpc_send.put(dict(attr=attr_name))
-        obj = self.fetch()
-
-        if obj is None:
-            return 'None'
-
-        if not isinstance(obj, (str, dict)):
-            reply = json.dumps(asdict(obj), indent=2)
-
-        return reply
+        return self.fetch()

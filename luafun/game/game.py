@@ -84,15 +84,16 @@ class Dota2Game:
     We use multiprocess, asyncio was not given the required performance.
     A huge part of performance is used to receive messages from the game itself
     """
-    def __init__(self, path=None, dedicated=True):
+    def __init__(self, path=None, dedicated=True, config=None):
         self.paths = DotaPaths(path)
         self.options = DotaOptions(dedicated=dedicated)
         self.args = None
 
-        self.state = None
         self.process = None
         self.reply_count = defaultdict(int)
+
         self.manager = None
+        self.state = None
 
         self.dire_state_process = None
         self.radiant_state_process = None
@@ -103,6 +104,7 @@ class Dota2Game:
         self.ipc_recv_process = None
         self.ipc_recv_queue = None
 
+        self.config = config
         self.http_server = None
         self.http_rpc_send = None
         self.http_rpc_recv = None
@@ -165,8 +167,13 @@ class Dota2Game:
 
     def start_ipc(self):
         self.manager = mp.Manager()
-        self.state = self.manager.dict()
-        self.state['running'] = True
+
+        if self.config is None:
+            self.state = self.manager.dict()
+            self.state['running'] = True
+        else:
+            self.state = self.config.state
+
         level = logging.DEBUG
 
         # Dire State
@@ -202,15 +209,20 @@ class Dota2Game:
             level
         )
 
-        # HTTP server
-        self.http_rpc_recv = self.manager.Queue()
-        self.http_rpc_send = self.manager.Queue()
-        self.http_server = http_inspect(
-            self.state,
-            self.http_rpc_send,
-            self.http_rpc_recv,
-            level
-        )
+        # Setup the server as an environment inspector
+        if self.config is None:
+            self.http_rpc_recv = self.manager.Queue()
+            self.http_rpc_send = self.manager.Queue()
+            self.http_server = http_inspect(
+                self.state,
+                self.http_rpc_send,
+                self.http_rpc_recv,
+                level
+            )
+        else:
+            # Setup the server as a monitor
+            self.http_rpc_recv = self.config.rpc_recv
+            self.http_rpc_send = self.config.rpc_send
 
     def stop(self):
         """Stop the game in progress
@@ -255,14 +267,19 @@ class Dota2Game:
         self._receive_message(*msg)
 
     def _handle_state(self):
+        s = time.time()
         dire_delta = self.dire_state_delta()
-        rad_delta = self.radiant_state_delta()
-
         if dire_delta is not None:
             self.update_dire_state(dire_delta)
+        e = time.time()
+        self.state['dire_state_time']  = e - s
 
+        s = time.time()
+        rad_delta = self.radiant_state_delta()
         if rad_delta is not None:
             self.update_radiant_state(rad_delta)
+        e = time.time()
+        self.state['rad_state_time']  = e - s
 
     def wait(self):
         """Wait for the game to finish, this is used for debugging exclusively"""
@@ -280,8 +297,16 @@ class Dota2Game:
                     self.stop()
                 # ---
 
+                s = time.time()
                 self._handle_http_rpc()
+                e = time.time()
+                self.state['http_time']  = e - s
+
+                s = time.time()
                 self._handle_ipc()
+                e = time.time()
+                self.state['ipc_time']  = e - s
+
                 self._handle_state()
 
                 if self.pending_ready and self.ready:
@@ -355,7 +380,9 @@ class Dota2Game:
 
     def __exit__(self, exception_type, exception_value, exception_traceback):
         self.stop()
-        self.http_server.terminate()
+
+        if self.http_server is not None:
+            self.http_server.terminate()
 
         self.dire_state_process.join()
         self.radiant_state_process.join()
@@ -365,11 +392,14 @@ class Dota2Game:
         log.debug("Game has finished")
 
 
-def main():
+def main(config=None):
     from luafun.ipc_send import new_ipc_message
     logging.basicConfig(level=logging.DEBUG)
 
-    game = Dota2Game('F:/SteamLibrary/steamapps/common/dota 2 beta/', False)
+    game = Dota2Game(
+        'F:/SteamLibrary/steamapps/common/dota 2 beta/',
+        False,
+        config=config)
 
     with game:
         game.send_message(new_ipc_message())

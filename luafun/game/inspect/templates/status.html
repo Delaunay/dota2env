@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<table class="table table-striped table-hover">
+    <tr>
+        <th>Process</th>
+        <th>Last Message (s)</th>
+        <th>Process Time (s)</th>
+      </tr>
+    <tbody>
+        <tr>
+            <td>IPC</td>
+            <td>{{ ipc_recv }}</td>
+            <td>{{ state.get('ipc_time', 'NA') }}</td>
+        </tr>
+        <tr>
+            <td>Dire State</td>
+            <td>{{ dire_state }}</td>
+            <td>{{ state.get('dire_state_time', 'NA') }}</td>
+        </tr>
+        <tr>
+            <td>Radiant State</td>
+            <td>{{ rad_state }}</td>
+            <td>{{ state.get('rad_state_time', 'NA') }}</td>
+        </tr>
+        <tr>
+            <td>HTTP</td>
+            <td></td>
+            <td>{{ state.get('http_time', 'NA') }}</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

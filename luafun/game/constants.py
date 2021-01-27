@@ -6,7 +6,7 @@ import json
 # might be automated so it never gets out of date
 
 def load_source_file(name):
-    dirname = os.dirname(__file__)
+    dirname = os.path.dirname(__file__)
 
     with open(os.path.join(dirname, name), 'r') as f:
         return json.load(f)

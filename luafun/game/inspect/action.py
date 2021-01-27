@@ -1,4 +1,5 @@
 import logging
+import multiprocessing as mp
 
 from luafun.game.inspect.base import BasePage
 
@@ -8,30 +9,53 @@ import rpcjs.elements as html
 log = logging.getLogger(__name__)
 
 
+class Config:
+    def __init__(self, app):
+        # this is supposed to be inverted, not a bug
+        self.rpc_recv = app.rpc_send
+        self.rpc_send = app.rpc_recv
+        self.state = app.state
+
 class Actions(BasePage):
     def routes(self):
         return [
             '/action/<string:action>'
         ]
 
-    def __init__(self, env, state, rpc_recv, rpc_send):
-        super(Actions, self).__init__(rpc_recv, rpc_send)
+    def __init__(self, app):
+        super(Actions, self).__init__(app)
         self.title = 'State'
-        self.state = state
-        self.env = env
+        self.process = None
 
     def main(self, action):
         if action == 'stop':
             self.state['running'] = False
 
         if action == 'get_info':
-            self.send_get_info()
+            return self.send_get_info()
 
         if action == 'send_move_action':
-            self.send_get_info()
+            return self.send_get_info()
+
+        if action == 'play':
+            return self.start()
 
         page = self.env.get_template('state.html')
-        return page.render(code='Stopped')
+        return page.render(code='Stopped', state=self.state)
+
+    def start(self):
+        """Start a new environment running"""
+        from luafun.dotaenv import main
+
+        config = Config(self.app)
+        self.state['running'] = True
+        self.process = mp.Process(
+            target=main,
+            args=(config,)
+        )
+        self.process.start()
+        page = self.env.get_template('state.html')
+        return page.render(code='Starting', state=self.state)
 
     def send_get_info(self):
         # here
@@ -60,7 +84,3 @@ class Actions(BasePage):
         self.rpc_send.put(dict(attr='send_message', args=[m]))
         obj = self.fetch()
         # --
-
-        return self.default_route(request)
-
-

@@ -1,4 +1,14 @@
+<style>
+.outlined {
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.5);
 
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+</style>
 <div id="nav">
     {% block nav %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -13,34 +23,45 @@
                     <li class="nav-item"><a class="nav-link active" aria-current="page" href="/">Home</a></li>
 
                     <!--  Radiant -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="raddrop" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Radiant
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="/state/radiant/0">Player 1</a></li>
-                            <li><a class="dropdown-item" href="/state/radiant/1">Player 2</a></li>
-                            <li><a class="dropdown-item" href="/state/radiant/2">Player 3</a></li>
-                            <li><a class="dropdown-item" href="/state/radiant/3">Player 4</a></li>
-                            <li><a class="dropdown-item" href="/state/radiant/4">Player 5</a></li>
-                        </ul>
-                    </li>
+                    <div class="btn-group outlined" role="group">
+                        <li class="nav-item"><a class="btn nav-link" aria-current="page" href="/state/radiant">Radiant</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="btn nav-link dropdown-toggle" href="#" id="raddrop" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Players
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="/state/radiant/0">Player 1</a></li>
+                                <li><a class="dropdown-item" href="/state/radiant/1">Player 2</a></li>
+                                <li><a class="dropdown-item" href="/state/radiant/2">Player 3</a></li>
+                                <li><a class="dropdown-item" href="/state/radiant/3">Player 4</a></li>
+                                <li><a class="dropdown-item" href="/state/radiant/4">Player 5</a></li>
+                            </ul>
+                        </li>
+                    </div>
 
                     <!--  Dire -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="diredrop" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Dire
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="/state/dire/5">Player 6</a></li>
-                            <li><a class="dropdown-item" href="/state/dire/6">Player 7</a></li>
-                            <li><a class="dropdown-item" href="/state/dire/7">Player 8</a></li>
-                            <li><a class="dropdown-item" href="/state/dire/8">Player 9</a></li>
-                            <li><a class="dropdown-item" href="/state/dire/9">Player 10</a></li>
-                        </ul>
-                    </li>
+                    <div class="btn-group outlined" role="group">
+                        <li class="nav-item"><a class="btn nav-link" aria-current="page" href="/state/dire">Dire</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="btn nav-link dropdown-toggle" href="#" id="diredrop" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Players
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="/state/dire/5">Player 6</a></li>
+                                <li><a class="dropdown-item" href="/state/dire/6">Player 7</a></li>
+                                <li><a class="dropdown-item" href="/state/dire/7">Player 8</a></li>
+                                <li><a class="dropdown-item" href="/state/dire/8">Player 9</a></li>
+                                <li><a class="dropdown-item" href="/state/dire/9">Player 10</a></li>
+                            </ul>
+                        </li>
+                    </div>
 
-                    <li class="nav-item"> <a class="btn btn-danger" href="/action/stop" role="button">Stop</a></li>
+                    <div class="btn-group" role="group">
+                        <li class="nav-item"><a class="btn btn-success nav-link {{ (state['running'])|select('disabled') }}" href="/action/play" role="button" aria-disabled="{{ state['running']|bool }}">Play</a></li>
+                        <li class="nav-item"><a class="btn btn-danger nav-link {{ (not state['running'])|select('disabled') }}" href="/action/stop" role="button" aria-disabled="{{ (not state['running'])|bool }}">Stop</a></li>
+                    </div>
+
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="/status">Status</a></li>
                 </ul>
             </div>
         </div>
@@ -49,7 +70,7 @@
 </div>
 <div id="content" class="container-fluid">
     {% block content %}
-        {{ body }}
+        {{ body|safe }}
     {% endblock %}
 </div>
 <div id="footer">
