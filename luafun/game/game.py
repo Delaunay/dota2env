@@ -107,7 +107,6 @@ class Dota2Game:
         self.http_rpc_send = None
         self.http_rpc_recv = None
 
-
         self.ready = False
         self.pending_ready = True
         self.bot_count = 10
@@ -361,7 +360,6 @@ class Dota2Game:
         self.dire_state_process.join()
         self.radiant_state_process.join()
         self.ipc_recv_process.join()
-        self.http_server.join()
 
         self.cleanup()
         log.debug("Game has finished")

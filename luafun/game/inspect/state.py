@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 class GameInspector(BasePage):
     def routes(self):
         return [
-            '/state/<string:faction>'
+            '/state/<string:faction>/<int:player>'
         ]
 
     def __init__(self, env, rpc_recv, rpc_send):
@@ -19,13 +19,14 @@ class GameInspector(BasePage):
         self.rpc_send = rpc_send
         self.title = 'State'
 
-    def main(self, faction):
+    def main(self, faction, player=None):
         if faction.lower() in ('rad', 'radiant'):
             self.title = 'Radiant State'
-            body = html.pre(self.getattr('radiant_state'))
+            body = self.getattr('radiant_state')
         else:
             self.title = 'Dire State'
-            body = html.pre(self.getattr('dire_state'))
+            body = self.getattr('dire_state')
 
         page = self.env.get_template('state.html')
-        return page.render(code=body)
+        #if player is None:
+        return page.render(code=html.pre(body))
