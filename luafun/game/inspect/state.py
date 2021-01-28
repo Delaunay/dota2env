@@ -140,10 +140,10 @@ class DrawMap(BasePage):
         radiant = faction.lower() in ('rad', 'radiant')
 
         if radiant:
-            self.title = 'Radiant State'
+            self.title = 'Radiant Map'
             state = self.getattr('radiant_state')
         else:
-            self.title = 'Dire State'
+            self.title = 'Dire Map'
             state = self.getattr('dire_state')
 
         default_icon = self.load_image(os.path.join(self.resource_folder, '30_005.png'))
