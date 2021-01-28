@@ -21,6 +21,7 @@ import luafun.game.dota2.shared as enums
 GAME_START = 30
 NIGHT_DAY_TIME = 5 * 60
 
+
 @dataclass
 class GlobalGameState:
     game_delta: float = 0
@@ -48,6 +49,7 @@ class GlobalGameState:
     stock_observer: int = 2
     stock_sentry: int = 3
     stock_raindrop: int = 0
+
 
 @dataclass
 class Unit:
@@ -286,29 +288,44 @@ def apply_diff(state, delta: msg.CMsgBotWorldState):
 
         for field, value in player.items():
             pdata[field] = value 
-    
+
+
     for unit in delta.get('units', []):
+        remove_dead = False
+
         # Add Hero info into their own struct
         # >>> Units that are constant
         if unit['unit_type'] == msg.UnitType.HERO:
-            udata = state._players[unit['player_id']]
+            source = state._players
+            key = 'player_id'
         
         # exist for the the entire game
         elif unit['unit_type'] == msg.UnitType.COURIER:
-            udata = state._couriers[unit['player_id']]
+            source = state._couriers
+            key = 'player_id'
         
         # They stay up for most of the game
         elif unit['unit_type'] in (msg.UnitType.BUILDING, msg.UnitType.FORT, msg.UnitType.BARRACKS, msg.UnitType.TOWER):
-            udata = state._buildings[unit['handle']]
-        # Neutrals + Roshan
+            source = state._buildings
+            key = 'handle'
+        # Roshan
+
+        # Neutrals
 
         # <<<
         # CREEP_HERO, LANE_CREEP
         else:
-            udata = state._units[unit['handle']]
+            remove_dead = True
+            source = state._units
+            key = 'handle'
+
+        udata = source[unit[key]]
 
         for field, value in unit.items():
             udata[field] = value
+
+        if remove_dead and not udata.get('is_alive', True):
+            source.pop(unit[key])
     # ---
 
     # Courier Event

@@ -7,6 +7,7 @@ from rpcjs.dashboard import Dashboard
 import rpcjs.elements as html
 from rpcjs.page import Page
 
+from werkzeug.routing import FloatConverter as BaseFloatConverter
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from luafun.game.inspect.state import GameInspector, DrawMap
@@ -15,6 +16,10 @@ from luafun.game.inspect.status import Status
 
 
 log = logging.getLogger(__name__)
+
+
+class FloatConverter(BaseFloatConverter):
+    regex = r'-?\d+(\.\d+)?'
 
 
 def to_bool(value):
@@ -90,6 +95,8 @@ def _http_inspect(state, rpc_recv, rpc_send, level, debug=False):
 
         dash.app.config['DEBUG'] = debug
         dash.app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+        dash.app.url_map.converters['float'] = FloatConverter
+
         dash.add_page(ShowRoutes(state))
         dash.add_page(GameInspector(state))
         dash.add_page(Actions(state))

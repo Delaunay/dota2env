@@ -17,7 +17,7 @@ class Status(BasePage):
 
     def __init__(self, app):
         super(Status, self).__init__(app)
-        self.title = 'Satus'
+        self.title = 'Status'
 
     def main(self):
         ipc_recv = self.state.get('ipc_recv')
@@ -38,7 +38,6 @@ class Status(BasePage):
 
         if rad_state:
             kwargs['rad_state'] = now - rad_state
-
 
         page = self.env.get_template('status.html')
         return page.render(**kwargs, state=self.state)

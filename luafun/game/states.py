@@ -32,12 +32,14 @@ class SyncWorldListener:
     def running(self):
         return self.state['running']
 
-    def connect(self, retries=10):
+    def connect(self, retries=20):
         pending = None
 
         for i in range(retries):
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                # windows TCP_KEEPCNT, TCP_KEEPIDLE ?
+                # s.setsockopt(socket.TCP_KEEPCNT, 1)
                 s.setblocking(True)
                 s.connect((self.host, self.port))
                 log.debug(f'Connection established after {i} retries')
@@ -58,7 +60,7 @@ class SyncWorldListener:
 
         return None
 
-    def read_message(self, read):
+    def read_message(self, read: socket.socket):
         chunks = []
         bytes_recv = 0
 
@@ -66,6 +68,13 @@ class SyncWorldListener:
         retries = 0
         while msg_size == b'' and retries < 10:
             msg_size = read.recv(4)
+
+            # means that the socket was closed
+            # This mainly happens on windows every 1000 messages or so
+            if msg_size == b'':
+                self.sock = self.connect(10)
+                read = self.sock
+            # ---
             retries += 1
 
         if msg_size == b'':
