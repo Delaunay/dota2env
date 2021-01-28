@@ -1,4 +1,3 @@
-import asyncio
 from datetime import datetime
 import json
 import logging
@@ -51,7 +50,6 @@ class IPCRecv:
     def _run(self):
         self.got_messages = False
         win = None
-
         for line in Pygtail(self.logfilename):
             self.state['ipc_recv'] = datetime.utcnow()
             result = IPC_RECV.search(line)
@@ -74,13 +72,16 @@ class IPCRecv:
                 self.state['win'] = 'RADIANT'
                 continue
 
+        # no new message
+        self.state['ipc_recv'] = datetime.utcnow()
+
     def run(self):
         while self.running:
             try:
                 self._run()
 
                 if not self.got_messages:
-                    time.sleep(0.13)
+                    time.sleep(0.13 / 2)
 
             except Exception as e:
                 time.sleep(0.01)

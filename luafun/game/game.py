@@ -2,16 +2,12 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 import logging
 import os
-import json
 import multiprocessing as mp
 import subprocess
 import time
-import traceback
-import uuid
 
 from luafun.game.config import DotaPaths
 from luafun.game.args import DotaOptions
-from luafun.game.modes import DOTA_GameMode
 from luafun.game.inspect import http_inspect
 from luafun.game.ipc_recv import ipc_recv
 from luafun.game.ipc_send import ipc_send, TEAM_RADIANT, TEAM_DIRE

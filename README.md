@@ -12,6 +12,10 @@ Like in real life you need to
 2. Choose the correct rewards balance early rewards and late rewards
 3. Encode the action
 
+# Assets
+
+Most assets located in `luafun/game/resources` are owned by Valve.
+
 # Platform
 
 * works best on linux
@@ -32,6 +36,8 @@ Like in real life you need to
     * cd $DOTA_PATH/game/dota/scripts/vscripts
     * ln -s ~/work/LuaFun/bots/ bots
 6. Run the simulation
+7. Use you browser to see how it is going
+    http://localhost:5000/draw/radiant
 
 [1]: https://www.anaconda.com/products/individual
 

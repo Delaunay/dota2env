@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 import uuid
 
 from luafun.game.modes import DOTA_GameMode
