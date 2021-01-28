@@ -42,7 +42,7 @@ class IPCRecv:
                 log.debug(f'Starting IPC recv after {i} retries')
                 break
 
-            time.sleep(0.05)
+            time.sleep(1)
         else:
             msg = 'Impossible to initialize IPC recv'
             log.error(msg)

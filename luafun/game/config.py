@@ -1,6 +1,9 @@
 import os
 
-EXECUTABLE_PATH = '/game/bin/win64/dota2.exe'
+EXECUTABLE_PATH_WINDOWS = '/game/bin/win64/dota2.exe'
+EXECUTABLE_PATH_LINUX = '/game/dota.sh'
+EXECUTABLE_PATH_LINUX = '/game/bin/linuxsteamrt64/dota2'
+
 BOT_PATH = '/game/dota/scripts/vscripts/bots/'
 CONSOLE_LOG = '/game/dota/scripts/vscripts/bots/console.log'
 SEND_MSG = '/game/dota/scripts/vscripts/bots/IPC_recv.lua'
@@ -8,6 +11,8 @@ SEND_MSG = '/game/dota/scripts/vscripts/bots/IPC_recv.lua'
 LINUX_APP_PATH = "~/Steam/steamapps/common/dota 2 beta"
 OSX_APP_PATH = "~/Library/Application Support/Steam/SteamApps/common/dota 2 beta"
 WINDOWS_APP_PATH = "C:/Program Files (x86)/Steam/steamapps/common/dota 2 beta"
+
+# <steam path>/ubuntu12_32/steam-runtime/run.sh
 
 
 class DotaPaths:
@@ -31,7 +36,12 @@ class DotaPaths:
 
     @property
     def executable_path(self):
-        return self.path + '/' + EXECUTABLE_PATH
+        from sys import platform
+
+        if platform == "linux" or platform == "linux2":
+            return self.path + '/' + EXECUTABLE_PATH_LINUX
+
+        return self.path + '/' + EXECUTABLE_PATH_WINDOWS
 
     @property
     def ipc_recv_handle(self):

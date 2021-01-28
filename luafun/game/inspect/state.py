@@ -90,12 +90,12 @@ class DrawMap(BasePage):
         }
         self.color_building = {
             2: '#006400',
-            3: '#b20000'
+            3: '#B20000'
         }
 
         self.color_unit = {
             2: '#00FF00',
-            3: '#ff0000'
+            3: '#FF0000'
         }
 
     def load_image(self, name):

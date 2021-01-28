@@ -2,6 +2,7 @@ from datetime import datetime
 import logging
 import select
 import socket
+import time
 import multiprocessing as mp
 from struct import unpack
 import traceback
@@ -32,22 +33,28 @@ class SyncWorldListener:
         return self.state['running']
 
     def connect(self, retries=10):
+        pending = None
+
         for i in range(retries):
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 s.setblocking(True)
                 s.connect((self.host, self.port))
-                s.setblocking(True)
-
                 log.debug(f'Connection established after {i} retries')
                 return s
 
-            except ConnectionRefusedError:
+            except ConnectionRefusedError as err:
                 if not self.running:
+                    log.debug('Giving up; game has stopped')
                     return None
 
+                pending = err
+                time.sleep(1)
         else:
             log.debug('Could not establish connection')
+
+            if pending is not None:
+                raise pending
 
         return None
 
@@ -111,6 +118,9 @@ class SyncWorldListener:
 
     def run(self):
         self.sock = self.connect()
+
+        if self.sock is None:
+            raise RuntimeError('Impossible to connect to the game')
 
         while self.running:
             try:

@@ -8,7 +8,7 @@ import traceback
 
 from luafun.game.game import Dota2Game
 import luafun.game.dota2.state_types as msg
-import luafun.game.dota2.shared as enums
+from luafun.game.ipc_send import TEAM_RADIANT, TEAM_DIRE
 
 from luafun.openai import models, stichers, states
 
@@ -31,6 +31,7 @@ async def _acquire_faction(state):
     async with state._lock:
         state._r += 1
         return state.copy()
+
 
 def acquire_state(state):
     return asyncio.run(_acquire_faction(state))
@@ -112,12 +113,12 @@ class Dota2Env(Dota2Game):
         pass
 
 
-def main(config=None):
+def main(path, config=None):
     from luafun.game.modes import DOTA_GameMode
     from luafun.game.ipc_send import new_ipc_message
     logging.basicConfig(level=logging.DEBUG)
 
-    game = Dota2Env('F:/SteamLibrary/steamapps/common/dota 2 beta/', False, config=config)
+    game = Dota2Env(path, False, config=config)
     game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_AP)
     game.options.ticks_per_observation = 4
     game.options.host_timescale = 2
@@ -131,4 +132,11 @@ def main(config=None):
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+
+    from luafun.utils.options import option
+    sys.stderr = sys.stdout
+
+    # p = option('dota.path', 'F:/SteamLibrary/steamapps/common/dota 2 beta/')
+    p = option('dota.path', '/media/setepenre/local/SteamLibraryLinux/steamapps/common/dota2/')
+    main(p)

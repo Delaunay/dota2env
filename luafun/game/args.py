@@ -35,6 +35,11 @@ class DotaOptions:
         if self.dedicated:
             additional.append('-dedicated')
 
+        from sys import platform
+
+        if platform == "linux" or platform == "linux2":
+            additional.append('-gl')
+
         return additional + [
             '-botworldstatesocket_threaded',
             '-botworldstatetosocket_frames', '{}'.format(self.ticks_per_observation),

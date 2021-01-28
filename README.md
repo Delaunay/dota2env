@@ -14,8 +14,8 @@ Like in real life you need to
 
 # Platform
 
-* works on windows
-* should work on linux
+* works best on linux
+* there is a bug in windows where state stop updating after 1000 timestep
 
 #  Install
 
@@ -27,7 +27,11 @@ Like in real life you need to
     * conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
     * pip install -r requirements.txt
     * pip install -e .
-5. Run the simulation
+5. change the bot folder
+    * DOTA_PATH=/media/setepenre/local/SteamLibraryLinux/steamapps/common/dota\ 2\ beta
+    * cd $DOTA_PATH/game/dota/scripts/vscripts
+    * ln -s ~/work/LuaFun/bots/ bots
+6. Run the simulation
 
 [1]: https://www.anaconda.com/products/individual
 

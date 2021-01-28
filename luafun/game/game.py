@@ -147,9 +147,16 @@ class Dota2Game:
         except Exception as e:
             log.error(f'Error when removing file {e}')
 
+        from sys import platform
+
+        path = [self.paths.executable_path]
+        if platform == "linux" or platform == "linux2":
+           path = ['/home/setepenre/.steam/ubuntu12_32/steam-runtime/run.sh', self.paths.executable_path]
+
         # save the arguments of the current game for visibility
-        self.args = [self.paths.executable_path] + self.options.args(self.paths)
-        self.process = subprocess.Popen(self.args) # , stdin=subprocess.PIPE
+        self.args = path + self.options.args(self.paths)
+        print(self.args)
+        self.process = subprocess.Popen(self.args)  # , stdin=subprocess.PIPE
 
     def dire_state_delta(self):
         if not self.dire_state_delta_queue.empty():
@@ -392,12 +399,12 @@ class Dota2Game:
         log.debug("Game has finished")
 
 
-def main(config=None):
-    from luafun.ipc_send import new_ipc_message
+def main(path='F:/SteamLibrary/steamapps/common/dota 2 beta/', config=None):
+    from luafun.game.ipc_send import new_ipc_message
     logging.basicConfig(level=logging.DEBUG)
 
     game = Dota2Game(
-        'F:/SteamLibrary/steamapps/common/dota 2 beta/',
+        path,
         False,
         config=config)
 
