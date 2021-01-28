@@ -207,9 +207,8 @@ local function get_info()
     -- GetNearbyBarracks
 end
 
--- TODO check how to get the bot courier
-local hCourier = GetCourier(0)
 local bot = GetBot()
+local hCourier = GetCourier(bot:GetPlayerID())
 
 -- Map the action ID to its function
 -- This is all the actions the bots can make
@@ -238,7 +237,7 @@ local function get_action_table()
     actionHandler[ALevelAbility]         = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_LevelAbility(sAbilityName) end
     actionHandler[ATakeOutpost]          = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return "" end
     actionHandler[ACourierBurst]         = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_BURST) end
-    actionHandler[ACourierEnemySecret]   = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_ENEMY_SECRET_SHOP) end
+    -- actionHandler[ACourierEnemySecret]   = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_ENEMY_SECRET_SHOP) end
     actionHandler[ACourierReturn]        = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_RETURN) end
     actionHandler[ACourierSecret]        = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_SECRET_SHOP) end
     actionHandler[ACourierTakeStash]     = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_TAKE_STASH_ITEMS) end
