@@ -2,7 +2,36 @@
 
 
 {% block content %}
-<pre>
-{{ code|safe }}
-</pre>
+
+<table class="table">
+    <tr>
+        <th>Raw State</th>
+        <th>Actions</th>
+    </tr>
+    <tr>
+        <td>
+            <pre>
+                {{ code|safe }}
+            </pre>
+        </td>
+        <td>
+            <ul>
+                <li><a class="btn btn-secondary" href="/action/MoveToLocation/{{player}}/0x0">MoveToLocation</a></li>
+                <li><a class="btn btn-secondary" href="/action/MoveDirectly/{{player}}/0x0">MoveDirectly</a></li>
+                <li><a class="btn btn-secondary" href="/action/AttackMove/{{player}}/0x0">AttackMove</a></li>
+                <li><a class="btn btn-secondary" href="/action/CourierTransfert/{{player}}">CourierTransfert</a></li>
+                <li><a class="btn btn-secondary" href="/action/CourierTakeStash/{{player}}">CourierTakeStash</a></li>
+                <li><a class="btn btn-secondary" href="/action/CourierSecret/{{player}}">CourierSecret</a></li>
+                <li><a class="btn btn-secondary" href="/action/CourierReturn/{{player}}">CourierReturn</a></li>
+                <li><a class="btn btn-secondary" href="/action/CourierBurst/{{player}}">CourierBurst</a></li>
+                <!--li><a class="btn btn-secondary" href="/action/TakeOutpost">TakeOutpost</a></li-->
+                <li><a class="btn btn-secondary" href="/action/Glyph/{{player}}">Glyph</a></li>
+                <li><a class="btn btn-secondary" href="/action/Buyback/{{player}}">Buyback</a></li>
+            </ul>
+        </td>
+    </tr>
+</table>
+
+
+
 {% endblock %}

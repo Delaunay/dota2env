@@ -12,6 +12,7 @@ import rpcjs.elements as html
 
 log = logging.getLogger(__name__)
 
+
 class GameInspector(BasePage):
     def routes(self):
         return [
@@ -54,7 +55,7 @@ class GameInspector(BasePage):
             raw = json.dumps(state, indent=2)
 
         page = self.env.get_template(page)
-        return page.render(code=html.pre(raw), state=self.state)
+        return page.render(code=html.pre(raw), state=self.state, player=player)
 
 
 class DrawMap(BasePage):

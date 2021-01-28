@@ -8,6 +8,10 @@
     margin-right: 5px;
 }
 
+table td, table td * {
+    vertical-align: top;
+}
+
 </style>
 <div id="nav">
     {% block nav %}
@@ -74,9 +78,11 @@
 <div class="m-3"></div>
 
 <div id="content" class="container-fluid">
+    <div class="d-flex justify-content-center">
     {% block content %}
         {{ body|safe }}
     {% endblock %}
+    </div>
 </div>
 <div id="footer">
     {% block footer %}
