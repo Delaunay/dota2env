@@ -50,18 +50,19 @@ class Action(IntEnum):
 
     # Courier Action bundled to the hero
     CourierBurst                  = 22
-    CourierEnemySecret            = 23
-    CourierReturn                 = 24
-    CourierSecret                 = 25
-    CourierTakeStash              = 26
-    CourierTransfert              = 27
+    # CourierEnemySecret            = 23
+    CourierReturn                 = 23
+    CourierSecret                 = 24
+    CourierTakeStash              = 25
+    CourierTransfert              = 26
 
     # Tensor cores work better with a multiple of 8
     # This gives us room to grow
-    NotUsed1 = 28
-    NotUsed2 = 29
-    NotUsed3 = 30
-    NotUsed4 = 31
+    NotUsed1 = 27
+    NotUsed2 = 28
+    NotUsed3 = 29
+    NotUsed4 = 30
+    NotUsed5 = 31
 
     # The action exist but it is not necessary
     # Courier                         # ( hCourier, nAction )
@@ -71,7 +72,8 @@ class Action(IntEnum):
 # Could bundle the courier action as a hero action
 class CourierAction(IntEnum):
     BURST               = 0
-    ENEMY_SECRET_SHOP   = 1
+    # hidden
+    # ENEMY_SECRET_SHOP   = 1
     RETURN              = 2
     SECRET_SHOP         = 3
     TAKE_STASH_ITEMS    = 4
@@ -202,8 +204,9 @@ class Player:
     def CourierBurst(self):
         self.act[ARG.action] = Action.CourierBurst
 
-    def CourierEnemySecret(self):
-        self.act[ARG.action] = Action.CourierEnemySecret
+    # Ability is hidden
+    # def CourierEnemySecret(self):
+    #    self.act[ARG.action] = Action.CourierEnemySecret
 
     def CourierReturn(self):
         self.act[ARG.action] = Action.CourierReturn

@@ -113,15 +113,16 @@ local AGlyph                         = 19  -- ()
 local ALevelAbility                  = 20  -- ( sAbilityName )
 local ATakeOutpost                   = 21  -- ()
 local ACourierBurst                  = 22
-local ACourierEnemySecret            = 23
-local ACourierReturn                 = 24
-local ACourierSecret                 = 25
-local ACourierTakeStash              = 26
-local ACourierTransfert              = 27
-local NotUsed1 = 28
-local NotUsed2 = 29
-local NotUsed3 = 30
-local NotUsed4 = 31
+-- local ACourierEnemySecret            = 23
+local ACourierReturn                 = 23
+local ACourierSecret                 = 24
+local ACourierTakeStash              = 25
+local ACourierTransfert              = 26
+local NotUsed1 = 27
+local NotUsed2 = 28
+local NotUsed3 = 29
+local NotUsed4 = 30
+local NotUsed5 = 31
 
 
 local function _get_world_size()
