@@ -34,10 +34,10 @@ class Status(BasePage):
             kwargs['ipc_recv'] = now - ipc_recv
 
         if dire_state:
-            kwargs['dire_state'] = now - dire_state
+            kwargs['dire_state'] = dire_state
 
         if rad_state:
-            kwargs['rad_state'] = now - rad_state
+            kwargs['rad_state'] = rad_state
 
         page = self.env.get_template('status.html')
         return page.render(**kwargs, state=self.state)

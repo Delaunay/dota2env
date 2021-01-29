@@ -32,12 +32,20 @@ class SyncWorldListener:
     def running(self):
         return self.state['running']
 
-    def connect(self, retries=20):
+    def connect(self, retries=20, sock=None):
         pending = None
 
         for i in range(retries):
             try:
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                if sock is None:
+                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                else:
+                    # windows get disconnected from time to time needs to reconnect
+                    # I want a way to restore the connection with the original socket
+                    # to not lose messages, but this seems harder than expected
+                    # s = sock
+                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
                 # windows TCP_KEEPCNT, TCP_KEEPIDLE ?
                 # s.setsockopt(socket.TCP_KEEPCNT, 1)
                 s.setblocking(True)
@@ -71,8 +79,10 @@ class SyncWorldListener:
 
             # means that the socket was closed
             # This mainly happens on windows every 1000 messages or so
+            # this also means we are MISSING messages, windows
+            # it critically flawed because of those disconnects
             if msg_size == b'':
-                self.sock = self.connect(10)
+                self.sock = self.connect(10, self.sock)
                 read = self.sock
             # ---
             retries += 1
@@ -106,17 +116,17 @@ class SyncWorldListener:
         readable, _, error = select.select([self.sock], [], [self.sock], 0.250)
 
         for read in readable:
+            s = datetime.utcnow()
             msg = self.read_message(read)
 
             if msg is not None:
-                self.state[self.namespace] = datetime.utcnow()
-
                 json_msg = MessageToJson(
                     msg,
                     preserving_proto_field_name=True,
                     use_integers_for_enums=True)
 
                 self.queue.put(json_msg)
+                self.state[self.namespace] = (datetime.utcnow() - s).total_seconds()
             else:
                 log.debug(f'Could not read message because: {self.reason}')
                 self.reason = None
@@ -144,7 +154,8 @@ class SyncWorldListener:
                 if self.running:
                     log.error(traceback.format_exc())
 
-        self.sock.close()
+        if self.sock:
+            self.sock.close()
         log.debug('World state listener shutting down')
 
 
