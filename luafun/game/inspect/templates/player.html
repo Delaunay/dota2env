@@ -15,48 +15,73 @@
             </pre>
         </td>
         <td>
-            <h1>Actions</h1>
-            <ul>
-                <li><a class="btn btn-secondary" href="/action/MoveToLocation/{{player}}/0x0">MoveToLocation</a></li>
-                <li><a class="btn btn-secondary" href="/action/Stop/{{player}}">Stop</a></li>
-                <li><a class="btn btn-secondary" href="/action/MoveDirectly/{{player}}/0x0">MoveDirectly</a></li>
-                <li><a class="btn btn-secondary" href="/action/AttackMove/{{player}}/0x0">AttackMove</a></li>
-                <li><a class="btn btn-secondary" href="/action/CourierTransfert/{{player}}">CourierTransfert</a></li>
-                <li><a class="btn btn-secondary" href="/action/CourierTakeStash/{{player}}">CourierTakeStash</a></li>
-                <li><a class="btn btn-secondary" href="/action/CourierSecret/{{player}}">CourierSecret</a></li>
-                <li><a class="btn btn-secondary" href="/action/CourierReturn/{{player}}">CourierReturn</a></li>
-                <li><a class="btn btn-secondary" href="/action/CourierBurst/{{player}}">CourierBurst</a></li>
-                <!--li><a class="btn btn-secondary" href="/action/TakeOutpost">TakeOutpost</a></li-->
-                <li><a class="btn btn-secondary" href="/action/Glyph/{{player}}">Glyph</a></li>
-                <li><a class="btn btn-secondary" href="/action/Buyback/{{player}}">Buyback</a></li>
-            </ul>
+            <h4>Actions</h4>
 
-            <h1>Items</h1>
             <table class="table">
                 <tr>
-                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/0">Item1</a></td>
-                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/1">Item2</a></td>
-                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/2">Item3</a></td>
-                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/6">Neutral</a></td>
+                    <th>Movement</th>
+                    <td><a class="btn btn-secondary" href="/action/MoveToLocation/{{player}}/0x0">MoveToLocation</a></td>
+                    <td><a class="btn btn-secondary" href="/action/MoveDirectly/{{player}}/0x0">MoveDirectly</a></td>
+                    <td><a class="btn btn-secondary" href="/action/MoveToUnit/{{player}}/0x0">MoveToUnit</a></td>
+                    <td><a class="btn btn-secondary" href="/action/AttackMove/{{player}}/0x0">AttackMove</a></td>
+                    <td><a class="btn btn-secondary" href="/action/AttackUnit/{{player}}/0x0">AttackUnit</a></td>
+                    <td><a class="btn btn-secondary" href="/action/Stop/{{player}}">Stop</a></td>
                 </tr>
                 <tr>
-                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/3">Item4</a></td>
-                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/4">Item5</a></td>
-                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/5">Item6</a></td>
-                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/15">TP</a></td>
+                    <th>Courier</th>
+                    <td><a class="btn btn-secondary" href="/action/CourierTransfert/{{player}}">CourierTransfert</a></td>
+                    <td><a class="btn btn-secondary" href="/action/CourierTakeStash/{{player}}">CourierTakeStash</a></td>
+                    <td><a class="btn btn-secondary" href="/action/CourierSecret/{{player}}">CourierSecret</a></td>
+                    <td><a class="btn btn-secondary" href="/action/CourierReturn/{{player}}">CourierReturn</a></td>
+                    <td><a class="btn btn-secondary" href="/action/CourierBurst/{{player}}">CourierBurst</a></td>
+                    <td></td>
                 </tr>
                 <tr>
-                    <td>BB1</td>
-                    <td>BB2</td>
-                    <td>BB3</td>
+                    <th>Others</th>
+                    <td><a class="btn btn-secondary" href="/action/Glyph/{{player}}">Glyph</a></td>
+                    <td><a class="btn btn-secondary" href="/action/Buyback/{{player}}">Buyback</a></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                     <td></td>
                 </tr>
             </table>
 
-            <h1>Abilities</h1>
+            <h4>Items</h4>
             <table class="table">
                 <tr>
-                    <td>Use Ability</td>
+                    <th>Inventory</th>
+                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/0">Item1</a></td>
+                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/1">Item2</a></td>
+                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/2">Item3</a></td>
+                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/3">Item4</a></td>
+                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/4">Item5</a></td>
+                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/5">Item6</a></td>
+                </tr>
+                <tr>
+                    <th></th> <!-- This test moving main inventory item to backpack -->
+                    <td><a class="btn btn-secondary" href="/action/SwapItems/{{player}}/0/6">Backpack1</a></td>
+                    <td><a class="btn btn-secondary" href="/action/SwapItems/{{player}}/0/7">Backpack2</a></td>
+                    <td><a class="btn btn-secondary" href="/action/SwapItems/{{player}}/0/8">Backpack3</a></td>
+                    <td></td>
+                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/15">TP</a></td>
+                    <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/16">Neutral</a></td>
+                </tr>
+                <tr>
+                    <th>Stash</th> <!-- This test moving main inventory item to stash -->
+                    <td><a class="btn btn-secondary" href="/action/SwapItems/{{player}}/0/9">S1</a></td>
+                    <td><a class="btn btn-secondary" href="/action/SwapItems/{{player}}/0/10">S2</a></td>
+                    <td><a class="btn btn-secondary" href="/action/SwapItems/{{player}}/0/11">S3</a></td>
+                    <td><a class="btn btn-secondary" href="/action/SwapItems/{{player}}/0/12">S4</a></td>
+                    <td><a class="btn btn-secondary" href="/action/SwapItems/{{player}}/0/13">S5</a></td>
+                    <td><a class="btn btn-secondary" href="/action/SwapItems/{{player}}/0/14">S6</a></td>
+                </tr>
+            </table>
+
+            <h4>Abilities</h4>
+            <table class="table">
+                <tr>
+                    <th>Use Ability</th>
                     <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/16">Q</a></td>
                     <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/17">W</a></td>
                     <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/18">E</a></td>
@@ -65,7 +90,7 @@
                     <td><a class="btn btn-secondary" href="/action/UseAbility/{{player}}/21">R</a></td>
                 </tr>
                 <tr>
-                    <td>Use Ability On Location</td>
+                    <th>Use Ability On Location</th>
                     <td><a class="btn btn-secondary" href="/action/UseAbilityOnLocation/{{player}}/16/0x0">Q</a></td>
                     <td><a class="btn btn-secondary" href="/action/UseAbilityOnLocation/{{player}}/17/0x0">W</a></td>
                     <td><a class="btn btn-secondary" href="/action/UseAbilityOnLocation/{{player}}/18/0x0">E</a></td>
@@ -74,7 +99,7 @@
                     <td><a class="btn btn-secondary" href="/action/UseAbilityOnLocation/{{player}}/21/0x0">R</a></td>
                 </tr>
                 <tr>
-                    <td>Level Ability</td>
+                    <th>Level Ability</th>
                     <td><a class="btn btn-secondary" href="/action/LevelAbility/{{player}}/16">Q</a></td>
                     <td><a class="btn btn-secondary" href="/action/LevelAbility/{{player}}/17">W</a></td>
                     <td><a class="btn btn-secondary" href="/action/LevelAbility/{{player}}/18">E</a></td>
@@ -83,7 +108,7 @@
                     <td><a class="btn btn-secondary" href="/action/LevelAbility/{{player}}/21">R</a></td>
                 </tr>
                 <tr>
-                    <td>Talent</td>
+                    <th>Talent</th>
                     <td><a class="btn btn-secondary" href="/action/LevelAbility/{{player}}/24">T1</a></td>
                     <td><a class="btn btn-secondary" href="/action/LevelAbility/{{player}}/25">T2</a></td>
                     <td><a class="btn btn-secondary" href="/action/LevelAbility/{{player}}/26">T3</a></td>

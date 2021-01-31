@@ -3,7 +3,7 @@ import json
 import multiprocessing as mp
 
 from luafun.game.inspect.base import BasePage
-from luafun.game.action import IPCMessageBuilder
+from luafun.game.action import IPCMessageBuilder, Action
 
 import rpcjs.elements as html
 
@@ -26,6 +26,7 @@ class Actions(BasePage):
             '/action/<string:action>/<int:player>/<float:x>x<float:y>',
             '/action/<string:action>/<int:player>/<int:slot>',
             '/action/<string:action>/<int:player>/<int:slot>/<float:x>x<float:y>',
+            '/action/<string:action>/<int:player>/<int:slot>/<int:slot2>',
         ]
 
     def __init__(self, app):
@@ -62,6 +63,7 @@ class Actions(BasePage):
             'LevelAbility': self.make_item_action('LevelAbility'),
             # use rune id
             'PickUpRune': self.make_item_action('PickUpRune'),
+            'SwapItems': self.swap_item,
 
             # Unit Handle
             # -----------
@@ -79,6 +81,16 @@ class Actions(BasePage):
             # Item name
             # PurchaseItem
         }
+
+        if len(self.base_actions) != len(Action):
+            print(f'Missing action implementations: {len(self.base_actions)} < {len(Action)}')
+
+    def swap_item(self, player, slot=0, slot2=0, **kwargs):
+        b = IPCMessageBuilder()
+        p = b.player(player)
+        p.SwapItems(slot, slot2)
+        m = b.build()
+        return self.send_action(m)
 
     def location_ability(self, player, slot=0, x=0, y=0, **kwargs):
         b = IPCMessageBuilder()
@@ -111,7 +123,7 @@ class Actions(BasePage):
         m = b.build()
         return self.send_action(m)
 
-    def main(self, action, player=0, x=0, y=0, slot=0):
+    def main(self, action, player=0, x=0, y=0, slot=0, slot2=0):
         if action == 'stop':
             self.state['running'] = False
 
@@ -119,7 +131,7 @@ class Actions(BasePage):
             return self.send_get_info()
 
         if action in self.base_actions:
-            return self.base_actions[action](player, x=x, y=y, slot=slot)
+            return self.base_actions[action](player, x=x, y=y, slot=slot, slot2=slot2)
 
         if action == 'play':
             return self.start()

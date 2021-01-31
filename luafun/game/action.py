@@ -53,20 +53,20 @@ class AbilitySlot(IntEnum):
     Ablity0 = 0         # Q
     Ablity1 = 1         # W
     Ablity2 = 2         # E
-    Ablity3 = 3         # D
-    Ablity4 = 4         # F
+    Ablity3 = 3         # D generic_hidden
+    Ablity4 = 4         # F generic_hidden
     Ablity5 = 5         # R
     Ablity6 = 6
     Ablity7 = 7
     Ablity8 = 8
-    Ablity9 = 9
-    Ablity10 = 10
-    Ablity11 = 11
-    Ablity12 = 12
-    Ablity13 = 13
-    Ablity14 = 14
-    Ablity15 = 15
-    Ablity16 = 16
+    Ablity9 = 9         # Talent 1  (usually, the talent offset can be shifted)
+    Ablity10 = 10       # Talent 2  example: rubick, invoker, etc..
+    Ablity11 = 11       # Talent 3
+    Ablity12 = 12       # Talent 4  98 heroes follow the pattern above
+    Ablity13 = 13       # Talent 5
+    Ablity14 = 14       # Talent 6
+    Ablity15 = 15       # Talent 7
+    Ablity16 = 16       # Talent 8
     Ablity17 = 17
     Ablity18 = 18
     Ablity19 = 19
@@ -121,6 +121,7 @@ class Action(IntEnum):
 
     # Tensor cores work better with a multiple of 8
     # This gives us room to grow
+    NotUsed1 = 27
     NotUsed2 = 28
     NotUsed3 = 29
     NotUsed4 = 30

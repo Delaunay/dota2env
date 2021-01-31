@@ -274,6 +274,8 @@ local function get_action_table()
         end
         return bot:ActionImmediate_SetItemCombineLock(hItem, not hItem:IsCombineLock())
     end
+    -- when swapping item there is a script that automatically transfer items to inventory
+    -- if the inventory has space
     actionHandler[ASwapItems]            = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_SwapItems(nSlot, ix2) end
     actionHandler[ABuyback]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Buyback() end
     actionHandler[AGlyph]                = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Glyph() end
