@@ -41,7 +41,7 @@ class Actions(BasePage):
             'AttackMove': self.make_vloc_action('AttackMove'),
 
             # No argument action
-            'CourierTransfert': self.make_noarg_action('CourierTransfert'),
+            'CourierTransfer': self.make_noarg_action('CourierTransfer'),
             'CourierTakeStash': self.make_noarg_action('CourierTakeStash'),
             'CourierSecret': self.make_noarg_action('CourierSecret'),
             'CourierReturn': self.make_noarg_action('CourierReturn'),

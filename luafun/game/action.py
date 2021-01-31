@@ -112,7 +112,7 @@ class Action(IntEnum):
     CourierReturn                 = 23
     CourierSecret                 = 24
     CourierTakeStash              = 25
-    CourierTransfert              = 26
+    CourierTransfer               = 26
 
     # Tensor cores work better with a multiple of 8
     # This gives us room to grow
@@ -274,8 +274,8 @@ class Player:
     def CourierTakeStash(self):
         self.act[ARG.action] = Action.CourierTakeStash
 
-    def CourierTransfert(self):
-        self.act[ARG.action] = Action.CourierTransfert
+    def CourierTransfer(self):
+        self.act[ARG.action] = Action.CourierTransfer
 
 
 class IPCMessageBuilder:

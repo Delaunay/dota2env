@@ -117,7 +117,7 @@ local ACourierBurst                  = 22
 local ACourierReturn                 = 23
 local ACourierSecret                 = 24
 local ACourierTakeStash              = 25
-local ACourierTransfert              = 26
+local CourierTransfer                = 26
 local NotUsed0 = 27
 local NotUsed1 = 28
 local NotUsed2 = 29
@@ -332,7 +332,7 @@ local function get_action_table()
     actionHandler[ACourierReturn]        = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_RETURN) end
     actionHandler[ACourierSecret]        = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_SECRET_SHOP) end
     actionHandler[ACourierTakeStash]     = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_TAKE_STASH_ITEMS) end
-    actionHandler[ACourierTransfert]     = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_TRANSFER_ITEMS) end
+    actionHandler[CourierTransfer]       = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_TRANSFER_ITEMS) end
     actionHandler[NotUsed0]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return "" end
     actionHandler[NotUsed1]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return "" end
     actionHandler[NotUsed2]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return "" end
