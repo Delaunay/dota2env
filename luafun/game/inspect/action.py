@@ -43,6 +43,7 @@ class Actions(BasePage):
             'CourierTakeStash': self.make_noarg_action('CourierTakeStash'),
             'CourierSecret': self.make_noarg_action('CourierSecret'),
             'CourierReturn': self.make_noarg_action('CourierReturn'),
+            'Stop': self.make_noarg_action('Stop'),
 
             # Ability is hidden
             # 'CourierEnemySecret': self.make_noarg_action('CourierEnemySecret'),
@@ -52,14 +53,15 @@ class Actions(BasePage):
             'Buyback': self.make_noarg_action('Buyback'),
 
             # Ability / slot
+            'UseAbility': self.make_item_action('UseAbility'),
             'UseAbilityOnLocation': self.location_ability,
             'DropItem': self.drop_item,
             'SellItem': self.make_item_action('SellItem'),
             'DisassembleItem': self.make_item_action('DisassembleItem'),
             'SetItemCombineLock': self.make_item_action('SetItemCombineLock'),
             'LevelAbility': self.make_item_action('LevelAbility'),
-
-            'UseAbility': self.make_item_action('UseAbility'),
+            # use rune id
+            'PickUpRune': self.make_item_action('PickUpRune'),
 
             # Unit Handle
             # -----------
@@ -70,11 +72,9 @@ class Actions(BasePage):
             # Trees
             # UseAbilityOnTree
 
+            # -------
             # Item Handle
             # PickUpItem
-
-            # Runes ID
-            # PickUpRune
 
             # Item name
             # PurchaseItem

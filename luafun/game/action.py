@@ -16,35 +16,46 @@ from luafun.game.ipc_send import new_ipc_message, TEAM_RADIANT, TEAM_DIRE
     # BOT_ACTION_TYPE_DELAY
 
 
+class RuneSlot(IntEnum):
+    PowerUpTop = 0
+    PowerUpBottom = 1
+    BountyRiverTop = 2
+    BountyRadiant = 3
+    BountyRiverBottom = 4
+    BountyDire = 5
+
+
+# indices are zero based with 0-5 corresponding to inventory, 6-8 are backpack and 9-15 are stash
 class ItemSlot(IntEnum):
-    Item0 = 0
+    Item0 = 0       # Inventory
     Item1 = 1
     Item2 = 2
     Item3 = 3
     Item4 = 4
-    Item5 = 5
+    Item5 = 5       # backpack
     Item6 = 6
     Item7 = 7
-    Item8 = 8
+    Item8 = 8       # Stash
     Item9 = 9
     Item10 = 10
     Item11 = 11
     Item12 = 12
     Item13 = 13
     Item14 = 14
-    Item15 = 15
+    Item15 = 15     # TP
+    Item16 = 16     # Neutral ?
 
 
-assert len(ItemSlot) == 16, '16 item slots'
+assert len(ItemSlot) == 17, '17 item slots'
 
 
 class AbilitySlot(IntEnum):
-    Ablity0 = 0
-    Ablity1 = 1
-    Ablity2 = 2
-    Ablity3 = 3
-    Ablity4 = 4
-    Ablity5 = 5
+    Ablity0 = 0         # Q
+    Ablity1 = 1         # W
+    Ablity2 = 2         # E
+    Ablity3 = 3         # D
+    Ablity4 = 4         # F
+    Ablity5 = 5         # R
     Ablity6 = 6
     Ablity7 = 7
     Ablity8 = 8
@@ -74,19 +85,19 @@ assert len(AbilitySlot) == 23, '23 abilities'
 #   ~4 ability + tp ability
 #   ~6 Items + neutral item
 class Action(IntEnum):
-    MoveToLocation                = 0   # ( vLocation )
-    MoveDirectly                  = 1   # ( vLocation )
-    MoveToUnit                    = 2   # ( hUnit )
-    AttackUnit                    = 3   # ( hUnit, bOnce = True )
-    AttackMove                    = 4   # ( vLocation )
-    UseAbility                    = 5   # ( hAbility )
-    UseAbilityOnEntity            = 6   # ( hAbility, hTarget )
-    UseAbilityOnLocation          = 7   # ( hAbility, vLocation )
-    UseAbilityOnTree              = 8   # ( hAbility, iTree )
-    PickUpRune                    = 9   # ( nRune )
-    PickUpItem                    = 10  # ( hItem )
-    DropItem                      = 11  # ( hItem, vLocation )
-    Delay                         = 12  # ( fDelay )
+    Stop                          = 0
+    MoveToLocation                = 1   # ( vLocation )
+    MoveDirectly                  = 2   # ( vLocation )
+    MoveToUnit                    = 3   # ( hUnit )
+    AttackUnit                    = 4   # ( hUnit, bOnce = True )
+    AttackMove                    = 5   # ( vLocation )
+    UseAbility                    = 6   # ( hAbility )
+    UseAbilityOnEntity            = 7   # ( hAbility, hTarget )
+    UseAbilityOnLocation          = 8   # ( hAbility, vLocation )
+    UseAbilityOnTree              = 9   # ( hAbility, iTree )
+    PickUpRune                    = 10  # ( nRune )
+    PickUpItem                    = 11  # ( hItem )
+    DropItem                      = 12  # ( hItem, vLocation )
     PurchaseItem                  = 13  # ( sItemName )
     SellItem                      = 14  # ( hItem )
     DisassembleItem               = 15  # ( hItem )
@@ -110,7 +121,6 @@ class Action(IntEnum):
 
     # Tensor cores work better with a multiple of 8
     # This gives us room to grow
-    NotUsed1 = 27
     NotUsed2 = 28
     NotUsed3 = 29
     NotUsed4 = 30
@@ -147,13 +157,11 @@ class ActionArgument(IntEnum):
     vLoc     = 1
     hUnit    = 2    # this should be handle
     nSlot    = 3    # Slot (item or ability)
-    iTree    = 4
-    nRune    = 5
-    fDelay   = 6
-    sItem    = 7
-    hItem    = 8
-    ix1      = 9
-    ix2      = 10
+    iTree    = 4    # This is problematic we have 2000+ trees
+    nRune    = 5    # This could be bundled as an enum like inventory slots
+    sItem    = 6    # Needed to buy item
+    hItem    = 7    # Needed to pickup item
+    ix2      = 8
 
 
 ARG = ActionArgument
@@ -217,10 +225,6 @@ class Player:
         self.act[ARG.vLoc] = vLocation
         self.act[ARG.nSlot] = hItem
 
-    def Delay(self, fDelay):
-        self.act[ARG.action] = Action.Delay
-        self.act[ARG.fDelay] = fDelay
-
     def PurchaseItem(self, sItemName):
         self.act[ARG.action] = Action.PurchaseItem
         self.act[ARG.sItem] = sItemName
@@ -237,13 +241,16 @@ class Player:
         self.act[ARG.action] = Action.SetItemCombineLock
         self.act[ARG.nSlot] = hItem
 
-    def SwapItems(self, index1, index2):
+    def SwapItems(self, nslot, index2):
         self.act[ARG.action] = Action.SwapItems
-        self.act[ARG.ix1] = index1
+        self.act[ARG.nSlot] = nslot
         self.act[ARG.ix2] = index2
 
     def Buyback(self):
         self.act[ARG.action] = Action.Buyback
+
+    def Stop(self):
+        self.act[ARG.action] = Action.Stop
 
     def Glyph(self):
         self.act[ARG.action] = Action.Glyph

@@ -77,6 +77,8 @@ class SyncWorldListener:
             # This mainly happens on windows every 1000 messages or so
             # this also means we are MISSING messages, windows
             # it critically flawed because of those disconnects
+            # After a bit of investigation it seems the disconnects is coming from Dota itself
+            # there is no resolution in sight
             if msg_size == b'':
                 self.sock.close()
                 self.sock = self.connect(10)
