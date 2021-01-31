@@ -32,22 +32,18 @@ class SyncWorldListener:
     def running(self):
         return self.state['running']
 
-    def connect(self, retries=20, sock=None):
+    def connect(self, retries=20):
         pending = None
 
         for i in range(retries):
             try:
-                if sock is None:
-                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                else:
-                    # windows get disconnected from time to time needs to reconnect
-                    # I want a way to restore the connection with the original socket
-                    # to not lose messages, but this seems harder than expected
-                    # s = sock
-                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                # this does not do anything
+                # s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 5)     # Number of Keep alive probes
+                # s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 1)    # Iddle time before keep alive proves are sent
+                # s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 1)   # interval between keep alive probes
+                # s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 0)     # disables the Nagle algorithm for TCP sockets
 
-                # windows TCP_KEEPCNT, TCP_KEEPIDLE ?
-                # s.setsockopt(socket.TCP_KEEPCNT, 1)
                 s.setblocking(True)
                 s.connect((self.host, self.port))
                 log.debug(f'Connection established after {i} retries')
@@ -82,8 +78,10 @@ class SyncWorldListener:
             # this also means we are MISSING messages, windows
             # it critically flawed because of those disconnects
             if msg_size == b'':
-                self.sock = self.connect(10, self.sock)
+                self.sock = self.connect(10)
                 read = self.sock
+                self.reason = f'Reconnected to server'
+                return None
             # ---
             retries += 1
 
@@ -112,21 +110,25 @@ class SyncWorldListener:
         world_state.ParseFromString(msg)
         return world_state
 
+    def insert_message(self, m):
+        json_msg = MessageToJson(
+            msg,
+            preserving_proto_field_name=True,
+            use_integers_for_enums=True)
+
+        self.queue.put(json_msg)
+        self.state[self.namespace] = (datetime.utcnow() - s).total_seconds()
+
     def _run(self):
-        readable, _, error = select.select([self.sock], [], [self.sock], 0.250)
+        # this needs to be lower than the game.deadline so in case of disconnect we can reconnect fast
+        readable, _, error = select.select([self.sock], [], [self.sock], 0.05)
 
         for read in readable:
             s = datetime.utcnow()
             msg = self.read_message(read)
 
             if msg is not None:
-                json_msg = MessageToJson(
-                    msg,
-                    preserving_proto_field_name=True,
-                    use_integers_for_enums=True)
-
-                self.queue.put(json_msg)
-                self.state[self.namespace] = (datetime.utcnow() - s).total_seconds()
+                self.insert_message(msg)
             else:
                 log.debug(f'Could not read message because: {self.reason}')
                 self.reason = None
