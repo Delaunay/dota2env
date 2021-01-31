@@ -137,6 +137,11 @@ if __name__ == '__main__':
     from luafun.utils.options import option
     sys.stderr = sys.stdout
 
-    # p = option('dota.path', 'F:/SteamLibrary/steamapps/common/dota 2 beta/')
-    p = option('dota.path', '/media/setepenre/local/SteamLibraryLinux/steamapps/common/dota2/')
+    s = 'F:/SteamLibrary/steamapps/common/dota 2 beta/'
+    from sys import platform
+
+    if platform == "linux" or platform == "linux2":
+        s = '/media/setepenre/local/SteamLibraryLinux/steamapps/common/dota2/'
+
+    p = option('dota.path', s)
     main(p)
