@@ -74,7 +74,7 @@ class Actions(BasePage):
             'UseAbilityOnEntity': self.ability_on_entity,
 
             # Trees
-            'UseAbilityOnTree': self.make_unit_action('UseAbilityOnTree'),
+            'UseAbilityOnTree': self.ability_on_tree,
 
             # Item name
             'PurchaseItem': self.purchase_item,
@@ -107,6 +107,13 @@ class Actions(BasePage):
         b = IPCMessageBuilder()
         p = b.player(player)
         p.UseAbilityOnEntity(slot, slot2)
+        m = b.build()
+        return self.send_action(m)
+
+    def ability_on_tree(self, player, slot=0, slot2=0, **kwargs):
+        b = IPCMessageBuilder()
+        p = b.player(player)
+        p.UseAbilityOnTree(slot, slot2)
         m = b.build()
         return self.send_action(m)
 
@@ -158,6 +165,7 @@ class Actions(BasePage):
         m = b.build()
         return self.send_action(m)
 
+    # this shows the minimal number of arguments for the action table in lua +tree
     def main(self, action, player=0, x=0, y=0, slot=0, slot2=0, item='item_gauntlets'):
         if action == 'stop':
             self.state['running'] = False
