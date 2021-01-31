@@ -60,8 +60,8 @@ class AbilitySlot(IntEnum):
     Ablity18 = 18
     Ablity19 = 19
     Ablity20 = 20
-    Ablity21 = 20
-    Ablity22 = 20
+    Ablity21 = 21
+    Ablity22 = 22
 
 
 assert len(AbilitySlot) == 23, '23 abilities'
@@ -95,7 +95,7 @@ class Action(IntEnum):
     Buyback                       = 18  # ()
     Glyph                         = 19  # ()
     LevelAbility                  = 20  # ( sAbilityName )
-    # TODO: check how to implement thos
+    # TODO: check how to implement those
     # seems to be a regular ability that can be used
     # might not even be needed
     TakeOutpost                   = 21  # ()
@@ -154,7 +154,6 @@ class ActionArgument(IntEnum):
     hItem    = 8
     ix1      = 9
     ix2      = 10
-    sAbility = 11
 
 
 ARG = ActionArgument
@@ -188,21 +187,21 @@ class Player:
 
     def UseAbility(self, hAbility):
         self.act[ARG.action] = Action.UseAbility
-        self.act[ARG.hAbility] = hAbility
+        self.act[ARG.nSlot] = hAbility
 
     def UseAbilityOnEntity(self, hAbility, hTarget):
         self.act[ARG.action] = Action.UseAbilityOnEntity
-        self.act[ARG.hAbility] = hAbility
-        self.act[ARG.hTarget] = hTarget
+        self.act[ARG.nSlot] = hAbility
+        self.act[ARG.hUnit] = hTarget
 
-    def UseAbilityOnLocation(self, hAbility, vLocation):
+    def UseAbilityOnLocation(self, hAbility, vLoc):
         self.act[ARG.action] = Action.UseAbilityOnLocation
-        self.act[ARG.hAbility] = hAbility
-        self.act[ARG.vLocation] = vLocation
+        self.act[ARG.nSlot] = hAbility
+        self.act[ARG.vLoc] = vLoc
 
     def UseAbilityOnTree(self, hAbility, iTree):
         self.act[ARG.action] = Action.UseAbilityOnTree
-        self.act[ARG.hAbility] = hAbility
+        self.act[ARG.nSlot] = hAbility
         self.act[ARG.iTree] = iTree
 
     def PickUpRune(self, nRune):
@@ -216,7 +215,7 @@ class Player:
     def DropItem(self, hItem, vLocation):
         self.act[ARG.action] = Action.DropItem
         self.act[ARG.vLoc] = vLocation
-        self.act[ARG.hItem] = hItem
+        self.act[ARG.nSlot] = hItem
 
     def Delay(self, fDelay):
         self.act[ARG.action] = Action.Delay
@@ -228,15 +227,15 @@ class Player:
 
     def SellItem(self, hItem):
         self.act[ARG.action] = Action.SellItem
-        self.act[ARG.hItem] = hItem
+        self.act[ARG.nSlot] = hItem
 
     def DisassembleItem(self, hItem):
         self.act[ARG.action] = Action.DisassembleItem
-        self.act[ARG.hItem] = hItem
+        self.act[ARG.nSlot] = hItem
 
     def SetItemCombineLock(self, hItem):
         self.act[ARG.action] = Action.SetItemCombineLock
-        self.act[ARG.hItem] = hItem
+        self.act[ARG.nSlot] = hItem
 
     def SwapItems(self, index1, index2):
         self.act[ARG.action] = Action.SwapItems
@@ -249,9 +248,9 @@ class Player:
     def Glyph(self):
         self.act[ARG.action] = Action.Glyph
 
-    def LevelAbility(self, sAbilityName):
+    def LevelAbility(self, nSlot):
         self.act[ARG.action] = Action.LevelAbility
-        self.act[ARG.sAbility] = sAbilityName
+        self.act[ARG.nSlot] = nSlot
 
     def TakeOutpost(self):
         self.act[ARG.action] = Action.TakeOutpost

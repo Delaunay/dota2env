@@ -78,8 +78,8 @@ class SyncWorldListener:
             # this also means we are MISSING messages, windows
             # it critically flawed because of those disconnects
             if msg_size == b'':
+                self.sock.close()
                 self.sock = self.connect(10)
-                read = self.sock
                 self.reason = f'Reconnected to server'
                 return None
             # ---
@@ -110,7 +110,7 @@ class SyncWorldListener:
         world_state.ParseFromString(msg)
         return world_state
 
-    def insert_message(self, m):
+    def insert_message(self, msg, s):
         json_msg = MessageToJson(
             msg,
             preserving_proto_field_name=True,
@@ -128,14 +128,15 @@ class SyncWorldListener:
             msg = self.read_message(read)
 
             if msg is not None:
-                self.insert_message(msg)
+                self.insert_message(msg, s)
             else:
                 log.debug(f'Could not read message because: {self.reason}')
                 self.reason = None
 
         for err in error:
             err.close()
-            s = self.connect()
+            log.debug(f'socket error')
+            self.sock = self.connect()
 
     def run(self):
         self.sock = self.connect()
