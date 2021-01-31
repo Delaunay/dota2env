@@ -369,17 +369,6 @@ local function get_player_info()
     send_message({P = players})
 end
 
--- Unit Lookup: we that lookup was builtin, from the wiki:
--- > The function itself is reasonably fast because it will build the lists on-demand and no more than once per frame,
--- > but the lists can be long and performing logic on all units (or even all creeps) can easily get pretty slow.
-local units = {}
-local function get_unit_handle(nUnit)
-    units = {}
-    for hUnit in GetUnitList(UNIT_LIST_ALL) do
-
-    end
-end
-
 -- Decode the message and execute the requested command
 local function execute_rpc(message)
     local action    = message['0']

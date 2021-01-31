@@ -2,6 +2,13 @@ import torch
 import torch.nn as nn
 
 
+# I think the most challenging is probably how to make the network select an Entity
+# Entity come and go and we need to select one for a few action, this include trees
+#   * Trees might be fairly far from the hero (Timbersaw) or fairly close (tango)
+#   * Enemy entities could be far and close as well (Spirit breaker)
+#   * allies need to be there as well for buff spell
+
+
 class CategoryEmbedder(nn.Module):
     """Takes a hot encoded vector and returns a compact representation of the category
 
@@ -12,7 +19,7 @@ class CategoryEmbedder(nn.Module):
         super(CategoryEmbedder, self).__init__()
 
         self.embedder = nn.Sequential(
-            nn.Linear(in_size, n_latent_var),
+            nn.Linear(in_size, n_latent),
             nn.ReLU(),
             nn.Linear(n_latent, n_latent),
             nn.ReLU(),
@@ -47,14 +54,14 @@ class HeroEmbedder(nn.Module):
     """
 
     def __init__(self, in_size=(24, 120), n_latent=240, out_size=120):
-        super(HeroSummary, self).__init__()
+        super(HeroEmbedder, self).__init__()
         n_abilities, size = in_size
 
         # b x #abilities x #out_size => b x #out_size
         self.summary = nn.Sequential(
-            nn.Conv1d(n_abilities, 1, kernel_size=3)
-            nn.Flatten()
-            nn.Linear(in_size, n_latent_var),
+            nn.Conv1d(n_abilities, 1, kernel_size=3),
+            nn.Flatten(),
+            nn.Linear(in_size, n_latent),
             nn.ReLU(),
             nn.Linear(n_latent, n_latent),
             nn.ReLU(),
@@ -96,7 +103,7 @@ class SelectionCategorical(nn.Module):
         # instead of picking the most likely
         # we sample from a distribution
         # this makes our actor discover need strategies
-        dist = Categorical(action_probs)
+        dist = nn.Categorical(action_probs)
         action = dist.sample()
 
         # Used for the cost function
@@ -163,9 +170,9 @@ class ActorCritic(nn.Module):
         with torch.no_grad():
             action_probs = self.actor(state)
 
-            dist = Categorical(action_probs)
-            action_logprobs = dist.log_prob(action)
+            dist = nn.Categorical(action_probs)
             action = dist.sample()
+            action_logprobs = dist.log_prob(action)
 
             return action
 
@@ -174,7 +181,7 @@ class ActorCritic(nn.Module):
         with torch.enable_grad():
             # Do the forward pass so we have gradients for the optimization
             action_probs = self.actor(state)
-            dist = Categorical(action_probs)
+            dist = nn.Categorical(action_probs)
             action_logprobs = dist.log_prob(action)
             dist_entropy = dist.entropy()
 
