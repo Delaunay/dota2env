@@ -136,6 +136,7 @@ local function _get_world_size()
 end
 
 local function _get_trees()
+    -- GetAllTrees
     for i= 0,2500
     do
         local loc = GetTreeLocation(i)
@@ -186,13 +187,47 @@ local function _get_neutrals()
     end
 end
 
+
+-- from https://stackoverflow.com/questions/2620377/lua-reflection-get-list-of-functions-fields-on-an-object
+local seen = {}
+function dump(t,i)
+    seen[t]=true
+    local s={}
+    local n=0
+    for k in pairs(t) do
+        n=n+1 s[n]=k
+    end
+    table.sort(s)
+    for k,v in ipairs(s) do
+        print(i,v)
+        v=t[v]
+        if type(v)=="table" and not seen[v] then
+            dump(v,i.."\t")
+        end
+    end
+end
+
+
 -- Dump a bunch of useful information
 local function get_info()
+-- DebugDrawCircle
+-- DebugDrawLine
+-- DebugDrawText
+-- DebugPause
+
+-- CreateHTTPRequest
+-- CreateRemoteHTTPRequest
+
+    -- GetLaneFrontAmount
+    -- GetLaneFrontLocation
+    -- GetLocationAlongLane
+
     -- int GetHeightLevel( vLocation )
     -- bool IsLocationVisible( vLocation )
     -- bool IsLocationPassable( vLocation )
 
-    _get_neutrals()
+    dump(_G,"")
+    -- _get_neutrals()
 
      -- GetDroppedItemList()
 
@@ -207,7 +242,10 @@ local function get_info()
     -- GetNearbyBarracks
 end
 
+
+
 local bot = GetBot()
+-- is it better to use GetCourierForPlayer ?
 local hCourier = GetCourier(bot:GetPlayerID())
 
 local function get_ability_handle(slot)
@@ -231,18 +269,19 @@ end
 -- Map the action ID to its function
 -- This is all the actions the bots can make
 local function get_action_table()
+    -- Need a way to map to unit Handle from python
     local actionHandler = {}
     actionHandler[AStop]                 = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_ClearActions(true) end
     actionHandler[AMoveToLocation]       = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_MoveToLocation(vLoc) end
     actionHandler[AMoveDirectly]         = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_MoveDirectly(vLoc) end
-    actionHandler[AMoveToUnit]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_MoveToUnit(vLoc) end
-    actionHandler[AAttackUnit]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_AttackUnit(hUnit, true) end
+    actionHandler[AMoveToUnit]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_MoveToUnit(GetBotByHandle(hUnit)) end
+    actionHandler[AAttackUnit]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_AttackUnit(GetBotByHandle(hUnit), true) end
     actionHandler[AAttackMove]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_AttackMove(vLoc) end
     actionHandler[AUseAbility]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2)
         return bot:Action_UseAbility(get_ability_handle(nSlot))
     end
     actionHandler[AUseAbilityOnEntity]   = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2)
-        return bot:Action_UseAbilityOnEntity(get_ability_handle(nSlot), hUnit)
+        return bot:Action_UseAbilityOnEntity(get_ability_handle(nSlot), GetBotByHandle(hUnit))
     end
     actionHandler[AUseAbilityOnLocation] = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2)
         return bot:Action_UseAbilityOnLocation(get_ability_handle(nSlot), vLoc)
@@ -330,6 +369,17 @@ local function get_player_info()
     send_message({P = players})
 end
 
+-- Unit Lookup: we that lookup was builtin, from the wiki:
+-- > The function itself is reasonably fast because it will build the lists on-demand and no more than once per frame,
+-- > but the lists can be long and performing logic on all units (or even all creeps) can easily get pretty slow.
+local units = {}
+local function get_unit_handle(nUnit)
+    units = {}
+    for hUnit in GetUnitList(UNIT_LIST_ALL) do
+
+    end
+end
+
 -- Decode the message and execute the requested command
 local function execute_rpc(message)
     local action    = message['0']
@@ -373,11 +423,26 @@ local function execute_rpc(message)
         ix2)
 end
 
+-- from https://developer.valvesoftware.com/wiki/Dota_Bot_Scripting#UNIT_SCOPED_FUNCTIONS
+-- > This function will be called once per frame for every minion under control by a bot.
+-- > For example, if you implemented it in bot_beastmaster.lua,
+-- > it would constantly get called both for your boar and hawk while they're summoned and alive.
+-- > The handle to the bear/hawk unit is passed in as hMinionUnit.
+-- > Action commands that are usable on your hero are usable on the passed-in hMinionUnit.
+--
+-- Figure out how this would work with a NNet
+local function delegate_miinion_think(hMinionUnit)
+
+end
+
 -- A single Game will generate 10 sample, one for each bot
 local function delegate_think()
     -- Ready to process a new message
     -- Usefully for debugging but it pollutes the console
     -- send_message({S = "R"})
+
+    -- Do model inference there
+
 
     -- Message uid used to know if we missed a message
     local uid = 0

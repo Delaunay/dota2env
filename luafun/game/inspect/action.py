@@ -23,6 +23,7 @@ class Actions(BasePage):
         return [
             '/action/<string:action>',
             '/action/<string:action>/<int:player>',
+            '/action/<string:action>/<int:player>/<string:item>',
             '/action/<string:action>/<int:player>/<float:x>x<float:y>',
             '/action/<string:action>/<int:player>/<int:slot>',
             '/action/<string:action>/<int:player>/<int:slot>/<float:x>x<float:y>',
@@ -65,25 +66,59 @@ class Actions(BasePage):
             'PickUpRune': self.make_item_action('PickUpRune'),
             'SwapItems': self.swap_item,
 
-            # Unit Handle
-            # -----------
-            # MoveToUnit
-            # AttackUnit
-            # UseAbilityOnEntity
+            # Entity Handle
+            # -------------
+            'MoveToUnit': self.make_unit_action('MoveToUnit'),
+            'AttackUnit': self.make_unit_action('AttackUnit'),
+            'PickUpItem': self.make_unit_action('PickUpItem'),
+            'UseAbilityOnEntity': self.ability_on_entity,
 
             # Trees
-            # UseAbilityOnTree
-
-            # -------
-            # Item Handle
-            # PickUpItem
+            'UseAbilityOnTree': self.make_unit_action('UseAbilityOnTree'),
 
             # Item name
-            # PurchaseItem
+            'PurchaseItem': self.purchase_item,
+
+            # No ops
+            'NotUsed1': self.noop,
+            'NotUsed2': self.noop,
+            'NotUsed3': self.noop,
+            'NotUsed4': self.noop,
+            'NotUsed5': self.noop,
         }
 
         if len(self.base_actions) != len(Action):
             print(f'Missing action implementations: {len(self.base_actions)} < {len(Action)}')
+
+    def purchase_item(self, player, item, **kwargs):
+        b = IPCMessageBuilder()
+        p = b.player(player)
+        p.PurchaseItem(item)
+        m = b.build()
+        return self.send_action(m)
+
+    def noop(self, *args, **kwargs):
+        page = self.env.get_template('state.html')
+        return page.render(
+            code=f'No Op',
+            state=self.state)
+
+    def ability_on_entity(self, player, slot=0, slot2=0, **kwargs):
+        b = IPCMessageBuilder()
+        p = b.player(player)
+        p.UseAbilityOnEntity(slot, slot2)
+        m = b.build()
+        return self.send_action(m)
+
+    def make_unit_action(self, name):
+        def send_item_action(player, slot=0, **kwargs):
+            b = IPCMessageBuilder()
+            p = b.player(player)
+            getattr(p, name)(slot)
+            m = b.build()
+            return self.send_action(m)
+
+        return send_item_action
 
     def swap_item(self, player, slot=0, slot2=0, **kwargs):
         b = IPCMessageBuilder()
@@ -123,7 +158,7 @@ class Actions(BasePage):
         m = b.build()
         return self.send_action(m)
 
-    def main(self, action, player=0, x=0, y=0, slot=0, slot2=0):
+    def main(self, action, player=0, x=0, y=0, slot=0, slot2=0, item='item_gauntlets'):
         if action == 'stop':
             self.state['running'] = False
 
@@ -131,7 +166,7 @@ class Actions(BasePage):
             return self.send_get_info()
 
         if action in self.base_actions:
-            return self.base_actions[action](player, x=x, y=y, slot=slot, slot2=slot2)
+            return self.base_actions[action](player, x=x, y=y, slot=slot, slot2=slot2, item=item)
 
         if action == 'play':
             return self.start()

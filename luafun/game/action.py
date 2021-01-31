@@ -1,19 +1,7 @@
 from enum import IntEnum
 from luafun.game.ipc_send import new_ipc_message, TEAM_RADIANT, TEAM_DIRE
 
-# Action Type
-    # BOT_ACTION_TYPE_NONE
-    # BOT_ACTION_TYPE_IDLE
-    # BOT_ACTION_TYPE_MOVE_TO
-    # BOT_ACTION_TYPE_MOVE_TO_DIRECTLY
-    # BOT_ACTION_TYPE_ATTACK
-    # BOT_ACTION_TYPE_ATTACKMOVE
-    # BOT_ACTION_TYPE_USE_ABILITY
-    # BOT_ACTION_TYPE_PICK_UP_RUNE
-    # BOT_ACTION_TYPE_PICK_UP_ITEM
-    # BOT_ACTION_TYPE_DROP_ITEM
-    # BOT_ACTION_TYPE_SHRINE
-    # BOT_ACTION_TYPE_DELAY
+# Game mapping
 
 
 class RuneSlot(IntEnum):
@@ -49,17 +37,18 @@ class ItemSlot(IntEnum):
 assert len(ItemSlot) == 17, '17 item slots'
 
 
+# might have to normalize talent so it is easier to learn
 class AbilitySlot(IntEnum):
     Ablity0 = 0         # Q
     Ablity1 = 1         # W
     Ablity2 = 2         # E
     Ablity3 = 3         # D generic_hidden
     Ablity4 = 4         # F generic_hidden
-    Ablity5 = 5         # R
+    Ablity5 = 5         # R                 This is standard
     Ablity6 = 6
     Ablity7 = 7
     Ablity8 = 8
-    Ablity9 = 9         # Talent 1  (usually, the talent offset can be shifted)
+    Ablity9 = 9         # Talent 1  (usually but the talent offset can be shifted)
     Ablity10 = 10       # Talent 2  example: rubick, invoker, etc..
     Ablity11 = 11       # Talent 3
     Ablity12 = 12       # Talent 4  98 heroes follow the pattern above
@@ -102,17 +91,23 @@ class Action(IntEnum):
     SellItem                      = 14  # ( hItem )
     DisassembleItem               = 15  # ( hItem )
     SetItemCombineLock            = 16  # ( hItem, bLocked )
+    # The index order does not matter
+    # bots automatically transfer items from stash to inventory when possible
     SwapItems                     = 17  # ( index1, index2 )
     Buyback                       = 18  # ()
     Glyph                         = 19  # ()
     LevelAbility                  = 20  # ( sAbilityName )
-    # TODO: check how to implement those
+    # TODO: check how to implement this
     # seems to be a regular ability that can be used
     # might not even be needed
+    # from https://dota2.gamepedia.com/Outpost
+    # > An outpost can be captured by ordering the hero to attack it
+    # TODO: verify this
     TakeOutpost                   = 21  # ()
 
     # Courier Action bundled to the hero
     CourierBurst                  = 22
+    # hidden ability; cannot use
     # CourierEnemySecret            = 23
     CourierReturn                 = 23
     CourierSecret                 = 24

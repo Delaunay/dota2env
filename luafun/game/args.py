@@ -60,6 +60,10 @@ class DotaOptions:
             # looked like the cmd args where console command so tried to execute that one
             # in hope of making us spectator at the start of the game but no dice
             # '-jointeam', 'spec',
+            # This is not what is sounds like
+            # this is just to watch bot games in the client
+            # not to auto join as spectator
+            # '-dota_spectator_auto_spectate_bot_games', 1,
             # Relates to steam client.
             '+clientport', '{}'.format(self.client_port),
             '+dota_1v1_skip_strategy', '1',
