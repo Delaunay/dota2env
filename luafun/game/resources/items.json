@@ -1,0 +1,1610 @@
+[
+  {
+    "name": "item_blink",
+    "id": 1
+  },
+  {
+    "name": "item_overwhelming_blink",
+    "id": 600
+  },
+  {
+    "name": "item_swift_blink",
+    "id": 603
+  },
+  {
+    "name": "item_arcane_blink",
+    "id": 604
+  },
+  {
+    "name": "item_recipe_arcane_blink",
+    "id": 606
+  },
+  {
+    "name": "item_recipe_swift_blink",
+    "id": 607
+  },
+  {
+    "name": "item_recipe_overwhelming_blink",
+    "id": 608
+  },
+  {
+    "name": "item_blades_of_attack",
+    "id": 2
+  },
+  {
+    "name": "item_broadsword",
+    "id": 3
+  },
+  {
+    "name": "item_chainmail",
+    "id": 4
+  },
+  {
+    "name": "item_claymore",
+    "id": 5
+  },
+  {
+    "name": "item_helm_of_iron_will",
+    "id": 6
+  },
+  {
+    "name": "item_javelin",
+    "id": 7
+  },
+  {
+    "name": "item_mithril_hammer",
+    "id": 8
+  },
+  {
+    "name": "item_platemail",
+    "id": 9
+  },
+  {
+    "name": "item_quarterstaff",
+    "id": 10
+  },
+  {
+    "name": "item_quelling_blade",
+    "id": 11
+  },
+  {
+    "name": "item_faerie_fire",
+    "id": 237
+  },
+  {
+    "name": "item_infused_raindrop",
+    "id": 265
+  },
+  {
+    "name": "item_wind_lace",
+    "id": 244
+  },
+  {
+    "name": "item_ring_of_protection",
+    "id": 12
+  },
+  {
+    "name": "item_stout_shield",
+    "id": 182
+  },
+  {
+    "name": "item_recipe_moon_shard",
+    "id": 246
+  },
+  {
+    "name": "item_moon_shard",
+    "id": 247
+  },
+  {
+    "name": "item_gauntlets",
+    "id": 13
+  },
+  {
+    "name": "item_slippers",
+    "id": 14
+  },
+  {
+    "name": "item_mantle",
+    "id": 15
+  },
+  {
+    "name": "item_branches",
+    "id": 16
+  },
+  {
+    "name": "item_belt_of_strength",
+    "id": 17
+  },
+  {
+    "name": "item_boots_of_elves",
+    "id": 18
+  },
+  {
+    "name": "item_robe",
+    "id": 19
+  },
+  {
+    "name": "item_circlet",
+    "id": 20
+  },
+  {
+    "name": "item_crown",
+    "id": 261
+  },
+  {
+    "name": "item_ogre_axe",
+    "id": 21
+  },
+  {
+    "name": "item_blade_of_alacrity",
+    "id": 22
+  },
+  {
+    "name": "item_staff_of_wizardry",
+    "id": 23
+  },
+  {
+    "name": "item_ultimate_orb",
+    "id": 24
+  },
+  {
+    "name": "item_gloves",
+    "id": 25
+  },
+  {
+    "name": "item_blitz_knuckles",
+    "id": 485
+  },
+  {
+    "name": "item_lifesteal",
+    "id": 26
+  },
+  {
+    "name": "item_voodoo_mask",
+    "id": 473
+  },
+  {
+    "name": "item_ring_of_regen",
+    "id": 27
+  },
+  {
+    "name": "item_ring_of_tarrasque",
+    "id": 279
+  },
+  {
+    "name": "item_sobi_mask",
+    "id": 28
+  },
+  {
+    "name": "item_boots",
+    "id": 29
+  },
+  {
+    "name": "item_gem",
+    "id": 30
+  },
+  {
+    "name": "item_cloak",
+    "id": 31
+  },
+  {
+    "name": "item_talisman_of_evasion",
+    "id": 32
+  },
+  {
+    "name": "item_cheese",
+    "id": 33
+  },
+  {
+    "name": "item_magic_stick",
+    "id": 34
+  },
+  {
+    "name": "item_recipe_magic_wand",
+    "id": 35
+  },
+  {
+    "name": "item_magic_wand",
+    "id": 36
+  },
+  {
+    "name": "item_ghost",
+    "id": 37
+  },
+  {
+    "name": "item_clarity",
+    "id": 38
+  },
+  {
+    "name": "item_enchanted_mango",
+    "id": 216
+  },
+  {
+    "name": "item_flask",
+    "id": 39
+  },
+  {
+    "name": "item_dust",
+    "id": 40
+  },
+  {
+    "name": "item_bottle",
+    "id": 41
+  },
+  {
+    "name": "item_ward_observer",
+    "id": 42
+  },
+  {
+    "name": "item_ward_sentry",
+    "id": 43
+  },
+  {
+    "name": "item_recipe_ward_dispenser",
+    "id": 217
+  },
+  {
+    "name": "item_ward_dispenser",
+    "id": 218
+  },
+  {
+    "name": "item_tango",
+    "id": 44
+  },
+  {
+    "name": "item_tango_single",
+    "id": 241
+  },
+  {
+    "name": "item_courier",
+    "id": 45
+  },
+  {
+    "name": "item_flying_courier",
+    "id": 286
+  },
+  {
+    "name": "item_tpscroll",
+    "id": 46
+  },
+  {
+    "name": "item_recipe_travel_boots",
+    "id": 47
+  },
+  {
+    "name": "item_recipe_travel_boots_2",
+    "id": 219
+  },
+  {
+    "name": "item_travel_boots",
+    "id": 48
+  },
+  {
+    "name": "item_travel_boots_2",
+    "id": 220
+  },
+  {
+    "name": "item_recipe_phase_boots",
+    "id": 49
+  },
+  {
+    "name": "item_phase_boots",
+    "id": 50
+  },
+  {
+    "name": "item_demon_edge",
+    "id": 51
+  },
+  {
+    "name": "item_eagle",
+    "id": 52
+  },
+  {
+    "name": "item_reaver",
+    "id": 53
+  },
+  {
+    "name": "item_relic",
+    "id": 54
+  },
+  {
+    "name": "item_hyperstone",
+    "id": 55
+  },
+  {
+    "name": "item_ring_of_health",
+    "id": 56
+  },
+  {
+    "name": "item_void_stone",
+    "id": 57
+  },
+  {
+    "name": "item_mystic_staff",
+    "id": 58
+  },
+  {
+    "name": "item_energy_booster",
+    "id": 59
+  },
+  {
+    "name": "item_point_booster",
+    "id": 60
+  },
+  {
+    "name": "item_vitality_booster",
+    "id": 61
+  },
+  {
+    "name": "item_fluffy_hat",
+    "id": 593
+  },
+  {
+    "name": "item_recipe_power_treads",
+    "id": 62
+  },
+  {
+    "name": "item_power_treads",
+    "id": 63
+  },
+  {
+    "name": "item_recipe_grandmasters_glaive",
+    "id": 653
+  },
+  {
+    "name": "item_grandmasters_glaive",
+    "id": 655
+  },
+  {
+    "name": "item_recipe_hand_of_midas",
+    "id": 64
+  },
+  {
+    "name": "item_hand_of_midas",
+    "id": 65
+  },
+  {
+    "name": "item_recipe_oblivion_staff",
+    "id": 66
+  },
+  {
+    "name": "item_oblivion_staff",
+    "id": 67
+  },
+  {
+    "name": "item_recipe_witch_blade",
+    "id": 533
+  },
+  {
+    "name": "item_witch_blade",
+    "id": 534
+  },
+  {
+    "name": "item_recipe_pers",
+    "id": 68
+  },
+  {
+    "name": "item_pers",
+    "id": 69
+  },
+  {
+    "name": "item_recipe_poor_mans_shield",
+    "id": 70
+  },
+  {
+    "name": "item_poor_mans_shield",
+    "id": 71
+  },
+  {
+    "name": "item_satchel",
+    "id": 731
+  },
+  {
+    "name": "item_recipe_bracer",
+    "id": 72
+  },
+  {
+    "name": "item_bracer",
+    "id": 73
+  },
+  {
+    "name": "item_recipe_wraith_band",
+    "id": 74
+  },
+  {
+    "name": "item_wraith_band",
+    "id": 75
+  },
+  {
+    "name": "item_recipe_null_talisman",
+    "id": 76
+  },
+  {
+    "name": "item_null_talisman",
+    "id": 77
+  },
+  {
+    "name": "item_recipe_mekansm",
+    "id": 78
+  },
+  {
+    "name": "item_mekansm",
+    "id": 79
+  },
+  {
+    "name": "item_recipe_vladmir",
+    "id": 80
+  },
+  {
+    "name": "item_vladmir",
+    "id": 81
+  },
+  {
+    "name": "item_recipe_buckler",
+    "id": 85
+  },
+  {
+    "name": "item_buckler",
+    "id": 86
+  },
+  {
+    "name": "item_recipe_ring_of_basilius",
+    "id": 87
+  },
+  {
+    "name": "item_ring_of_basilius",
+    "id": 88
+  },
+  {
+    "name": "item_recipe_holy_locket",
+    "id": 268
+  },
+  {
+    "name": "item_holy_locket",
+    "id": 269
+  },
+  {
+    "name": "item_recipe_pipe",
+    "id": 89
+  },
+  {
+    "name": "item_pipe",
+    "id": 90
+  },
+  {
+    "name": "item_recipe_urn_of_shadows",
+    "id": 91
+  },
+  {
+    "name": "item_urn_of_shadows",
+    "id": 92
+  },
+  {
+    "name": "item_recipe_headdress",
+    "id": 93
+  },
+  {
+    "name": "item_headdress",
+    "id": 94
+  },
+  {
+    "name": "item_recipe_sheepstick",
+    "id": 95
+  },
+  {
+    "name": "item_sheepstick",
+    "id": 96
+  },
+  {
+    "name": "item_recipe_orchid",
+    "id": 97
+  },
+  {
+    "name": "item_orchid",
+    "id": 98
+  },
+  {
+    "name": "item_recipe_bloodthorn",
+    "id": 245
+  },
+  {
+    "name": "item_bloodthorn",
+    "id": 250
+  },
+  {
+    "name": "item_recipe_echo_sabre",
+    "id": 251
+  },
+  {
+    "name": "item_echo_sabre",
+    "id": 252
+  },
+  {
+    "name": "item_recipe_cyclone",
+    "id": 99
+  },
+  {
+    "name": "item_cyclone",
+    "id": 100
+  },
+  {
+    "name": "item_recipe_wind_waker",
+    "id": 612
+  },
+  {
+    "name": "item_wind_waker",
+    "id": 610
+  },
+  {
+    "name": "item_recipe_aether_lens",
+    "id": 233
+  },
+  {
+    "name": "item_aether_lens",
+    "id": 232
+  },
+  {
+    "name": "item_recipe_force_staff",
+    "id": 101
+  },
+  {
+    "name": "item_force_staff",
+    "id": 102
+  },
+  {
+    "name": "item_recipe_hurricane_pike",
+    "id": 262
+  },
+  {
+    "name": "item_hurricane_pike",
+    "id": 263
+  },
+  {
+    "name": "item_recipe_dagon",
+    "id": 103
+  },
+  {
+    "name": "item_recipe_dagon_2",
+    "id": 197
+  },
+  {
+    "name": "item_recipe_dagon_3",
+    "id": 198
+  },
+  {
+    "name": "item_recipe_dagon_4",
+    "id": 199
+  },
+  {
+    "name": "item_recipe_dagon_5",
+    "id": 200
+  },
+  {
+    "name": "item_dagon",
+    "id": 104
+  },
+  {
+    "name": "item_dagon_2",
+    "id": 201
+  },
+  {
+    "name": "item_dagon_3",
+    "id": 202
+  },
+  {
+    "name": "item_dagon_4",
+    "id": 203
+  },
+  {
+    "name": "item_dagon_5",
+    "id": 204
+  },
+  {
+    "name": "item_recipe_necronomicon",
+    "id": 105
+  },
+  {
+    "name": "item_recipe_necronomicon_2",
+    "id": 191
+  },
+  {
+    "name": "item_recipe_necronomicon_3",
+    "id": 192
+  },
+  {
+    "name": "item_necronomicon",
+    "id": 106
+  },
+  {
+    "name": "item_necronomicon_2",
+    "id": 193
+  },
+  {
+    "name": "item_necronomicon_3",
+    "id": 194
+  },
+  {
+    "name": "item_recipe_ultimate_scepter",
+    "id": 107
+  },
+  {
+    "name": "item_ultimate_scepter",
+    "id": 108
+  },
+  {
+    "name": "item_recipe_ultimate_scepter_2",
+    "id": 270
+  },
+  {
+    "name": "item_ultimate_scepter_2",
+    "id": 271
+  },
+  {
+    "name": "item_aghanims_shard",
+    "id": 609
+  },
+  {
+    "name": "item_recipe_refresher",
+    "id": 109
+  },
+  {
+    "name": "item_refresher",
+    "id": 110
+  },
+  {
+    "name": "item_recipe_assault",
+    "id": 111
+  },
+  {
+    "name": "item_assault",
+    "id": 112
+  },
+  {
+    "name": "item_recipe_heart",
+    "id": 113
+  },
+  {
+    "name": "item_heart",
+    "id": 114
+  },
+  {
+    "name": "item_recipe_black_king_bar",
+    "id": 115
+  },
+  {
+    "name": "item_black_king_bar",
+    "id": 116
+  },
+  {
+    "name": "item_aegis",
+    "id": 117
+  },
+  {
+    "name": "item_recipe_shivas_guard",
+    "id": 118
+  },
+  {
+    "name": "item_shivas_guard",
+    "id": 119
+  },
+  {
+    "name": "item_recipe_bloodstone",
+    "id": 120
+  },
+  {
+    "name": "item_bloodstone",
+    "id": 121
+  },
+  {
+    "name": "item_recipe_sphere",
+    "id": 122
+  },
+  {
+    "name": "item_sphere",
+    "id": 123
+  },
+  {
+    "name": "item_recipe_lotus_orb",
+    "id": 221
+  },
+  {
+    "name": "item_lotus_orb",
+    "id": 226
+  },
+  {
+    "name": "item_recipe_meteor_hammer",
+    "id": 222
+  },
+  {
+    "name": "item_meteor_hammer",
+    "id": 223
+  },
+  {
+    "name": "item_recipe_nullifier",
+    "id": 224
+  },
+  {
+    "name": "item_nullifier",
+    "id": 225
+  },
+  {
+    "name": "item_recipe_aeon_disk",
+    "id": 255
+  },
+  {
+    "name": "item_aeon_disk",
+    "id": 256
+  },
+  {
+    "name": "item_recipe_kaya",
+    "id": 258
+  },
+  {
+    "name": "item_kaya",
+    "id": 259
+  },
+  {
+    "name": "item_trident",
+    "id": 369
+  },
+  {
+    "name": "item_combo_breaker",
+    "id": 276
+  },
+  {
+    "name": "item_refresher_shard",
+    "id": 260
+  },
+  {
+    "name": "item_recipe_spirit_vessel",
+    "id": 266
+  },
+  {
+    "name": "item_spirit_vessel",
+    "id": 267
+  },
+  {
+    "name": "item_recipe_vanguard",
+    "id": 124
+  },
+  {
+    "name": "item_vanguard",
+    "id": 125
+  },
+  {
+    "name": "item_recipe_crimson_guard",
+    "id": 243
+  },
+  {
+    "name": "item_crimson_guard",
+    "id": 242
+  },
+  {
+    "name": "item_recipe_blade_mail",
+    "id": 126
+  },
+  {
+    "name": "item_blade_mail",
+    "id": 127
+  },
+  {
+    "name": "item_recipe_soul_booster",
+    "id": 128
+  },
+  {
+    "name": "item_soul_booster",
+    "id": 129
+  },
+  {
+    "name": "item_recipe_hood_of_defiance",
+    "id": 130
+  },
+  {
+    "name": "item_hood_of_defiance",
+    "id": 131
+  },
+  {
+    "name": "item_recipe_eternal_shroud",
+    "id": 691
+  },
+  {
+    "name": "item_eternal_shroud",
+    "id": 692
+  },
+  {
+    "name": "item_recipe_rapier",
+    "id": 132
+  },
+  {
+    "name": "item_rapier",
+    "id": 133
+  },
+  {
+    "name": "item_recipe_monkey_king_bar",
+    "id": 134
+  },
+  {
+    "name": "item_monkey_king_bar",
+    "id": 135
+  },
+  {
+    "name": "item_recipe_radiance",
+    "id": 136
+  },
+  {
+    "name": "item_radiance",
+    "id": 137
+  },
+  {
+    "name": "item_recipe_butterfly",
+    "id": 138
+  },
+  {
+    "name": "item_butterfly",
+    "id": 139
+  },
+  {
+    "name": "item_recipe_greater_crit",
+    "id": 140
+  },
+  {
+    "name": "item_greater_crit",
+    "id": 141
+  },
+  {
+    "name": "item_recipe_basher",
+    "id": 142
+  },
+  {
+    "name": "item_basher",
+    "id": 143
+  },
+  {
+    "name": "item_recipe_bfury",
+    "id": 144
+  },
+  {
+    "name": "item_bfury",
+    "id": 145
+  },
+  {
+    "name": "item_recipe_manta",
+    "id": 146
+  },
+  {
+    "name": "item_manta",
+    "id": 147
+  },
+  {
+    "name": "item_recipe_lesser_crit",
+    "id": 148
+  },
+  {
+    "name": "item_lesser_crit",
+    "id": 149
+  },
+  {
+    "name": "item_recipe_dragon_lance",
+    "id": 234
+  },
+  {
+    "name": "item_dragon_lance",
+    "id": 236
+  },
+  {
+    "name": "item_recipe_armlet",
+    "id": 150
+  },
+  {
+    "name": "item_armlet",
+    "id": 151
+  },
+  {
+    "name": "item_recipe_invis_sword",
+    "id": 183
+  },
+  {
+    "name": "item_invis_sword",
+    "id": 152
+  },
+  {
+    "name": "item_recipe_silver_edge",
+    "id": 248
+  },
+  {
+    "name": "item_silver_edge",
+    "id": 249
+  },
+  {
+    "name": "item_recipe_sange_and_yasha",
+    "id": 153
+  },
+  {
+    "name": "item_sange_and_yasha",
+    "id": 154
+  },
+  {
+    "name": "item_recipe_kaya_and_sange",
+    "id": 272
+  },
+  {
+    "name": "item_kaya_and_sange",
+    "id": 273
+  },
+  {
+    "name": "item_recipe_yasha_and_kaya",
+    "id": 274
+  },
+  {
+    "name": "item_yasha_and_kaya",
+    "id": 277
+  },
+  {
+    "name": "item_recipe_satanic",
+    "id": 155
+  },
+  {
+    "name": "item_satanic",
+    "id": 156
+  },
+  {
+    "name": "item_recipe_mjollnir",
+    "id": 157
+  },
+  {
+    "name": "item_mjollnir",
+    "id": 158
+  },
+  {
+    "name": "item_recipe_skadi",
+    "id": 159
+  },
+  {
+    "name": "item_skadi",
+    "id": 160
+  },
+  {
+    "name": "item_recipe_sange",
+    "id": 161
+  },
+  {
+    "name": "item_sange",
+    "id": 162
+  },
+  {
+    "name": "item_recipe_helm_of_the_dominator",
+    "id": 163
+  },
+  {
+    "name": "item_helm_of_the_dominator",
+    "id": 164
+  },
+  {
+    "name": "item_recipe_helm_of_the_dominator_2",
+    "id": 633
+  },
+  {
+    "name": "item_helm_of_the_dominator_2",
+    "id": 635
+  },
+  {
+    "name": "item_recipe_maelstrom",
+    "id": 165
+  },
+  {
+    "name": "item_maelstrom",
+    "id": 166
+  },
+  {
+    "name": "item_recipe_gungir",
+    "id": 1565
+  },
+  {
+    "name": "item_gungir",
+    "id": 1466
+  },
+  {
+    "name": "item_recipe_desolator",
+    "id": 167
+  },
+  {
+    "name": "item_desolator",
+    "id": 168
+  },
+  {
+    "name": "item_recipe_yasha",
+    "id": 169
+  },
+  {
+    "name": "item_yasha",
+    "id": 170
+  },
+  {
+    "name": "item_recipe_mask_of_madness",
+    "id": 171
+  },
+  {
+    "name": "item_mask_of_madness",
+    "id": 172
+  },
+  {
+    "name": "item_recipe_diffusal_blade",
+    "id": 173
+  },
+  {
+    "name": "item_diffusal_blade",
+    "id": 174
+  },
+  {
+    "name": "item_recipe_ethereal_blade",
+    "id": 175
+  },
+  {
+    "name": "item_ethereal_blade",
+    "id": 176
+  },
+  {
+    "name": "item_recipe_soul_ring",
+    "id": 177
+  },
+  {
+    "name": "item_soul_ring",
+    "id": 178
+  },
+  {
+    "name": "item_recipe_arcane_boots",
+    "id": 179
+  },
+  {
+    "name": "item_arcane_boots",
+    "id": 180
+  },
+  {
+    "name": "item_recipe_octarine_core",
+    "id": 228
+  },
+  {
+    "name": "item_octarine_core",
+    "id": 235
+  },
+  {
+    "name": "item_orb_of_venom",
+    "id": 181
+  },
+  {
+    "name": "item_blight_stone",
+    "id": 240
+  },
+  {
+    "name": "item_recipe_orb_of_corrosion",
+    "id": 640
+  },
+  {
+    "name": "item_orb_of_corrosion",
+    "id": 569
+  },
+  {
+    "name": "item_recipe_falcon_blade",
+    "id": 599
+  },
+  {
+    "name": "item_falcon_blade",
+    "id": 596
+  },
+  {
+    "name": "item_recipe_mage_slayer",
+    "id": 597
+  },
+  {
+    "name": "item_mage_slayer",
+    "id": 598
+  },
+  {
+    "name": "item_recipe_ancient_janggo",
+    "id": 184
+  },
+  {
+    "name": "item_ancient_janggo",
+    "id": 185
+  },
+  {
+    "name": "item_recipe_medallion_of_courage",
+    "id": 186
+  },
+  {
+    "name": "item_medallion_of_courage",
+    "id": 187
+  },
+  {
+    "name": "item_recipe_solar_crest",
+    "id": 227
+  },
+  {
+    "name": "item_solar_crest",
+    "id": 229
+  },
+  {
+    "name": "item_smoke_of_deceit",
+    "id": 188
+  },
+  {
+    "name": "item_tome_of_knowledge",
+    "id": 257
+  },
+  {
+    "name": "item_recipe_veil_of_discord",
+    "id": 189
+  },
+  {
+    "name": "item_veil_of_discord",
+    "id": 190
+  },
+  {
+    "name": "item_recipe_guardian_greaves",
+    "id": 230
+  },
+  {
+    "name": "item_guardian_greaves",
+    "id": 231
+  },
+  {
+    "name": "item_recipe_rod_of_atos",
+    "id": 205
+  },
+  {
+    "name": "item_rod_of_atos",
+    "id": 206
+  },
+  {
+    "name": "item_recipe_iron_talon",
+    "id": 238
+  },
+  {
+    "name": "item_iron_talon",
+    "id": 239
+  },
+  {
+    "name": "item_recipe_abyssal_blade",
+    "id": 207
+  },
+  {
+    "name": "item_abyssal_blade",
+    "id": 208
+  },
+  {
+    "name": "item_recipe_heavens_halberd",
+    "id": 209
+  },
+  {
+    "name": "item_heavens_halberd",
+    "id": 210
+  },
+  {
+    "name": "item_recipe_ring_of_aquila",
+    "id": 211
+  },
+  {
+    "name": "item_ring_of_aquila",
+    "id": 212
+  },
+  {
+    "name": "item_recipe_tranquil_boots",
+    "id": 213
+  },
+  {
+    "name": "item_tranquil_boots",
+    "id": 214
+  },
+  {
+    "name": "item_shadow_amulet",
+    "id": 215
+  },
+  {
+    "name": "item_recipe_glimmer_cape",
+    "id": 253
+  },
+  {
+    "name": "item_glimmer_cape",
+    "id": 254
+  },
+  {
+    "name": "item_river_painter",
+    "id": 1021
+  },
+  {
+    "name": "item_river_painter2",
+    "id": 1022
+  },
+  {
+    "name": "item_river_painter3",
+    "id": 1023
+  },
+  {
+    "name": "item_river_painter4",
+    "id": 1024
+  },
+  {
+    "name": "item_river_painter5",
+    "id": 1025
+  },
+  {
+    "name": "item_river_painter6",
+    "id": 1026
+  },
+  {
+    "name": "item_river_painter7",
+    "id": 1027
+  },
+  {
+    "name": "item_mutation_tombstone",
+    "id": 1028
+  },
+  {
+    "name": "item_super_blink",
+    "id": 1029
+  },
+  {
+    "name": "item_pocket_tower",
+    "id": 1030
+  },
+  {
+    "name": "item_pocket_roshan",
+    "id": 1032
+  },
+  {
+    "name": "item_keen_optic",
+    "id": 287
+  },
+  {
+    "name": "item_grove_bow",
+    "id": 288
+  },
+  {
+    "name": "item_quickening_charm",
+    "id": 289
+  },
+  {
+    "name": "item_philosophers_stone",
+    "id": 290
+  },
+  {
+    "name": "item_force_boots",
+    "id": 291
+  },
+  {
+    "name": "item_desolator_2",
+    "id": 292
+  },
+  {
+    "name": "item_phoenix_ash",
+    "id": 293
+  },
+  {
+    "name": "item_seer_stone",
+    "id": 294
+  },
+  {
+    "name": "item_greater_mango",
+    "id": 295
+  },
+  {
+    "name": "item_elixer",
+    "id": 302
+  },
+  {
+    "name": "item_vampire_fangs",
+    "id": 297
+  },
+  {
+    "name": "item_craggy_coat",
+    "id": 298
+  },
+  {
+    "name": "item_greater_faerie_fire",
+    "id": 299
+  },
+  {
+    "name": "item_timeless_relic",
+    "id": 300
+  },
+  {
+    "name": "item_mirror_shield",
+    "id": 301
+  },
+  {
+    "name": "item_recipe_ironwood_tree",
+    "id": 303
+  },
+  {
+    "name": "item_ironwood_tree",
+    "id": 304
+  },
+  {
+    "name": "item_mango_tree",
+    "id": 328
+  },
+  {
+    "name": "item_royal_jelly",
+    "id": 305
+  },
+  {
+    "name": "item_pupils_gift",
+    "id": 306
+  },
+  {
+    "name": "item_tome_of_aghanim",
+    "id": 307
+  },
+  {
+    "name": "item_repair_kit",
+    "id": 308
+  },
+  {
+    "name": "item_mind_breaker",
+    "id": 309
+  },
+  {
+    "name": "item_third_eye",
+    "id": 310
+  },
+  {
+    "name": "item_spell_prism",
+    "id": 311
+  },
+  {
+    "name": "item_princes_knife",
+    "id": 325
+  },
+  {
+    "name": "item_witless_shako",
+    "id": 330
+  },
+  {
+    "name": "item_imp_claw",
+    "id": 334
+  },
+  {
+    "name": "item_flicker",
+    "id": 335
+  },
+  {
+    "name": "item_spy_gadget",
+    "id": 336
+  },
+  {
+    "name": "item_spider_legs",
+    "id": 326
+  },
+  {
+    "name": "item_helm_of_the_undying",
+    "id": 327
+  },
+  {
+    "name": "item_recipe_vambrace",
+    "id": 329
+  },
+  {
+    "name": "item_vambrace",
+    "id": 331
+  },
+  {
+    "name": "item_horizon",
+    "id": 312
+  },
+  {
+    "name": "item_fusion_rune",
+    "id": 313
+  },
+  {
+    "name": "item_ocean_heart",
+    "id": 354
+  },
+  {
+    "name": "item_broom_handle",
+    "id": 355
+  },
+  {
+    "name": "item_trusty_shovel",
+    "id": 356
+  },
+  {
+    "name": "item_nether_shawl",
+    "id": 357
+  },
+  {
+    "name": "item_dragon_scale",
+    "id": 358
+  },
+  {
+    "name": "item_essence_ring",
+    "id": 359
+  },
+  {
+    "name": "item_clumsy_net",
+    "id": 360
+  },
+  {
+    "name": "item_enchanted_quiver",
+    "id": 361
+  },
+  {
+    "name": "item_ninja_gear",
+    "id": 362
+  },
+  {
+    "name": "item_illusionsts_cape",
+    "id": 363
+  },
+  {
+    "name": "item_havoc_hammer",
+    "id": 364
+  },
+  {
+    "name": "item_panic_button",
+    "id": 365
+  },
+  {
+    "name": "item_apex",
+    "id": 366
+  },
+  {
+    "name": "item_ballista",
+    "id": 367
+  },
+  {
+    "name": "item_woodland_striders",
+    "id": 368
+  },
+  {
+    "name": "item_recipe_trident",
+    "id": 275
+  },
+  {
+    "name": "item_demonicon",
+    "id": 370
+  },
+  {
+    "name": "item_recipe_fallen_sky",
+    "id": 317
+  },
+  {
+    "name": "item_fallen_sky",
+    "id": 371
+  },
+  {
+    "name": "item_pirate_hat",
+    "id": 372
+  },
+  {
+    "name": "item_dimensional_doorway",
+    "id": 373
+  },
+  {
+    "name": "item_ex_machina",
+    "id": 374
+  },
+  {
+    "name": "item_faded_broach",
+    "id": 375
+  },
+  {
+    "name": "item_paladin_sword",
+    "id": 376
+  },
+  {
+    "name": "item_minotaur_horn",
+    "id": 377
+  },
+  {
+    "name": "item_orb_of_destruction",
+    "id": 378
+  },
+  {
+    "name": "item_the_leveller",
+    "id": 379
+  },
+  {
+    "name": "item_arcane_ring",
+    "id": 349
+  },
+  {
+    "name": "item_titan_sliver",
+    "id": 381
+  },
+  {
+    "name": "item_chipped_vest",
+    "id": 565
+  },
+  {
+    "name": "item_wizard_glass",
+    "id": 566
+  },
+  {
+    "name": "item_gloves_of_travel",
+    "id": 570
+  },
+  {
+    "name": "item_elven_tunic",
+    "id": 573
+  },
+  {
+    "name": "item_cloak_of_flames",
+    "id": 574
+  },
+  {
+    "name": "item_venom_gland",
+    "id": 575
+  },
+  {
+    "name": "item_trickster_cloak",
+    "id": 571
+  },
+  {
+    "name": "item_gladiator_helm",
+    "id": 576
+  },
+  {
+    "name": "item_possessed_mask",
+    "id": 577
+  },
+  {
+    "name": "item_ancient_perseverance",
+    "id": 578
+  },
+  {
+    "name": "item_star_mace",
+    "id": 637
+  },
+  {
+    "name": "item_penta_edged_sword",
+    "id": 638
+  },
+  {
+    "name": "item_oakheart",
+    "id": 582
+  },
+  {
+    "name": "item_warhammer",
+    "id": 674
+  },
+  {
+    "name": "item_bullwhip",
+    "id": 680
+  },
+  {
+    "name": "item_psychic_headband",
+    "id": 675
+  },
+  {
+    "name": "item_ceremonial_robe",
+    "id": 676
+  },
+  {
+    "name": "item_quicksilver_amulet",
+    "id": 686
+  },
+  {
+    "name": "item_book_of_shadows",
+    "id": 677
+  },
+  {
+    "name": "item_giants_ring",
+    "id": 678
+  },
+  {
+    "name": "item_vengeances_shadow",
+    "id": 679
+  },
+  {
+    "name": "item_stormcrafter",
+    "id": 585
+  },
+  {
+    "name": "item_overflowing_elixir",
+    "id": 588
+  },
+  {
+    "name": "item_mysterious_hat",
+    "id": 589
+  }
+]

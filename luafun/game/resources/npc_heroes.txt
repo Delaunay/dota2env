@@ -6843,7 +6843,7 @@
 		"AttributeIntelligenceGain"		"1.300000"
 		"AttributeBaseAgility"		"18"
 		"AttributeAgilityGain"		"1.40000"
-		"StatusHealthRegen"		"3.0"
+		"StatusHealthRegen"		"2.5"
 		"MovementSpeed"		"320"
 		"MovementTurnRate"		"0.600000"
 		"BoundsHullName"		"DOTA_HULL_SIZE_HERO"
@@ -7055,7 +7055,7 @@
 		"HeroSelectSoundEffect"		"Hero_Enigma.Pick"
 		"GibType"		"ethereal"
 		"GibTintColor"	"49 37 133 255"
-		"HealthBarOffset"		"240"		
+		"HealthBarOffset"		"240"
 		"Ability1"		"enigma_malefice"
 		"Ability2"		"enigma_demonic_conversion"
 		"Ability3"		"enigma_midnight_pulse"
@@ -8120,13 +8120,13 @@
 		"AbilityDraftDisabled"		"0"
 		"ArmorPhysical"		"-1"
 		"AttackCapabilities"		"DOTA_UNIT_CAP_MELEE_ATTACK"
-		"AttackDamageMin"		"37"
-		"AttackDamageMax"		"41"
+		"AttackDamageMin"		"35"
+		"AttackDamageMax"		"39"
 		"AttackRate"		"1.700000"
 		"BaseAttackSpeed"		"110"
 		"AttackAnimationPoint"		"0.300000"
 		"AttackAcquisitionRange"		"600"
-		"AttackRange"		"150" 
+		"AttackRange"		"150"
 		"ProjectileSpeed"		"0"
 		"AttributePrimary"		"DOTA_ATTRIBUTE_STRENGTH"
 		"AttributeBaseStrength"		"23"
@@ -8608,7 +8608,7 @@
 		"HeroSelectSoundEffect"		"Hero_FacelessVoid.Pick"
 		"GibType"		"default"
 		"Ability1"		"faceless_void_time_walk"
-		"Ability2"		"faceless_void_time_dilation"	
+		"Ability2"		"faceless_void_time_dilation"
 		"Ability3"		"faceless_void_time_lock"
 		"Ability4"		"faceless_void_time_walk_reverse"
 		"Ability5"		"generic_hidden"
@@ -8770,8 +8770,8 @@
 		"Ability17"		"special_bonus_unique_wraith_king_4"
 		"ArmorPhysical"		"-1"
 		"AttackCapabilities"		"DOTA_UNIT_CAP_MELEE_ATTACK"
-		"AttackDamageMin"		"40"
-		"AttackDamageMax"		"42"
+		"AttackDamageMin"		"38"
+		"AttackDamageMax"		"40"
 		"AttackRate"		"1.700000"
 		"AttackAnimationPoint"		"0.560000"
 		"AttackAcquisitionRange"		"600"
@@ -9191,7 +9191,7 @@
 				"item_staff_of_wizardry"		"ITEM_EXTENSION"
 				"item_recipe_cyclone"		"ITEM_EXTENSION"
 				"item_cyclone"		"ITEM_DERIVED"
-				
+
 				"item_ogre_axe"		"ITEM_EXTENSION"
 				"item_mithril_hammer"		"ITEM_EXTENSION"
 				"item_recipe_black_king_bar"		"ITEM_EXTENSION"
@@ -9896,7 +9896,7 @@
 				"particles/units/heroes/hero_viper/viper_loadout.vpcf"		"loadout"
 			}
 		}
-		
+
 		"ItemSlots"
 		{
 			"0"
@@ -9917,7 +9917,7 @@
 				"TextureWidth"		"512"
 				"TextureHeight"		"512"
 				"MaxPolygonsLOD0"		"4000"
-				"MaxPolygonsLOD1"		"1600"				
+				"MaxPolygonsLOD1"		"1600"
 			}
 			"2"
 			{
@@ -9927,7 +9927,7 @@
 				"TextureWidth"		"512"
 				"TextureHeight"		"512"
 				"MaxPolygonsLOD0"		"2500"
-				"MaxPolygonsLOD1"		"1000"				
+				"MaxPolygonsLOD1"		"1000"
 			}
 
 			"3"
@@ -10670,7 +10670,7 @@
 
 				"item_energy_booster"		"ITEM_EXTENSION"
 				"item_arcane_boots"		"ITEM_DERIVED"
-				
+
                 "item_sobi_mask"                "ITEM_EXTENSION"
                 "item_sobi_mask"                "ITEM_EXTENSION"
 				"item_belt_of_strength"		"ITEM_EXTENSION"
@@ -11269,8 +11269,8 @@
 
 		"ArmorPhysical"		"1"
 		"AttackCapabilities"		"DOTA_UNIT_CAP_MELEE_ATTACK"
-		"AttackDamageMin"		"24"
-		"AttackDamageMax"		"30"
+		"AttackDamageMin"		"27"
+		"AttackDamageMax"		"33"
 		"AttackRate"		"1.7000"
 		"BaseAttackSpeed"		"120"
 		"AttackAnimationPoint"		"0.390000"
@@ -11283,7 +11283,7 @@
 		"AttributeIntelligenceGain"		"1.8000"
 		"AttributeBaseAgility"		"18"
 		"AttributeAgilityGain"		"2.400000"
-		"MovementSpeed"		"325" 
+		"MovementSpeed"		"325"
 		"MovementTurnRate"		"1.000000"
 		"HasAggressiveStance"		"1"
 		"BoundsHullName"		"DOTA_HULL_SIZE_HERO"
@@ -11597,7 +11597,7 @@
 		"MovementSpeed"		"290"
 		"MovementTurnRate"		"0.50000"
 		"BoundsHullName"		"DOTA_HULL_SIZE_HERO"
-		"HealthBarOffset"		"170"		
+		"HealthBarOffset"		"170"
 		"VoiceFile"		"soundevents/voscripts/game_sounds_vo_clinkz.vsndevts"
 		"particle_folder"		"particles/units/heroes/hero_clinkz"
 		"GameSoundsFile"		"soundevents/game_sounds_heroes/game_sounds_clinkz.vsndevts"
@@ -11745,9 +11745,9 @@
 		"Ability5"		"generic_hidden"
 		"Ability6"		"omniknight_guardian_angel"
 		"Ability10"		"special_bonus_unique_omniknight_5"
-		"Ability11"		"special_bonus_movement_speed_20"
+		"Ability11"		"special_bonus_attack_base_damage_40"
 		"Ability12"		"special_bonus_unique_omniknight_6"
-		"Ability13"		"special_bonus_attack_damage_70"
+		"Ability13"		"special_bonus_movement_speed_30"
 		"Ability14"		"special_bonus_unique_omniknight_2"
 		"Ability15"		"special_bonus_unique_omniknight_3"
 		"Ability16"		"special_bonus_unique_omniknight_1"
@@ -11913,7 +11913,7 @@
 				"12"		"omniknight_guardian_angel"
 				"13"		"omniknight_degen_aura"
 				"14"		"omniknight_degen_aura"
-				"15"		"special_bonus_movement_speed_20"
+				"15"		"special_bonus_unique_omniknight_5"
 				"16"		"omniknight_degen_aura"
 				"17"		""
 				"18"		"omniknight_guardian_angel"
@@ -13545,6 +13545,11 @@
 		"AttackAnimationPoint"		"0.300000"
 		"AttackAcquisitionRange"		"600"
 		"AttackRange"		"150"
+		"AttackSpeedActivityModifiers"
+		{
+			"fast"		"130"
+			"faster"	"200"
+		}
 		"AttributePrimary"		"DOTA_ATTRIBUTE_AGILITY"
 		"AttributeBaseStrength"		"23"
 		"AttributeStrengthGain"		"2.500000"
@@ -13845,7 +13850,7 @@
 		"HeroGlowColor"		"53 74 107"
 		"HeroSelectSoundEffect"		"Hero_Ancient_Apparition.Pick"
 		"GibType"		"ice"
-		"HealthBarOffset"		"190"		
+		"HealthBarOffset"		"190"
 		"Ability1"		"ancient_apparition_cold_feet"
 		"Ability2"		"ancient_apparition_ice_vortex"
 		"Ability3"		"ancient_apparition_chilling_touch"
@@ -13898,40 +13903,40 @@
 				"SlotIndex"		"0"
 				"SlotName"		"head"
 				"SlotText"		"#LoadoutSlot_Head_Accessory"
-				"TextureWidth"		"512"       
-				"TextureHeight"		"512"       
-				"MaxPolygonsLOD0"		"3000"   
-				"MaxPolygonsLOD1"		"500"   
+				"TextureWidth"		"512"
+				"TextureHeight"		"512"
+				"MaxPolygonsLOD0"		"3000"
+				"MaxPolygonsLOD1"		"500"
 			}
 			"1"
 			{
 				"SlotIndex"		"1"
 				"SlotName"		"shoulder"
 				"SlotText"		"#LoadoutSlot_Shoulder"
-				"TextureWidth"		"512"      
-				"TextureHeight"		"512"     
-				"MaxPolygonsLOD0"		"3500"  
-				"MaxPolygonsLOD1"		"1400"   
+				"TextureWidth"		"512"
+				"TextureHeight"		"512"
+				"MaxPolygonsLOD0"		"3500"
+				"MaxPolygonsLOD1"		"1400"
 			}
 			"2"
 			{
 				"SlotIndex"		"2"
 				"SlotName"		"arms"
 				"SlotText"		"#LoadoutSlot_Arms"
-				"TextureWidth"		"512"       
-				"TextureHeight"		"256"      
-				"MaxPolygonsLOD0"		"2500"  
-				"MaxPolygonsLOD1"		"1000"   
+				"TextureWidth"		"512"
+				"TextureHeight"		"256"
+				"MaxPolygonsLOD0"		"2500"
+				"MaxPolygonsLOD1"		"1000"
 			}
 			"3"
 			{
 				"SlotIndex"		"3"
 				"SlotName"		"tail"
 				"SlotText"		"#LoadoutSlot_Tail"
-				"TextureWidth"		"256"     
-				"TextureHeight"		"256"     
-				"MaxPolygonsLOD0"		"2000"  
-				"MaxPolygonsLOD1"		"800"   
+				"TextureWidth"		"256"
+				"TextureHeight"		"256"
+				"MaxPolygonsLOD0"		"2000"
+				"MaxPolygonsLOD1"		"800"
 			}
 
 			"4"
@@ -14678,7 +14683,7 @@
 		"Ability13"		"invoker_sun_strike"
 		"Ability14"		"invoker_forge_spirit"
 		"Ability15"		"invoker_ice_wall"
-		"Ability16"		"invoker_deafening_blast"		
+		"Ability16"		"invoker_deafening_blast"
 
 		"AbilityDraftAbilities"
 		{
@@ -14692,7 +14697,7 @@
 			"Ability8"		"invoker_forge_spirit_ad"
 			"Ability9"		"invoker_ice_wall_ad"
 			"Ability10"		"invoker_ghost_walk_ad"
-		}		
+		}
 		"AbilityDraftIgnoreCount" "16"
 		"AbilityTalentStart" "17"
 
@@ -15100,12 +15105,12 @@
 		"Ability10"		"special_bonus_hp_200"
 		"Ability11"		"special_bonus_attack_speed_15"
 		"Ability12"		"special_bonus_mp_250"
-		"Ability13"		"special_bonus_armor_8"
+		"Ability13"		"special_bonus_movement_speed_30"
 		"Ability14"		"special_bonus_strength_20"
 		"Ability15"		"special_bonus_unique_outworld_devourer_4"
 		"Ability16"		"special_bonus_unique_outworld_devourer"
 		"Ability17"		"special_bonus_spell_lifesteal_30"
-		"ArmorPhysical"		"1.5"
+		"ArmorPhysical"		"3.5"
 		"AttackCapabilities"		"DOTA_UNIT_CAP_RANGED_ATTACK"
 		"AttackDamageMin"		"19"
 		"AttackDamageMax"		"31"
@@ -15119,11 +15124,12 @@
 		"AttributeBaseStrength"		"21"
 		"AttributeStrengthGain"		"2.90000"
 		"AttributeBaseAgility"		"22"
-		"AttributeAgilityGain"		"1.30000"
+		"AttributeAgilityGain"		"1.60000"
 		"AttributeBaseIntelligence"		"30"
 		"AttributeIntelligenceGain"		"4.200000"
-		"MovementSpeed"		"315"
+		"MovementSpeed"		"325"
 		"MovementTurnRate"		"0.500000"
+		"StatusHealthRegen"		"1"
 		"HealthBarOffset"		"300"
 		"particle_folder"		"particles/units/heroes/hero_obsidian_destroyer"
 		"GameSoundsFile"		"soundevents/game_sounds_heroes/game_sounds_obsidian_destroyer.vsndevts"
@@ -15257,7 +15263,7 @@
 			"Ability2"		"lycan_howl"
 			"Ability3"		"lycan_feral_impulse"
 			"Ability4"		"lycan_shapeshift"
-		}		
+		}
 
 		"ArmorPhysical"		"-1"
 		"AttackCapabilities"		"DOTA_UNIT_CAP_MELEE_ATTACK"
@@ -15597,7 +15603,7 @@
 			"Ability1"		"shadow_demon_disruption"
 			"Ability2"		"shadow_demon_soul_catcher"
 			"Ability3"		"shadow_demon_demonic_purge"
-		}		
+		}
 
 		"ArmorPhysical"		"0"
 		"AttackCapabilities"		"DOTA_UNIT_CAP_RANGED_ATTACK"
@@ -15747,14 +15753,14 @@
 		"Ability16"		"special_bonus_unique_lone_druid_10"
 		"Ability17"		"special_bonus_unique_lone_druid_7"
 		"AbilityDraftIgnoreCount" "7"
-		
+
 		"AbilityDraftAbilities"
 		{
 			"Ability1"		"lone_druid_spirit_bear"
 			"Ability2"		"lone_druid_spirit_link"
 			"Ability3"		"lone_druid_savage_roar"
 			"Ability4"		"lone_druid_true_form"
-		}	
+		}
 
 		"ArmorPhysical"		"-2"
 		"AttackCapabilities"		"DOTA_UNIT_CAP_RANGED_ATTACK"
@@ -15914,7 +15920,7 @@
 		"LastHitChallengeRival"		"npc_dota_hero_omniknight"
 		"HeroSelectSoundEffect"		"Hero_ChaosKnight.Pick"
 		"GibType"		"ethereal"
-		"HealthBarOffset"		"260"	
+		"HealthBarOffset"		"260"
 		"GibTintColor"	"166 29 17 255"
 		"NameAliases"		"ck"
 		"Ability1"		"chaos_knight_chaos_bolt"
@@ -16047,7 +16053,7 @@
 				"item_ultimate_orb"		"ITEM_EXTENSION"
 				"item_recipe_manta"		"ITEM_EXTENSION"
 				"item_manta"		"ITEM_DERIVED"
-				
+
 				//"item_ring_of_tarrasque"		"ITEM_LUXURY"
 				"item_reaver"		"ITEM_LUXURY"
 				"item_vitality_booster"		"ITEM_LUXURY"
@@ -17131,7 +17137,7 @@
 		"AttributeBaseIntelligence"		"21"
 		"AttributeIntelligenceGain"		"2.100000"
 		"StatusHealthRegen"		"2.5"
-		"MovementSpeed"		"315"
+		"MovementSpeed"		"310"
 		"MovementTurnRate"		"0.500000"
 		"particle_folder"		"particles/units/heroes/hero_nyx_assassin"
 		"GameSoundsFile"		"soundevents/game_sounds_heroes/game_sounds_nyx_assassin.vsndevts"
@@ -17544,7 +17550,7 @@
 		"GibType"		"ethereal"
 		"GibTintColor"	"171 230 255 255"
 		"Ability1"		"wisp_tether"
-		"Ability2"		"wisp_spirits"		
+		"Ability2"		"wisp_spirits"
 		"Ability3"		"wisp_overcharge"
 		"Ability4"		"wisp_spirits_in"
 		"Ability5"		"wisp_spirits_out"
@@ -18606,7 +18612,7 @@
 		"Ability7"		"shredder_return_chakram"
 		"Ability8"		"shredder_return_chakram_2"
 		"Ability10"		"special_bonus_hp_200"
-		"Ability11"		"special_bonus_mp_regen_175"
+		"Ability11"		"special_bonus_mp_regen_150"
 		"Ability12"		"special_bonus_spell_amplify_8"
 		"Ability13"		"special_bonus_unique_timbersaw_2"
 		"Ability14"		"special_bonus_strength_16"
@@ -20213,7 +20219,7 @@
 				"ProvidesSetup"		"2"
 				"RequiresSetup"		"0"
 			}
-		}	
+		}
 	}
 	"npc_dota_hero_terrorblade"
 	{
@@ -20481,7 +20487,7 @@
 				"no_import"		"1" //imported using template
 			}
 
-			"2"	
+			"2"
 			{
 				"SlotIndex"		"2"
 				"SlotName"		"taunt"
@@ -21530,7 +21536,7 @@
 		"ArmorPhysical"		"2"
 		"AttackCapabilities"		"DOTA_UNIT_CAP_MELEE_ATTACK"
 		"AttackDamageMin"		"29"
-		"AttackDamageMax"		"35"
+		"AttackDamageMax"		"33"
 		"AttackRate"		"1.700000"
 		"AttackAnimationPoint"		"0.45"
 		"AttackSpeedActivityModifiers"
@@ -21547,7 +21553,7 @@
 			"attack_long_range"		"200"
 		}
 		"AttributePrimary"		"DOTA_ATTRIBUTE_AGILITY"
-		"AttributeBaseStrength"		"19"
+		"AttributeBaseStrength"		"18"
 		"AttributeStrengthGain"		"2.8"
 		"AttributeBaseIntelligence"		"20"
 		"AttributeIntelligenceGain"		"1.8"

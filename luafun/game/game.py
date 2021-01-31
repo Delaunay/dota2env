@@ -275,14 +275,14 @@ class Dota2Game:
         if dire_delta is not None:
             self.update_dire_state(dire_delta)
         e = time.time()
-        self.state['dire_state_time']  = e - s
+        self.state['dire_state_time'] = e - s
 
         s = time.time()
         rad_delta = self.radiant_state_delta()
         if rad_delta is not None:
             self.update_radiant_state(rad_delta)
         e = time.time()
-        self.state['rad_state_time']  = e - s
+        self.state['rad_state_time'] = e - s
 
     def wait(self):
         """Wait for the game to finish, this is used for debugging exclusively"""
@@ -298,17 +298,18 @@ class Dota2Game:
                 if winner is not None:
                     log.debug(f'{winner} won')
                     self.stop()
+                    break
                 # ---
 
                 s = time.time()
                 self._handle_http_rpc()
                 e = time.time()
-                self.state['http_time']  = e - s
+                self.state['http_time'] = e - s
 
                 s = time.time()
                 self._handle_ipc()
                 e = time.time()
-                self.state['ipc_time']  = e - s
+                self.state['ipc_time'] = e - s
 
                 self._handle_state()
 
@@ -320,6 +321,10 @@ class Dota2Game:
 
         except KeyboardInterrupt:
             pass
+
+        # wait the game to finish before exiting
+        while self.process.poll() is None:
+            time.sleep(0.01)
 
         self.stop()
 

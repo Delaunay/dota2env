@@ -289,7 +289,6 @@ def apply_diff(state, delta: msg.CMsgBotWorldState):
         for field, value in player.items():
             pdata[field] = value 
 
-
     for unit in delta.get('units', []):
         remove_dead = False
 

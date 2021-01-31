@@ -1,4 +1,8 @@
 from collections import defaultdict
+import logging
+
+
+log = logging.getLogger(__name__)
 
 
 class StartObject:
@@ -47,6 +51,7 @@ class Lexer:
                 return NewValue(value)
             else:
                 self.buffer += c
+                return
 
         if self.previous == '/' and c == '/':
             self.parsing_comment = True
@@ -54,6 +59,8 @@ class Lexer:
         if self.parsing_comment:
             if c == '\n':
                 self.parsing_comment = False
+                return EndLine()
+
             return None
 
         if c in (' ', '\t'):
@@ -68,8 +75,9 @@ class Lexer:
         if c == '\n':
             return EndLine()
 
-        if c == '"':
+        if c == '"' and not self.parsing_string:
             self.parsing_string = True
+            return
 
         if c == '/':
             self.previous = '/'
@@ -186,7 +194,7 @@ class Parser:
         # Object post processing to make it more workable
         for k, v in specials.items():
             if not isinstance(v, dict):
-                print(k, v, obj)
+                log.debug(k, v, obj)
                 continue
 
             var_type = v.pop('var_type')
@@ -196,10 +204,6 @@ class Parser:
 
                 if 'special' not in name and 'seasonal' not in name:
                     self.ability_spec[name] += 1
-
-        # for k, _ in obj.items():
-        #     if 'special' not in k and 'seasonal' not in k:
-        #         self.ability_spec[k] += 1
 
         if new_spec:
             obj['AbilitySpecial'] = new_spec
@@ -222,9 +226,104 @@ class Parser:
             self.current_value = None
 
 
-if __name__ == '__main__':
-    p = Parser('C:/Users/Newton/work/luafun/resources/npc_abilities.txt')
+def generate_ability_array():
+    import os
+    import json
+
+    folder = os.path.dirname(__file__)
+    f = os.path.join(folder, '..', 'game', 'resources', 'npc_abilities.txt')
+
+    p = Parser(f)
     p.parse()
+
+    abilities = []
+    for k, v in p.root['DOTAAbilities'].items():
+        if k in ('Version', 'dota_base_ability'):
+            continue
+
+        if 'ID' not in v or isinstance(v, str):
+            log.debug(f'Ignoring ability {k} {v}')
+            break
+
+        abilities.append(dict(name=k, id=int(v['ID'])))
+
+    f = os.path.join(folder, '..', 'game', 'resources', 'abilities.json')
+    with open(f, 'w') as f:
+        json.dump(abilities, f, indent=2)
+
+
+def generate_item_array():
+    import os
+    import json
+
+    folder = os.path.dirname(__file__)
+    f = os.path.join(folder, '..', 'game', 'resources', 'npc_items.txt')
+
+    p = Parser(f)
+    p.parse()
+
+    abilities = []
+    for k, v in p.root['DOTAAbilities'].items():
+        if k in ('Version', 'dota_base_ability'):
+            continue
+
+        if 'ID' not in v or isinstance(v, str):
+            log.debug(f'Ignoring ability {k} {v}')
+            break
+
+        abilities.append(dict(name=k, id=int(v['ID'])))
+
+    f = os.path.join(folder, '..', 'game', 'resources', 'items.json')
+    with open(f, 'w') as f:
+        json.dump(abilities, f, indent=2)
+
+
+def generate_hero_array():
+    import os
+    import json
+
+    folder = os.path.dirname(__file__)
+    f = os.path.join(folder, '..', 'game', 'resources', 'npc_heroes.txt')
+
+    p = Parser(f)
+    p.parse()
+
+    # Invoker has 24 slot
+    ability_count = 24
+
+    heroes = []
+    for k, v in p.root['DOTAHeroes'].items():
+        if k in ('Version', 'npc_dota_hero_base'):
+            continue
+
+        if 'HeroID' not in v or isinstance(v, str):
+            log.debug(f'Ignoring hero {k} {v}')
+            break
+
+        hero = dict(
+            name=k,
+            id=int(v['HeroID']),
+            abilities=[None] * ability_count,
+            alias=v.get('NameAliases'),
+            pretty_name=v.get('workshop_guide_name')
+        )
+
+        for i in range(ability_count):
+            k = f'Ability{i + 1}'
+            hero['abilities'][i] = v.get(k)
+
+        heroes.append(hero)
+
+    f = os.path.join(folder, '..', 'game', 'resources', 'heroes.json')
+    with open(f, 'w') as f:
+        json.dump(heroes, f, indent=2)
+
+
+if __name__ == '__main__':
+    # p = Parser('C:/Users/Newton/work/luafun/resources/npc_abilities.txt')
+    generate_ability_array()
+    generate_hero_array()
+    generate_item_array()
 
     # import json
 
