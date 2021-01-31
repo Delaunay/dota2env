@@ -96,7 +96,7 @@ local AMoveToUnit                    = 2   -- ( hUnit )
 local AAttackUnit                    = 3   -- ( hUnit, bOnce = True )
 local AAttackMove                    = 4   -- ( vLocation )
 local AUseAbility                    = 5   -- ( hAbility )
-local AUseAbilityOnEntity            = 6   -- ( hAbility, hTarget )
+local AUseAbilityOnEntity            = 6   -- ( hAbility )
 local AUseAbilityOnLocation          = 7   -- ( hAbility, vLocation )
 local AUseAbilityOnTree              = 8   -- ( hAbility, iTree )
 local APickUpRune                    = 9   -- ( nRune )
@@ -214,39 +214,42 @@ local hCourier = GetCourier(bot:GetPlayerID())
 -- This is all the actions the bots can make
 local function get_action_table()
     local actionHandler = {}
-    actionHandler[AMoveToLocation]       = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_MoveToLocation(vLoc) end
-    actionHandler[AMoveDirectly]         = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_MoveDirectly(vLoc) end
-    actionHandler[AMoveToUnit]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_MoveToUnit(vLoc) end
-    actionHandler[AAttackUnit]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_AttackUnit(vLoc, true) end
-    actionHandler[AAttackMove]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_AttackMove(vLoc) end
-    actionHandler[AUseAbility]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_UseAbility(vLoc) end
-    actionHandler[AUseAbilityOnEntity]   = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_UseAbilityOnEntity(hAbility, hTarget) end
-    actionHandler[AUseAbilityOnLocation] = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_UseAbilityOnLocation(hAbility, vLoc) end
-    actionHandler[AUseAbilityOnTree]     = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_UseAbilityOnTree(hAbility, iTree) end
-    actionHandler[APickUpRune]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_PickUpRune(nRune) end
-    actionHandler[APickUpItem]           = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_PickUpItem(hItem) end
-    actionHandler[ADropItem]             = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_DropItem(hItem, vLoc) end
-    actionHandler[ADelay]                = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_Delay(vLoc) end
-    actionHandler[APurchaseItem]         = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_PurchaseItem(sItem) end
-    actionHandler[ASellItem]             = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_SellItem(hItem) end
-    actionHandler[ADisassembleItem]      = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_DisassembleItem(hItem) end
-    actionHandler[ASetItemCombineLock]   = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_SetItemCombineLock(hItem, not hItem.IsCombineLock()) end
-    actionHandler[ASwapItems]            = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_SwapItems(ix1, ix2) end
-    actionHandler[ABuyback]              = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Buyback() end
-    actionHandler[AGlyph]                = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Glyph() end
-    actionHandler[ALevelAbility]         = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_LevelAbility(sAbilityName) end
-    actionHandler[ATakeOutpost]          = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return "" end
-    actionHandler[ACourierBurst]         = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_BURST) end
-    -- actionHandler[ACourierEnemySecret]   = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_ENEMY_SECRET_SHOP) end
-    actionHandler[ACourierReturn]        = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_RETURN) end
-    actionHandler[ACourierSecret]        = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_SECRET_SHOP) end
-    actionHandler[ACourierTakeStash]     = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_TAKE_STASH_ITEMS) end
-    actionHandler[ACourierTransfert]     = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_TRANSFER_ITEMS) end
-    actionHandler[NotUsed1]              = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return "" end
-    actionHandler[NotUsed2]              = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return "" end
-    actionHandler[NotUsed3]              = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return "" end
+    actionHandler[AMoveToLocation]       = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_MoveToLocation(vLoc) end
+    actionHandler[AMoveDirectly]         = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_MoveDirectly(vLoc) end
+    actionHandler[AMoveToUnit]           = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_MoveToUnit(vLoc) end
+    actionHandler[AAttackUnit]           = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_AttackUnit(hUnit, true) end
+    actionHandler[AAttackMove]           = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_AttackMove(vLoc) end
+    actionHandler[AUseAbility]           = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_UseAbility(vLoc) end
+    actionHandler[AUseAbilityOnEntity]   = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_UseAbilityOnEntity(GetAbilityInSlot(nSlot), hUnit) end
+    actionHandler[AUseAbilityOnLocation] = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_UseAbilityOnLocation(GetAbilityInSlot(nSlot), vLoc) end
+    actionHandler[AUseAbilityOnTree]     = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_UseAbilityOnTree(GetAbilityInSlot(nSlot), iTree) end
+    actionHandler[APickUpRune]           = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_PickUpRune(nRune) end
+    actionHandler[APickUpItem]           = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_PickUpItem(hItem) end
+    actionHandler[ADropItem]             = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_DropItem(GetItemInSlot(nSlot), vLoc) end
+    actionHandler[ADelay]                = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:Action_Delay(vLoc) end
+    actionHandler[APurchaseItem]         = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_PurchaseItem(sItem) end
+    actionHandler[ASellItem]             = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_SellItem(GetItemInSlot(nSlot) end
+    actionHandler[ADisassembleItem]      = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_DisassembleItem(GetItemInSlot(nSlot)) end
+    actionHandler[ASetItemCombineLock]   = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName)
+            local hItem = GetItemInSlot(nSlot)
+            return bot:ActionImmediate_SetItemCombineLock(hItem, not hItem:IsCombineLock())
+        end
+    actionHandler[ASwapItems]            = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_SwapItems(ix1, ix2) end
+    actionHandler[ABuyback]              = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Buyback() end
+    actionHandler[AGlyph]                = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Glyph() end
+    actionHandler[ALevelAbility]         = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_LevelAbility(sAbilityName) end
+    actionHandler[ATakeOutpost]          = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return "" end
+    actionHandler[ACourierBurst]         = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_BURST) end
+    -- actionHandler[ACourierEnemySecret]   = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_ENEMY_SECRET_SHOP) end
+    actionHandler[ACourierReturn]        = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_RETURN) end
+    actionHandler[ACourierSecret]        = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_SECRET_SHOP) end
+    actionHandler[ACourierTakeStash]     = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_TAKE_STASH_ITEMS) end
+    actionHandler[ACourierTransfert]     = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_TRANSFER_ITEMS) end
+    actionHandler[NotUsed1]              = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return "" end
+    actionHandler[NotUsed2]              = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return "" end
+    actionHandler[NotUsed3]              = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return "" end
     -- used for debug print
-    actionHandler[NotUsed4]              = function(vLoc, hUnit, hAbility, hTarget, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return get_info() end
+    actionHandler[NotUsed4]              = function(vLoc, hUnit, nSlot, iTree, nRune, fDelay, sItem, hItem, ix1, ix2, sAbilityName) return get_info() end
     return actionHandler
 end
 
@@ -282,16 +285,15 @@ local function execute_rpc(message)
     local action    = message['0']
     local vLoc      = message['1']
     local hUnit     = message['2']
-    local hAbility  = message['3']
-    local hTarget   = message['4']
-    local iTree     = message['5']
-    local nRune     = message['6']
-    local fDelay    = message['7']
-    local sItem     = message['8']
-    local hItem     = message['9']
-    local ix1       = message['10']
-    local ix2       = message['11']
-    local sAbility  = message['12']
+    local nSlot     = message['3']
+    local iTree     = message['4']
+    local nRune     = message['5']
+    local fDelay    = message['6']
+    local sItem     = message['7']
+    local hItem     = message['8']
+    local ix1       = message['9']
+    local ix2       = message['10']
+    local sAbility  = message['11']
 
     -- No action ignore this is valid
     if action == nil then
@@ -316,8 +318,7 @@ local function execute_rpc(message)
     -- Execute actions
     fun(vLoc,
         hUnit,
-        hAbility,
-        hTarget,
+        nSlot,
         iTree,
         nRune,
         fDelay,

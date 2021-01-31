@@ -15,6 +15,58 @@ from luafun.game.ipc_send import new_ipc_message, TEAM_RADIANT, TEAM_DIRE
     # BOT_ACTION_TYPE_SHRINE
     # BOT_ACTION_TYPE_DELAY
 
+
+class ItemSlot(IntEnum):
+    Item0 = 0
+    Item1 = 1
+    Item2 = 2
+    Item3 = 3
+    Item4 = 4
+    Item5 = 5
+    Item6 = 6
+    Item7 = 7
+    Item8 = 8
+    Item9 = 9
+    Item10 = 10
+    Item11 = 11
+    Item12 = 12
+    Item13 = 13
+    Item14 = 14
+    Item15 = 15
+
+
+assert len(ItemSlot) == 16, '16 item slots'
+
+
+class AbilitySlot(IntEnum):
+    Ablity0 = 0
+    Ablity1 = 1
+    Ablity2 = 2
+    Ablity3 = 3
+    Ablity4 = 4
+    Ablity5 = 5
+    Ablity6 = 6
+    Ablity7 = 7
+    Ablity8 = 8
+    Ablity9 = 9
+    Ablity10 = 10
+    Ablity11 = 11
+    Ablity12 = 12
+    Ablity13 = 13
+    Ablity14 = 14
+    Ablity15 = 15
+    Ablity16 = 16
+    Ablity17 = 17
+    Ablity18 = 18
+    Ablity19 = 19
+    Ablity20 = 20
+    Ablity21 = 20
+    Ablity22 = 20
+
+
+assert len(AbilitySlot) == 23, '23 abilities'
+
+
 # When looking at Action you might think that dota is not that complex
 # nevertheless you need to take into account that when calling UseAbility
 # you have to choose among ~1000 unique abilities (120 heroes * 4 + 155 items)
@@ -69,6 +121,10 @@ class Action(IntEnum):
     # UseShrine                       # ( hShrine )
     # MovePath                        # ( tWaypoints )
 
+
+assert len(Action) == 32, '32 actions'
+
+
 # Could bundle the courier action as a hero action
 class CourierAction(IntEnum):
     BURST               = 0
@@ -84,26 +140,25 @@ class CourierAction(IntEnum):
     # COURIER_ACTION_SIDE_SHOP
     # COURIER_ACTION_SIDE_SHOP2
 
-assert len(Action) == 32, '32 actions'
 
 # Argument index
 class ActionArgument(IntEnum):
     action   = 0
     vLoc     = 1
-    hUnit    = 2
-    hAbility = 3
-    hTarget  = 4
-    iTree    = 5
-    nRune    = 6
-    fDelay   = 7
-    sItem    = 8
-    hItem    = 9
-    ix1      = 10
-    ix2      = 11
-    sAbility = 12
+    hUnit    = 2    # this should be handle
+    nSlot    = 3    # Slot (item or ability)
+    iTree    = 4
+    nRune    = 5
+    fDelay   = 6
+    sItem    = 7
+    hItem    = 8
+    ix1      = 9
+    ix2      = 10
+    sAbility = 11
 
 
 ARG = ActionArgument
+
 
 # boilerplate to help humans send bot like action to lua
 # this only to debug & allows human to control the lua bots from python
