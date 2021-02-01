@@ -69,7 +69,7 @@ class AbilityEncoder(CategoryEncoder):
     variables
     """
     def __init__(self, n_latent=512):
-        super(AbilityEncoder, self).__init__(in_size=1024, n_latent=n_latent, out_size=120)
+        super(AbilityEncoder, self).__init__(in_size=1024, out_size=120)
 
 
 class HeroEncoder(nn.Module):

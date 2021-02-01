@@ -116,7 +116,7 @@ class Action(IntEnum):
     NotUsed3 = 28
     NotUsed4 = 29
     NotUsed5 = 30
-    NotUsed5 = 31
+    NotUsed6 = 31
 
     # The action exist but it is not necessary
     # Courier                         # ( hCourier, nAction )
@@ -234,6 +234,7 @@ class Player:
         self.act[ARG.nSlot] = hItem
 
     def SwapItems(self, nslot, index2):
+        # The index order does not matter
         self.act[ARG.action] = Action.SwapItems
         self.act[ARG.nSlot] = nslot
         self.act[ARG.ix2] = index2
