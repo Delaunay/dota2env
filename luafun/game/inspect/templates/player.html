@@ -19,12 +19,27 @@
 
             <table class="table">
                 <tr>
+                    <!--
+                        "name": #DOTA_OutpostName_South
+                        "location": {
+                            "x": 2549.722,
+                            "y": -4238.76,
+                            "z": 256.0
+                        },
+
+                        "name": "#DOTA_OutpostName_North",
+                        "location": {
+                            "x": -1941.7216,
+                            "y": 4542.76,
+                            "z": 256.0
+                        },
+                    -->
                     <th>Movement</th>
                     <td><a class="btn btn-secondary" href="/action/MoveToLocation/{{player}}/0x0">MoveToLocation</a></td>
                     <td><a class="btn btn-secondary" href="/action/MoveDirectly/{{player}}/0x0">MoveDirectly</a></td>
                     <td><a class="btn btn-secondary" href="/action/MoveToUnit/{{player}}/0x0">MoveToUnit</a></td>
-                    <td><a class="btn btn-secondary" href="/action/AttackMove/{{player}}/0x0">AttackMove</a></td>
-                    <td><a class="btn btn-secondary" href="/action/AttackUnit/{{player}}/0x0">AttackUnit</a></td>
+                    <td><a class="btn btn-secondary" href="/action/AttackMove/{{player}}/8000x8000">AttackMove</a></td>
+                    <td><a class="btn btn-secondary" href="/action/AttackUnit/{{player}}/96">AttackUnit</a></td>
                     <td><a class="btn btn-secondary" href="/action/Stop/{{player}}">Stop</a></td>
                 </tr>
                 <tr>

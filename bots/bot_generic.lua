@@ -111,13 +111,13 @@ local ASwapItems                     = 17  -- ( index1, index2 )
 local ABuyback                       = 18  -- ()
 local AGlyph                         = 19  -- ()
 local ALevelAbility                  = 20  -- ( sAbilityName )
-local ATakeOutpost                   = 21  -- ()
-local ACourierBurst                  = 22
+local ACourierBurst                  = 21
 -- local ACourierEnemySecret            = 23
-local ACourierReturn                 = 23
-local ACourierSecret                 = 24
-local ACourierTakeStash              = 25
-local CourierTransfer                = 26
+local ACourierReturn                 = 22
+local ACourierSecret                 = 23
+local ACourierTakeStash              = 24
+local CourierTransfer                = 25
+local NotUsed5 = 26
 local NotUsed0 = 27
 local NotUsed1 = 28
 local NotUsed2 = 29
@@ -210,13 +210,13 @@ end
 
 -- Dump a bunch of useful information
 local function get_info()
--- DebugDrawCircle
--- DebugDrawLine
--- DebugDrawText
--- DebugPause
+    -- DebugDrawCircle
+    -- DebugDrawLine
+    -- DebugDrawText
+    -- DebugPause
 
--- CreateHTTPRequest
--- CreateRemoteHTTPRequest
+    -- CreateHTTPRequest
+    -- CreateRemoteHTTPRequest
 
     -- GetLaneFrontAmount
     -- GetLaneFrontLocation
@@ -326,7 +326,6 @@ local function get_action_table()
         local sAbilityName = hAbility:GetName()
         return bot:ActionImmediate_LevelAbility(sAbilityName)
     end
-    actionHandler[ATakeOutpost]          = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return "" end
     actionHandler[ACourierBurst]         = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_BURST) end
     -- actionHandler[ACourierEnemySecret]   = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_ENEMY_SECRET_SHOP) end
     actionHandler[ACourierReturn]        = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_RETURN) end

@@ -73,6 +73,8 @@ assert len(AbilitySlot) == 23, '23 abilities'
 # the abilities are context depend each heroes can have
 #   ~4 ability + tp ability
 #   ~6 Items + neutral item
+#
+# NB: To take outpost, you can attack them using AttackUnit action
 class Action(IntEnum):
     Stop                          = 0
     MoveToLocation                = 1   # ( vLocation )
@@ -97,29 +99,23 @@ class Action(IntEnum):
     Buyback                       = 18  # ()
     Glyph                         = 19  # ()
     LevelAbility                  = 20  # ( sAbilityName )
-    # TODO: check how to implement this
-    # seems to be a regular ability that can be used
-    # might not even be needed
-    # from https://dota2.gamepedia.com/Outpost
-    # > An outpost can be captured by ordering the hero to attack it
-    # TODO: verify this
-    TakeOutpost                   = 21  # ()
 
     # Courier Action bundled to the hero
-    CourierBurst                  = 22
+    CourierBurst                  = 21
     # hidden ability; cannot use
     # CourierEnemySecret            = 23
-    CourierReturn                 = 23
-    CourierSecret                 = 24
-    CourierTakeStash              = 25
-    CourierTransfer               = 26
+    CourierReturn                 = 22
+    CourierSecret                 = 23
+    CourierTakeStash              = 24
+    CourierTransfer               = 25
 
     # Tensor cores work better with a multiple of 8
     # This gives us room to grow
-    NotUsed1 = 27
-    NotUsed2 = 28
-    NotUsed3 = 29
-    NotUsed4 = 30
+    NotUsed1 = 26
+    NotUsed2 = 27
+    NotUsed3 = 28
+    NotUsed4 = 29
+    NotUsed5 = 30
     NotUsed5 = 31
 
     # The action exist but it is not necessary
