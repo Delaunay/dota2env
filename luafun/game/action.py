@@ -62,9 +62,10 @@ class AbilitySlot(IntEnum):
     Ablity20 = 20
     Ablity21 = 21
     Ablity22 = 22
+    Ablity23 = 23
 
 
-assert len(AbilitySlot) == 23, '23 abilities'
+assert len(AbilitySlot) == 24, '24 abilities'
 
 
 # When looking at Action you might think that dota is not that complex

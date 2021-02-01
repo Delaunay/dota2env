@@ -45,6 +45,8 @@ ABILITY_COUNT = len(ABILITIES)
 HEROES = load_source_file('resources/heroes.json')
 HERO_COUNT = len(HEROES)
 
+MAX_ABILITY_COUNT_PER_HEROES = 24
+
 
 class HeroLookup:
     """Help bring some consistency with ability index.
@@ -149,29 +151,30 @@ class HeroLookup:
             self.ability_count = max(self.ability_count, len(hero.get('abilities', [])))
             self._from_id[hero['id']] = hero
             self._from_name[hero['name']] = hero
+            hero['remap'] = self._remap_abilities(hero)
 
-            # `special` count = 960 | 121 * 8 = 968
-            # npc_dota_hero_target_dummy is not a real hero
-            remapped_talents = []
-            remapped_abilities = []
+    def _remap_abilities(self, hero):
+        # `special` count = 960 | 121 * 8 = 968
+        # npc_dota_hero_target_dummy is not a real hero
+        remapped_talents = []
+        remapped_abilities = []
 
-            for i, ability in enumerate(hero.get('abilities', [])):
-                if ability and 'special' in ability:
-                    remapped_talents.append(i)
-                else:
-                    remapped_abilities.append(i)
+        for i, ability in enumerate(hero.get('abilities', [])):
+            if ability and 'special' in ability:
+                remapped_talents.append(i)
+            else:
+                remapped_abilities.append(i)
 
-            ability_count = 24
-            abilites = [None] * ability_count
+        abilites = [None] * MAX_ABILITY_COUNT_PER_HEROES
 
-            for i in range(len(remapped_abilities)):
-                abilites[i] = remapped_abilities[i]
+        for i in range(len(remapped_abilities)):
+            abilites[i] = remapped_abilities[i]
 
-            # insert talents at the end
-            for i in range(len(remapped_talents)):
-                abilites[- 8 + i] = remapped_talents[i]
+        # insert talents at the end
+        for i in range(len(remapped_talents)):
+            abilites[- len(remapped_talents) + i] = remapped_talents[i]
 
-            hero['remap'] = abilites
+        return abilites
 
     def from_id(self, id):
         return self._from_id.get(id)

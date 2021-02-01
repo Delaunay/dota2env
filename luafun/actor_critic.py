@@ -1,6 +1,9 @@
 import torch
 import torch.nn as nn
 
+import luafun.game.action as actions
+import luafun.game.constants as const
+
 
 class CategoryEncoder(nn.Module):
     """Takes a hot encoded vector and returns a compact representation of the category
@@ -173,15 +176,57 @@ class HeroModel(nn.Module):
     def __init__(self):
         super(HeroModel, self).__init__()
 
-        # ~25 actions
-        self.action = SelectionCategorical()
-        # ~12 Ability 4 + 6 + 2 + talent ?
-        # we can reuse that one for sAbility (Learn)
-        self.ability = SelectionCategorical()
+        # Abilities
+        # --- Inventory Abilities (size 16)
+        # 0
+        # .
+        # .
+        # 5
+        #
+        #
+        # 15
+        # --- Abilities Abilities (size 24)
+        # 16 Q
+        # 17 W
+        # 18 E
+        # 19 D
+        # 20 F
+        # 21 R
+        #  .
+        #  .
+        # 32 Talent 1.1
+        # 33 Talent 1.2
+        #  .
+        #  .
+        # 39 Talent 4.1
+        # 40 Talent 4.2
+        # ------------------------
+        # Total = 16 + 24  = 40
 
-        # 208 Items to select from
-        self.item = SelectionCategorical()
+        self.internal_model = ...
 
+        ability_count = len(actions.ItemSlot) + len(actions.AbilitySlot)
+
+        # Those sub networks are small and act as state decoder
+        # to return the precise action that is the most suitable
+        self.ability = SelectionCategorical(0, ability_count + 1)
+        self.runes = SelectionCategorical(0, len(actions.RuneSlot) + 1)
+        self.action = SelectionCategorical(0, len(actions.Action))
+        self.swap = SelectionCategorical(0, len(actions.ItemSlot))
+
+        # This is for purchasing only
+        self.item = SelectionCategorical(0, const.ITEM_COUNT + 1)
+
+        self.position = Coordinate()
+
+        # Select a unit in the game for action
+        self.unit = SelectionHandle()
+
+        # Missing:
+        # * Secondary Inventory Index for swapping
+        # * Vector Output for area targets
+        # * Select Tree
+        # * unit handle selection
         self.ability_embedder = AbilityEncoder()
         self.hero_embedder = HeroEncoder()
 
@@ -189,10 +234,20 @@ class HeroModel(nn.Module):
 
         # Unit Selection
 
+    def forward(self, x):
+        hidden = self.internal_model(x)
+
+        action = self.action(hidden)
+        rune = self.runes(hidden)
+        ability = self.ability(hidden)
+        secondary = self.swap(hidden)
+        item = self.item(hidden)
+
+        # Does this handle tree or not ?
+        unit = self.unit(hidden)
+        vec = self.position(hidden)
 
 
-    def forward(self, state):
-        pass
 
 
 class ActorCritic(nn.Module):
