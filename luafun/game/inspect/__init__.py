@@ -22,13 +22,19 @@ class FloatConverter(BaseFloatConverter):
     regex = r'-?\d+(\.\d+)?'
 
 
+class BoolConverter(BaseFloatConverter):
+    regex = r'[01]'
+
+
 def to_bool(value):
     return str(value).lower()
+
 
 def select(value, format):
     if value:
         return format
     return ''
+
 
 class AppState:
     def __init__(self, state, dash, rpc_recv, rpc_send):
@@ -96,6 +102,7 @@ def _http_inspect(state, rpc_recv, rpc_send, level, debug=False):
         dash.app.config['DEBUG'] = debug
         dash.app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
         dash.app.url_map.converters['float'] = FloatConverter
+        dash.app.url_map.converters['bool'] = BoolConverter
 
         dash.add_page(ShowRoutes(state))
         dash.add_page(GameInspector(state))

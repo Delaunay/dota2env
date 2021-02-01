@@ -100,13 +100,13 @@ local AUseAbility                    = 6   -- ( hAbility )
 local AUseAbilityOnEntity            = 7   -- ( hAbility )
 local AUseAbilityOnLocation          = 8   -- ( hAbility, vLocation )
 local AUseAbilityOnTree              = 9   -- ( hAbility, iTree )
-local APickUpRune                    = 10   -- ( nRune )
+local APickUpRune                    = 10  -- ( nRune )
 local APickUpItem                    = 11  -- ( hItem )
-local ADropItem                      = 12  -- ( hItem, vLocation )
+local ADropItem                      = 12  -- ( vLocation )
 local APurchaseItem                  = 13  -- ( sItemName )
 local ASellItem                      = 14  -- ( hItem )
 local ADisassembleItem               = 15  -- ( hItem )
-local ASetItemCombineLock            = 16  -- ( hItem, bLocked )
+local ASetItemCombineLock            = 16  -- ( bLocked )
 local ASwapItems                     = 17  -- ( index1, index2 )
 local ABuyback                       = 18  -- ()
 local AGlyph                         = 19  -- ()
@@ -123,6 +123,25 @@ local NotUsed1 = 28
 local NotUsed2 = 29
 local NotUsed3 = 30
 local NotUsed4 = 31
+
+
+-- look for the item that is close to the item we are looking for
+-- our vloc should be exact
+local function get_dropped_items(vloc)
+    for obj in GetDroppedItemList() do
+        local handle = obj.hItem
+        local loc = obj.vLocation
+
+        local x = loc.x - vloc.x
+        local y = loc.y - vloc.y
+
+        if x * x + y * y < 1e-2 then
+            return handle
+        end
+    end
+
+    return nil
+end
 
 
 local function _get_world_size()
@@ -271,25 +290,25 @@ end
 local function get_action_table()
     -- Need a way to map to unit Handle from python
     local actionHandler = {}
-    actionHandler[AStop]                 = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_ClearActions(true) end
-    actionHandler[AMoveToLocation]       = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_MoveToLocation(vLoc) end
-    actionHandler[AMoveDirectly]         = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_MoveDirectly(vLoc) end
-    actionHandler[AMoveToUnit]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_MoveToUnit(GetBotByHandle(hUnit)) end
-    actionHandler[AAttackUnit]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_AttackUnit(GetBotByHandle(hUnit), true) end
-    actionHandler[AAttackMove]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_AttackMove(vLoc) end
-    actionHandler[AUseAbility]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2)
+    actionHandler[AStop]                 = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:Action_ClearActions(true) end
+    actionHandler[AMoveToLocation]       = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:Action_MoveToLocation(vLoc) end
+    actionHandler[AMoveDirectly]         = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:Action_MoveDirectly(vLoc) end
+    actionHandler[AMoveToUnit]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:Action_MoveToUnit(GetBotByHandle(hUnit)) end
+    actionHandler[AAttackUnit]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:Action_AttackUnit(GetBotByHandle(hUnit), true) end
+    actionHandler[AAttackMove]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:Action_AttackMove(vLoc) end
+    actionHandler[AUseAbility]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
         return bot:Action_UseAbility(get_ability_handle(nSlot))
     end
-    actionHandler[AUseAbilityOnEntity]   = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2)
+    actionHandler[AUseAbilityOnEntity]   = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
         return bot:Action_UseAbilityOnEntity(get_ability_handle(nSlot), GetBotByHandle(hUnit))
     end
-    actionHandler[AUseAbilityOnLocation] = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2)
+    actionHandler[AUseAbilityOnLocation] = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
         return bot:Action_UseAbilityOnLocation(get_ability_handle(nSlot), vLoc)
     end
-    actionHandler[AUseAbilityOnTree]     = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2)
+    actionHandler[AUseAbilityOnTree]     = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
         return bot:Action_UseAbilityOnTree(get_ability_handle(nSlot), iTree)
     end
-    actionHandler[APickUpRune]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2)
+    actionHandler[APickUpRune]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
         -- It is easier to test if we move & pickup
         -- since pickup only happens if we are close enough and we do not move
         -- Note: like in a game the action needs to be called twice
@@ -299,26 +318,36 @@ local function get_action_table()
         bot:ActionQueue_MoveToLocation(loc)
         return bot:ActionPush_PickUpRune(nRune)
     end
-    actionHandler[APickUpItem]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_PickUpItem(hItem) end
-    actionHandler[ADropItem]             = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:Action_DropItem(bot:GetItemInSlot(nSlot), vLoc) end
-    actionHandler[APurchaseItem]         = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_PurchaseItem(sItem) end
-    actionHandler[ASellItem]             = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2)
+    actionHandler[APickUpItem]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
+        -- this does not seem to work, returns another ability than the one expected
+        -- local hItem = GetBotAbilityByHandle(hUnit)
+        -- local hItem = GetBotByHandle(hUnit)
+        -- both returns the wrong handle
+        -- print(hItem:GetName())
+
+        -- hack for now
+        local hItem = get_dropped_items(vLoc)
+        return bot:ActionQueue_PickUpItem(hItem)
+    end
+    actionHandler[ADropItem]             = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:Action_DropItem(bot:GetItemInSlot(nSlot), vLoc) end
+    actionHandler[APurchaseItem]         = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:ActionImmediate_PurchaseItem(sItem) end
+    actionHandler[ASellItem]             = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
         return bot:ActionImmediate_SellItem(bot:GetItemInSlot(nSlot))
     end
-    actionHandler[ADisassembleItem]      = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_DisassembleItem(bot:GetItemInSlot(nSlot)) end
-    actionHandler[ASetItemCombineLock]   = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2)
+    actionHandler[ADisassembleItem]      = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:ActionImmediate_DisassembleItem(bot:GetItemInSlot(nSlot)) end
+    actionHandler[ASetItemCombineLock]   = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
         local hItem = bot:GetItemInSlot(nSlot)
         if hItem == nil then
             return
         end
-        return bot:ActionImmediate_SetItemCombineLock(hItem, not hItem:IsCombineLock())
+        return bot:ActionImmediate_SetItemCombineLock(not hItem:IsCombineLock())
     end
     -- when swapping item there is a script that automatically transfer items to inventory
     -- if the inventory has space
-    actionHandler[ASwapItems]            = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_SwapItems(nSlot, ix2) end
-    actionHandler[ABuyback]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Buyback() end
-    actionHandler[AGlyph]                = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Glyph() end
-    actionHandler[ALevelAbility]         = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2)
+    actionHandler[ASwapItems]            = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:ActionImmediate_SwapItems(nSlot, ix2) end
+    actionHandler[ABuyback]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:ActionImmediate_Buyback() end
+    actionHandler[AGlyph]                = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:ActionImmediate_Glyph() end
+    actionHandler[ALevelAbility]         = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
         local hAbility = get_ability_handle(nSlot)
         if hAbility == nil then
             return
@@ -326,18 +355,18 @@ local function get_action_table()
         local sAbilityName = hAbility:GetName()
         return bot:ActionImmediate_LevelAbility(sAbilityName)
     end
-    actionHandler[ACourierBurst]         = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_BURST) end
-    -- actionHandler[ACourierEnemySecret]   = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_ENEMY_SECRET_SHOP) end
-    actionHandler[ACourierReturn]        = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_RETURN) end
-    actionHandler[ACourierSecret]        = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_SECRET_SHOP) end
-    actionHandler[ACourierTakeStash]     = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_TAKE_STASH_ITEMS) end
-    actionHandler[CourierTransfer]       = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_TRANSFER_ITEMS) end
-    actionHandler[NotUsed0]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return "" end
-    actionHandler[NotUsed1]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return "" end
-    actionHandler[NotUsed2]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return "" end
-    actionHandler[NotUsed3]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return "" end
+    actionHandler[ACourierBurst]         = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_BURST) end
+    -- actionHandler[ACourierEnemySecret]   = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_ENEMY_SECRET_SHOP) end
+    actionHandler[ACourierReturn]        = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_RETURN) end
+    actionHandler[ACourierSecret]        = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_SECRET_SHOP) end
+    actionHandler[ACourierTakeStash]     = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_TAKE_STASH_ITEMS) end
+    actionHandler[CourierTransfer]       = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:ActionImmediate_Courier(hCourier, COURIER_ACTION_TRANSFER_ITEMS) end
+    actionHandler[NotUsed0]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return "" end
+    actionHandler[NotUsed1]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return "" end
+    actionHandler[NotUsed2]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return "" end
+    actionHandler[NotUsed3]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return "" end
     -- used for debug print
-    actionHandler[NotUsed4]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, hItem, ix2) return get_info() end
+    actionHandler[NotUsed4]              = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return get_info() end
     return actionHandler
 end
 
@@ -377,8 +406,7 @@ local function execute_rpc(message)
     local iTree     = message['4']
     local nRune     = message['5']
     local sItem     = message['6']
-    local hItem     = message['7']
-    local ix2       = message['8']
+    local ix2       = message['7']
 
     -- No action ignore this is valid
     if action == nil then
@@ -401,15 +429,9 @@ local function execute_rpc(message)
     end
 
     -- Execute actions
-    fun(vLoc,
-        hUnit,
-        nSlot,
-        iTree,
-        nRune,
-        sItem,
-        hItem,
-        ix2)
+    fun(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
 end
+
 
 -- from https://developer.valvesoftware.com/wiki/Dota_Bot_Scripting#UNIT_SCOPED_FUNCTIONS
 -- > This function will be called once per frame for every minion under control by a bot.
@@ -419,7 +441,7 @@ end
 -- > Action commands that are usable on your hero are usable on the passed-in hMinionUnit.
 --
 -- Figure out how this would work with a NNet
-local function delegate_miinion_think(hMinionUnit)
+local function delegate_minion_think(hMinionUnit)
 
 end
 

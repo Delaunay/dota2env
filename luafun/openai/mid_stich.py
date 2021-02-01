@@ -110,7 +110,6 @@ class Unit:
     unit_type_WARD: int = 0
 
 
-
 @dataclass
 class Heroes:
     pass
@@ -124,6 +123,7 @@ class AlliedHeroes:
 def none():
     return None
 
+
 @dataclass
 class FactionState:
     global_state: GlobalGameState = field(default_factory=GlobalGameState)
@@ -136,14 +136,15 @@ class FactionState:
     item: Any = field(default_factory=none)
     ability: Any = field(default_factory=none)
     pickup: Any = field(default_factory=none)
+    dropitems: list = field(default_factory=list)
 
     # internal data to generate some of the field
     # unit lookup etc...
     _roshan_dead: int = 0
-    _players: Dict = field(default_factory=lambda:defaultdict(dict))
-    _couriers: Dict = field(default_factory=lambda:defaultdict(dict))
-    _units: Dict = field(default_factory=lambda:defaultdict(dict))
-    _buildings: Dict = field(default_factory=lambda:defaultdict(dict))
+    _players: Dict = field(default_factory=lambda: defaultdict(dict))
+    _couriers: Dict = field(default_factory=lambda: defaultdict(dict))
+    _units: Dict = field(default_factory=lambda: defaultdict(dict))
+    _buildings: Dict = field(default_factory=lambda: defaultdict(dict))
 
     # State Management
     _s: int = 0
@@ -355,9 +356,11 @@ def apply_diff(state, delta: msg.CMsgBotWorldState):
         pass
     # -- 
 
+    # This is not a delta
     # Item Drops (Neutral, Roshan)
+    state.dropitems = []
     for item in delta.get('dropped_items', []):
-        pass
+        state.dropitems.append(item)
     # --
 
     state._e += 1

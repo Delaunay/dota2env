@@ -28,7 +28,17 @@ class Actions(BasePage):
             '/action/<string:action>/<int:player>/<int:slot>',
             '/action/<string:action>/<int:player>/<int:slot>/<float:x>x<float:y>',
             '/action/<string:action>/<int:player>/<int:slot>/<int:slot2>',
+            '/action/<string:action>/<bool:all>',
+            '/action/<string:action>/<int:player>/<bool:all>',
+            '/action/<string:action>/<int:player>/<string:item>/<bool:all>',
+            '/action/<string:action>/<int:player>/<float:x>x<float:y>/<bool:all>',
+            '/action/<string:action>/<int:player>/<int:slot>/<bool:all>',
+            '/action/<string:action>/<int:player>/<int:slot>/<float:x>x<float:y>/<bool:all>',
+            '/action/<string:action>/<int:player>/<int:slot>/<int:slot2>/<bool:all>',
         ]
+
+    TEAM_RAD = [0, 1, 2, 3, 4]
+    TEAM_DIRE = [5, 6, 7, 8, 9]
 
     def __init__(self, app):
         super(Actions, self).__init__(app)
@@ -121,7 +131,7 @@ class Actions(BasePage):
         def send_item_action(player, slot=0, **kwargs):
             b = IPCMessageBuilder()
             p = b.player(player)
-            getattr(p, name)(slot)
+            getattr(p, name)(int(slot))
             m = b.build()
             return self.send_action(m)
 
@@ -166,7 +176,7 @@ class Actions(BasePage):
         return self.send_action(m)
 
     # this shows the minimal number of arguments for the action table in lua +tree
-    def main(self, action, player=0, x=0, y=0, slot=0, slot2=0, item='item_gauntlets'):
+    def main(self, action, player=0, x=0, y=0, slot=0, slot2=0, item='item_gauntlets', all=False):
         if action == 'stop':
             self.state['running'] = False
 
@@ -174,7 +184,7 @@ class Actions(BasePage):
             return self.send_get_info()
 
         if action in self.base_actions:
-            return self.base_actions[action](player, x=x, y=y, slot=slot, slot2=slot2, item=item)
+            return self.base_actions[action](player, x=x, y=y, slot=slot, slot2=slot2, item=item, all=all)
 
         if action == 'play':
             return self.start()
@@ -215,10 +225,20 @@ class Actions(BasePage):
         return self.send_action(m)
 
     def make_vloc_action(self, name):
-        def send_vloc_action(player, x, y, **kwargs):
+        def send_vloc_action(player, x, y, all=False, **kwargs):
             b = IPCMessageBuilder()
-            p = b.player(player)
-            getattr(p, name)([x, y])
+            players = [player]
+
+            if all:
+                if player < 4:
+                    players = self.TEAM_RAD
+                else:
+                    players = self.TEAM_DIRE
+
+            for player in players:
+                p = b.player(player)
+                getattr(p, name)([x, y])
+
             m = b.build()
             return self.send_action(m)
 

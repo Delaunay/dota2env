@@ -153,11 +153,11 @@ class ActionArgument(IntEnum):
     iTree    = 4    # This is problematic we have 2000+ trees
     nRune    = 5    # This could be bundled as an enum like inventory slots
     sItem    = 6    # Needed to buy item
-    hItem    = 7    # Needed to pickup item
-    ix2      = 8
+    ix2      = 7
 
 
 ARG = ActionArgument
+# 2":{"0":11,"2":355}
 
 
 # boilerplate to help humans send bot like action to lua
@@ -211,7 +211,7 @@ class Player:
 
     def PickUpItem(self, hItem):
         self.act[ARG.action] = Action.PickUpItem
-        self.act[ARG.hItem] = hItem
+        self.act[ARG.hUnit] = hItem
 
     def DropItem(self, hItem, vLocation):
         self.act[ARG.action] = Action.DropItem
