@@ -130,16 +130,10 @@ local NotUsed4 = 31
 -- look for the item that is close to the item we are looking for
 -- our vloc should be exact
 local function get_dropped_items(vloc)
-    for obj in GetDroppedItemList() do
-        local handle = obj.hItem
-        local loc = obj.vLocation
-
-        local x = loc.x - vloc.x
-        local y = loc.y - vloc.y
-
-        if x * x + y * y < 1e-2 then
-            return handle
-        end
+    for _, obj in pairs(GetDroppedItemList()) do
+        pprint.pprint(obj)
+        -- Useless ?
+        -- { item =  {}, owner = {}, playerid= 0}
     end
 
     return nil
@@ -343,18 +337,10 @@ local function get_action_table()
         return bot:ActionPush_PickUpRune(nRune)
     end
     actionHandler[APickUpItem]           = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
-        -- this does not seem to work, returns another ability than the one expected
-        -- local hItem = GetBotAbilityByHandle(hUnit)
-        -- local hItem = GetBotByHandle(hUnit)
-        -- both returns the wrong handle
-        -- print(hItem:GetName())
-
-        -- hack for now
-        local hItem = get_dropped_items(vLoc)
-        return bot:ActionQueue_PickUpItem(hItem)
+        local hItem = GetBotAbilityByHandle(hUnit)
+        return bot:Action_PickUpItem(hItem)
     end
     actionHandler[ADropItem]             = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
-        -- Drop Item is broken
         return bot:Action_DropItem(get_item(nSlot), vLoc)
     end
     actionHandler[APurchaseItem]         = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:ActionImmediate_PurchaseItem(sItem) end

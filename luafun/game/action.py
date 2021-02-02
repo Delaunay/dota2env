@@ -268,9 +268,6 @@ class Player:
         self.act[ARG.action] = Action.LevelAbility
         self.act[ARG.nSlot] = nSlot
 
-    def TakeOutpost(self):
-        self.act[ARG.action] = Action.TakeOutpost
-
     def CourierBurst(self):
         self.act[ARG.action] = Action.CourierBurst
 

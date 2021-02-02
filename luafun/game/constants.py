@@ -182,6 +182,22 @@ class HeroLookup:
     def from_name(self, name):
         return self._from_name.get(name)
 
+    @staticmethod
+    def remap(hero, aid):
+        from luafun.game.action import ItemSlot
+        n = len(ItemSlot)
+
+        if aid > n:
+            return hero['remap'][aid - n] + n
+
+        return aid
+
+    def ability_from_id(self, hid, aid):
+        return HeroLookup.remap(self._from_id.get(hid), aid)
+
+    def ability_from_name(self, name, aid):
+        return HeroLookup.remap(self._from_name.get(name), aid)
+
 
 HERO_LOOKUP = HeroLookup()
 
