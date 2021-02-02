@@ -47,6 +47,10 @@ Most assets located in `luafun/game/resources` are owned by Valve.
 * Full Hero take over
 
 
+# Steam Web API
+
+* register a key https://steamcommunity.com/dev/registerkey
+
 # The Game
 
 From OpenAI
