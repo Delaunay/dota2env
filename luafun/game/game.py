@@ -10,7 +10,7 @@ from luafun.game.config import DotaPaths
 from luafun.game.args import DotaOptions
 from luafun.game.inspect import http_inspect
 from luafun.game.ipc_recv import ipc_recv
-from luafun.game.ipc_send import ipc_send, TEAM_RADIANT, TEAM_DIRE
+from luafun.game.ipc_send import ipc_send, TEAM_RADIANT, TEAM_DIRE, new_ipc_message
 import luafun.game.dota2.state_types as msg
 from luafun.game.extractor import Extractor
 from luafun.game.states import world_listener_process
@@ -46,6 +46,11 @@ TEAM_NAMES = {
 
 def team_name(v):
     return str(TEAM_NAMES.get(v))
+
+
+class StateHolder:
+    def __init__(self):
+        self.value = 0
 
 
 class Dota2Game:
@@ -105,6 +110,7 @@ class Dota2Game:
         self.http_rpc_send = None
         self.http_rpc_recv = None
 
+        self.uid = StateHolder()
         self.ready = False
         self.pending_ready = True
         self.bot_count = 10
@@ -272,52 +278,69 @@ class Dota2Game:
     def _handle_state(self):
         s = time.time()
         dire_delta = self.dire_state_delta()
-        if dire_delta is not None:
+
+        while dire_delta is not None:
             self.update_dire_state(dire_delta)
+            dire_delta = self.dire_state_delta()
+
         e = time.time()
         self.state['dire_state_time'] = e - s
 
         s = time.time()
         rad_delta = self.radiant_state_delta()
-        if rad_delta is not None:
+
+        while rad_delta is not None:
             self.update_radiant_state(rad_delta)
+            rad_delta = self.radiant_state_delta()
+
         e = time.time()
         self.state['rad_state_time'] = e - s
+
+    def _tick(self):
+        stop = False
+
+        # Process event
+        if not self.running:
+            self.stop()
+            stop = True
+
+        winner = self.state.get('win')
+        if winner is not None:
+            log.debug(f'{winner} won')
+            self.stop()
+            stop = True
+        # ---
+
+        s = time.time()
+        self._handle_http_rpc()
+        e = time.time()
+        self.state['http_time'] = e - s
+
+        s = time.time()
+        self._handle_ipc()
+        e = time.time()
+        self.state['ipc_time'] = e - s
+
+        self._handle_state()
+
+        if self.pending_ready and self.ready:
+            self.pending_ready = False
+            # I wish something like this was possible
+            # out, err = self.process.communicate(b'jointeam spec')
+            # log.debug(f'{out} {err}')
+
+        return stop
 
     def wait(self):
         """Wait for the game to finish, this is used for debugging exclusively"""
         try:
             while self.process.poll() is None:
+
                 time.sleep(0.01)
+                stop = self._tick()
 
-                # Process event
-                if not self.running:
-                    self.stop()
-
-                winner = self.state.get('win')
-                if winner is not None:
-                    log.debug(f'{winner} won')
-                    self.stop()
+                if stop:
                     break
-                # ---
-
-                s = time.time()
-                self._handle_http_rpc()
-                e = time.time()
-                self.state['http_time'] = e - s
-
-                s = time.time()
-                self._handle_ipc()
-                e = time.time()
-                self.state['ipc_time'] = e - s
-
-                self._handle_state()
-
-                if self.pending_ready and self.ready:
-                    self.pending_ready = False
-                    # I wish something like this was possible
-                    # out, err = self.process.communicate(b'jointeam spec')
-                    # log.debug(f'{out} {err}')
 
         except KeyboardInterrupt:
             pass
@@ -374,7 +397,7 @@ class Dota2Game:
 
     def send_message(self, data: dict):
         """Send a message to the bots"""
-        ipc_send(self.paths.ipc_send_handle, data)
+        ipc_send(self.paths.ipc_send_handle, data, self.uid)
 
     def cleanup(self):
         """Cleanup needed by the environment"""
@@ -383,6 +406,8 @@ class Dota2Game:
     def __enter__(self):
         self.launch_dota()
         self.start_ipc()
+        # this is to create the file bots listens to
+        self.send_message(new_ipc_message())
         log.debug("Game has started")
         return self
 
@@ -410,8 +435,7 @@ def main(path='F:/SteamLibrary/steamapps/common/dota 2 beta/', config=None):
         config=config)
 
     with game:
-        game.send_message(new_ipc_message())
-
+        #
         game.wait()
 
     print('Done')

@@ -71,7 +71,7 @@ class DrawMap(BasePage):
 
         dir = os.path.dirname(os.path.abspath(__file__))
         resource = os.path.join(dir, '..', 'resources')
-        self.resource_folder =os.path.join(resource, 'minimap')
+        self.resource_folder = os.path.join(resource, 'minimap')
 
         minimap = os.path.join(self.resource_folder, 'minimap_7.23.png')
         minimap = os.path.realpath(minimap)

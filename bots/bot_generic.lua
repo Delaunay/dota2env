@@ -1,3 +1,5 @@
+-- Could not open botcpp: /media/setepenre/local/SteamLibraryLinux/steamapps/common/dota 2 beta/game/dota/scripts/vscripts/bots/botcpp_radiant.so: cannot open shared object file: No such file or directory
+
 local dkjson = require('game/dkjson')
 local pprint = require('bots/pprint')
 
@@ -267,15 +269,36 @@ local bot = GetBot()
 -- is it better to use GetCourierForPlayer ?
 local hCourier = GetCourier(bot:GetPlayerID())
 
+
+local function get_item(slot)
+    local hItem = bot:GetItemInSlot(slot)
+    if hItem == nil then
+        send_message({E = 'Could not find item in slot ' .. slot})
+        return nil
+    end
+    return hItem
+end
+
+
+local function get_ability(slot)
+    local hAbility = bot:GetAbilityInSlot(slot - 17)
+    if hAbility == nil then
+        send_message({E = 'Could not find ability in slot ' .. slot})
+        return nil
+    end
+    return hAbility
+end
+
+
 local function get_ability_handle(slot)
     local handle = nil
 
-    if slot >= 16 then
+    if slot >= 17 then
         -- Ability slot
-        handle = bot:GetAbilityInSlot(slot - 16)
+        handle = get_ability(slot)
     else
         -- Item slot
-        handle = bot:GetItemInSlot(slot)
+        handle = get_item(slot)
     end
 
     if handle == nil then
@@ -284,6 +307,7 @@ local function get_ability_handle(slot)
 
     return handle
 end
+
 
 -- Map the action ID to its function
 -- This is all the actions the bots can make
@@ -329,10 +353,13 @@ local function get_action_table()
         local hItem = get_dropped_items(vLoc)
         return bot:ActionQueue_PickUpItem(hItem)
     end
-    actionHandler[ADropItem]             = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:Action_DropItem(bot:GetItemInSlot(nSlot), vLoc) end
+    actionHandler[ADropItem]             = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
+        -- Drop Item is broken
+        return bot:Action_DropItem(get_item(nSlot), vLoc)
+    end
     actionHandler[APurchaseItem]         = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:ActionImmediate_PurchaseItem(sItem) end
     actionHandler[ASellItem]             = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
-        return bot:ActionImmediate_SellItem(bot:GetItemInSlot(nSlot))
+        return bot:ActionImmediate_SellItem(get_item(nSlot))
     end
     actionHandler[ADisassembleItem]      = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2) return bot:ActionImmediate_DisassembleItem(bot:GetItemInSlot(nSlot)) end
     actionHandler[ASetItemCombineLock]   = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
@@ -425,7 +452,15 @@ local function execute_rpc(message)
 
     -- Fix argument type
     if vLoc ~= nil then
-        vLoc = Vector(vLoc[1], vLoc[2], vLoc[3])
+        x = vLoc[1]
+        y = vLoc[2]
+        z = vLoc[3]
+
+        if z == nil then
+            z = bot:GetLocation().z
+        end
+
+        vLoc = Vector(x, y, z)
     end
 
     -- Execute actions

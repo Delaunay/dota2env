@@ -26,13 +26,8 @@ def new_ipc_message():
     }
 
 
-uid = 0
-
-
-def ipc_send(f2, data):
+def ipc_send(f2, data, uid):
     """Write a lua file with the data we want bots to receive"""
-    global uid
-
     f1 = f2 + '_tmp'
 
     # Remove old file so we can override it
@@ -46,8 +41,8 @@ def ipc_send(f2, data):
     # --
 
     # Keep track of the message id we are sending
-    uid += 1
-    data['uid'] = uid
+    uid.value += 1
+    data['uid'] = uid.value
     json_string = json.dumps(data, separators=(',', ':'))
 
     with open(f1, 'w') as file:
@@ -55,4 +50,3 @@ def ipc_send(f2, data):
 
     # Renaming is almost always atomic
     os.rename(f1, f2)
-    return uid

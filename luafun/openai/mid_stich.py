@@ -124,6 +124,10 @@ def none():
     return None
 
 
+def dictionary():
+    return defaultdict(dict)
+
+
 @dataclass
 class FactionState:
     global_state: GlobalGameState = field(default_factory=GlobalGameState)
@@ -137,14 +141,17 @@ class FactionState:
     ability: Any = field(default_factory=none)
     pickup: Any = field(default_factory=none)
     dropitems: list = field(default_factory=list)
+    courier: dict = field(default_factory=dictionary)
+    trees: dict = field(default_factory=dictionary)
+    runes: dict = field(default_factory=dictionary)
 
     # internal data to generate some of the field
     # unit lookup etc...
     _roshan_dead: int = 0
-    _players: Dict = field(default_factory=lambda: defaultdict(dict))
-    _couriers: Dict = field(default_factory=lambda: defaultdict(dict))
-    _units: Dict = field(default_factory=lambda: defaultdict(dict))
-    _buildings: Dict = field(default_factory=lambda: defaultdict(dict))
+    _players: Dict = field(default_factory=dictionary)
+    _couriers: Dict = field(default_factory=dictionary)
+    _units: Dict = field(default_factory=dictionary)
+    _buildings: Dict = field(default_factory=dictionary)
 
     # State Management
     _s: int = 0
@@ -259,8 +266,8 @@ def apply_diff(state, delta: msg.CMsgBotWorldState):
     # Roshan State
     for event in delta.get('roshan_killed_events', []):
         state._roshan_dead += 1
-        rosh_spawn_min = g.game_time + 8 * 60
-        rosh_spawn_max = g.game_time + 11 * 60
+        g.rosh_spawn_min = g.game_time + 8 * 60
+        g.rosh_spawn_max = g.game_time + 11 * 60
         g.rosh_alive = False
         g.rosh_dead = True
         g.rosh_cheese = state._roshan_dead > 1
@@ -288,7 +295,7 @@ def apply_diff(state, delta: msg.CMsgBotWorldState):
         pdata = state._players[player['player_id']]
 
         for field, value in player.items():
-            pdata[field] = value 
+            pdata[field] = value
 
     for unit in delta.get('units', []):
         remove_dead = False
@@ -321,6 +328,13 @@ def apply_diff(state, delta: msg.CMsgBotWorldState):
 
         udata = source[unit[key]]
 
+        # this is a edge case that should almost never happen
+        # all items are sent
+        if unit['unit_type'] == msg.UnitType.HERO:
+            if 'items' not in unit:
+                udata['items'] = []
+        # ----
+
         for field, value in unit.items():
             udata[field] = value
 
@@ -330,15 +344,20 @@ def apply_diff(state, delta: msg.CMsgBotWorldState):
 
     # Courier Event
     for courier in delta.get('couriers', []):
-        pass
+        courier_unit = state.courier[courier['handle']]
+        courier_unit['player_id'] = courier['player_id']
+        courier_unit['state'] = courier['state']
 
-    for courier in delta.get('courier_killed_events', []):
+    for event in delta.get('courier_killed_events', []):
         pass
     # -- 
 
     # Tree destruction event
-    for tree in delta.get('tree_events', []):
-        pass
+    for tree_event in delta.get('tree_events', []):
+        tree = state.trees[tree_event['tree_id']]
+
+        for f, value in tree_event.items():
+            tree[f] = value
     # -- 
 
     # Damage Event:
@@ -353,19 +372,23 @@ def apply_diff(state, delta: msg.CMsgBotWorldState):
 
     # Rune info
     for rune in delta.get('rune_infos', []):
-        pass
+        x = rune['location']['x']
+        y = rune['location']['y']
+
+        rune_id = f'{int(x)}{int(y)}'
+        rune_state = state.runes[rune_id]
+
+        for f, value in rune.items():
+            rune_state[f] = value
+
     # -- 
 
     # This is not a delta
     # Item Drops (Neutral, Roshan)
-    state.dropitems = []
-    for item in delta.get('dropped_items', []):
-        state.dropitems.append(item)
+    state.dropitems = delta.get('dropped_items', [])
     # --
 
     state._e += 1
-
-
 
 
 if __name__ == '__main__':

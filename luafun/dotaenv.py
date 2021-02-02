@@ -91,7 +91,9 @@ class Dota2Env(Dota2Game):
             log.error(f'Error happened during state stiching {e}')
             log.error(traceback.format_exc())
 
+        self.radiant_message.write(str(type(message)) + '\n')
         self.radiant_message.write(str(message))
+        self.radiant_message.write('-------\n')
 
     def receive_message(self, faction: int, player_id: int, message: dict):
         """We only use log to get errors back if any"""
@@ -124,11 +126,21 @@ def main(path, config=None):
     game.options.host_timescale = 2
 
     with game:
-        game.send_message(new_ipc_message())
-
+        #
         game.wait()
 
     print('Done')
+
+
+def guess_path():
+    from sys import platform
+
+    s = 'F:/SteamLibrary/steamapps/common/dota 2 beta/'
+
+    if platform == "linux" or platform == "linux2":
+        s = '/media/setepenre/local/SteamLibraryLinux/steamapps/common/dota2/'
+
+    return s
 
 
 if __name__ == '__main__':
@@ -137,11 +149,5 @@ if __name__ == '__main__':
     from luafun.utils.options import option
     sys.stderr = sys.stdout
 
-    s = 'F:/SteamLibrary/steamapps/common/dota 2 beta/'
-    from sys import platform
-
-    if platform == "linux" or platform == "linux2":
-        s = '/media/setepenre/local/SteamLibraryLinux/steamapps/common/dota2/'
-
-    p = option('dota.path', s)
+    p = option('dota.path', guess_path())
     main(p)

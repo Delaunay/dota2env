@@ -41,7 +41,7 @@
                     <th>Movement</th>
                     <td><a class="btn btn-secondary" href="/action/MoveToLocation/{{player}}/0x0">MoveToLocation</a></td>
                     <td><a class="btn btn-secondary" href="/action/MoveDirectly/{{player}}/0x0">MoveDirectly</a></td>
-                    <td><a class="btn btn-secondary" href="/action/MoveToUnit/{{player}}/0x0">MoveToUnit</a></td>
+                    <td><a class="btn btn-secondary" href="/action/MoveToUnit/{{player}}/96">MoveToUnit</a></td>
                     <td><a class="btn btn-secondary" href="/action/AttackMove/{{player}}/8000x8000">AttackMove</a></td>
                     <td><a class="btn btn-secondary" href="/action/AttackUnit/{{player}}/96">AttackUnit</a></td>
                     <td><a class="btn btn-secondary" href="/action/Stop/{{player}}">Stop</a></td>
@@ -97,13 +97,22 @@
                     <td><a class="btn btn-secondary" href="/action/SwapItems/{{player}}/0/14">S6</a></td>
                 </tr>
                 <tr>
-                    <th>Buy</th> <!-- This test moving main inventory item to stash -->
+                    <th>Buy</th>
                     <td><a class="btn btn-secondary" href="/action/PurchaseItem/{{player}}/item_tango">Tango</a></td>
                     <td><a class="btn btn-secondary" href="/action/PurchaseItem/{{player}}/item_slippers">Agility Slippers</a></td>
                     <td><a class="btn btn-secondary" href="/action/PurchaseItem/{{player}}/item_circlet">Circlet</a></td>
                     <td><a class="btn btn-secondary" href="/action/PurchaseItem/{{player}}/item_quelling_blade">Quelling Blade</a></td>
                     <td><a class="btn btn-secondary" href="/action/PurchaseItem/{{player}}/item_faerie_fire">Faerie Fire</a></td>
                     <td><a class="btn btn-secondary" href="/action/PurchaseItem/{{player}}/item_gauntlets">Gauntlets</a></td>
+                </tr>
+                <tr>
+                    <th>Item Action</th> <!-- This test moving main inventory item to stash -->
+                    <td><a class="btn btn-secondary" href="/action/DropItem/{{player}}/0/-6600x-6600">DropItem</a></td>
+                    <td><a class="btn btn-secondary" href="/action/PickUpItem/{{player}}/234">PickUpItem</a></td>
+                    <td><a class="btn btn-secondary" href="/action/SellItem/{{player}}/0">SellItem</a></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                 </tr>
             </table>
 
@@ -137,7 +146,7 @@
                     <td><a class="btn btn-secondary" href="/action/LevelAbility/{{player}}/21">R</a></td>
                 </tr>
                 <tr>
-                    <th>Talent</th>
+                    <th>Talents</th>
                     <td><a class="btn btn-secondary" href="/action/LevelAbility/{{player}}/24">T1</a></td>
                     <td><a class="btn btn-secondary" href="/action/LevelAbility/{{player}}/25">T2</a></td>
                     <td><a class="btn btn-secondary" href="/action/LevelAbility/{{player}}/26">T3</a></td>

@@ -107,14 +107,15 @@ class SelectionCategorical(nn.Module):
 
     """
 
-    def __init__(self, state_shape, n_latent_var, n_classes):
+    def __init__(self, state_shape, n_classes, n_hidden=None):
         super(SelectionCategorical, self).__init__()
+        if n_hidden is None:
+            n_hidden = int(n_classes)
+
         self.selector = nn.Sequential(
-            nn.Linear(state_shape, n_latent_var),
+            nn.Linear(state_shape, n_hidden),
             nn.ReLU(),
-            nn.Linear(n_latent_var, n_latent_var),
-            nn.ReLU(),
-            nn.Linear(n_latent_var, n_classes),
+            nn.Linear(n_hidden, n_classes),
             nn.Softmax(dim=-1)
         )
 
@@ -173,7 +174,7 @@ class HeroModel(nn.Module):
     We are having a small network for each action argument
     """
 
-    def __init__(self):
+    def __init__(self, input_size):
         super(HeroModel, self).__init__()
 
         # Abilities
@@ -203,19 +204,33 @@ class HeroModel(nn.Module):
         # ------------------------
         # Total = 16 + 24  = 40
 
-        self.internal_model = ...
+        # preprocess a spacial observation with a specialized network
+        self.state_preprocessor = nn.Module()
+
+        # Process our flatten world obersation vector
+        # Generates a hidden state that is decoded by smaller network
+        # which returns the actual action to take
+
+        self.hidden_size = int(input_size * 0.55)
+        self.input_size = int(input_size)
+        self.internal_model = nn.LSTM(
+            input_size=self.input_size,
+            hidden_size=self.hidden_size,
+            num_layers=3,
+            bias=True
+        )
 
         ability_count = len(actions.ItemSlot) + len(actions.AbilitySlot)
 
         # Those sub networks are small and act as state decoder
         # to return the precise action that is the most suitable
-        self.ability = SelectionCategorical(0, ability_count + 1)
-        self.runes = SelectionCategorical(0, len(actions.RuneSlot) + 1)
-        self.action = SelectionCategorical(0, len(actions.Action))
-        self.swap = SelectionCategorical(0, len(actions.ItemSlot))
+        self.ability = SelectionCategorical(self.hidden_size, ability_count + 1)
+        self.runes = SelectionCategorical(self.hidden_size, len(actions.RuneSlot) + 1)
+        self.action = SelectionCategorical(self.hidden_size, len(actions.Action))
+        self.swap = SelectionCategorical(self.hidden_size, len(actions.ItemSlot))
 
         # This is for purchasing only
-        self.item = SelectionCategorical(0, const.ITEM_COUNT + 1)
+        self.item = SelectionCategorical(self.hidden_size, const.ITEM_COUNT + 1)
 
         self.position = Coordinate()
 
@@ -235,7 +250,7 @@ class HeroModel(nn.Module):
         # Unit Selection
 
     def forward(self, x):
-        hidden = self.internal_model(x)
+        hidden, (hn, cn) = self.internal_model(x, (h0, c0))
 
         action = self.action(hidden)
         rune = self.runes(hidden)
@@ -252,10 +267,10 @@ class HeroModel(nn.Module):
 
 class ActorCritic(nn.Module):
     """Generic Implementation of the ActorCritic you should subclass to implement your model"""
-    def __init__(self):
+    def __init__(self, actor, critic):
         super(ActorCritic, self).__init__()
-        self.actor: nn.Module = None
-        self.critic: nn.Module = None
+        self.actor: nn.Module = actor
+        self.critic: nn.Module = critic
 
     def actor_weights(self):
         """Returns the actor weights"""

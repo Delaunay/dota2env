@@ -15,15 +15,18 @@ class RuneSlot(IntEnum):
 
 # indices are zero based with 0-5 corresponding to inventory, 6-8 are backpack and 9-15 are stash
 class ItemSlot(IntEnum):
-    Item0 = 0       # Inventory
+    # Inventory
+    Item0 = 0
     Item1 = 1
     Item2 = 2
     Item3 = 3
     Item4 = 4
-    Item5 = 5       # backpack
+    Item5 = 5
+    # backpack
     Item6 = 6
     Item7 = 7
-    Item8 = 8       # Stash
+    Item8 = 8
+    # Stash
     Item9 = 9
     Item10 = 10
     Item11 = 11
@@ -35,6 +38,18 @@ class ItemSlot(IntEnum):
 
 
 assert len(ItemSlot) == 17, '17 item slots'
+
+
+_n = len(ItemSlot)
+
+
+class SpellSlot(IntEnum):
+    Q = _n + 0
+    W = _n + 1
+    E = _n + 2
+    D = _n + 3
+    F = _n + 4
+    R = _n + 5
 
 
 # might have to normalize talent so it is easier to learn
