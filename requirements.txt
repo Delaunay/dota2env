@@ -3,3 +3,4 @@ Jinja2
 Pygtail
 socketio
 https://github.com/Delaunay/rpcjs.git
+gym

@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
+import torch.distributions as distributions
 
+import luafun.stitcher as obs
 import luafun.game.action as actions
 import luafun.game.constants as const
 
@@ -75,25 +77,11 @@ class AbilityEncoder(CategoryEncoder):
         super(AbilityEncoder, self).__init__(in_size=1024, out_size=120)
 
 
-class HeroEncoder(nn.Module):
-    """HeroSummary takes batch of ability processed by the AbilityEmbedder and returns a compact vector
-    representing a summary of the hero.
-    """
+class HeroEncoder(CategoryEncoder):
+    """Encode a hero into a vector"""
 
-    def __init__(self, in_size=(24, 120), n_latent=240, out_size=120):
-        super(HeroEncoder, self).__init__()
-        n_abilities, size = in_size
-
-        # b x #abilities x #out_size => b x #out_size
-        self.summary = nn.Sequential(
-            nn.Conv1d(n_abilities, 1, kernel_size=3),
-            nn.Flatten(),
-            nn.Linear(in_size, n_latent),
-            nn.ReLU(),
-            nn.Linear(n_latent, n_latent),
-            nn.ReLU(),
-            nn.Linear(n_latent, out_size),
-        )
+    def __init__(self, out_size=128):
+        super(HeroEncoder, self).__init__(in_size=const.HERO_COUNT, out_size=out_size)
 
     def forward(self, x):
         return self.embedder(x)
@@ -131,7 +119,7 @@ class SelectionCategorical(nn.Module):
         # instead of picking the most likely
         # we sample from a distribution
         # this makes our actor discover need strategies
-        dist = nn.Categorical(action_probs)
+        dist = distributions.Categorical(action_probs)
         action = dist.sample()
 
         # Used for the cost function
@@ -160,6 +148,79 @@ class ItemPurchaser(SelectionCategorical):
     """Select the item we want to buy"""
     def __init__(self, hidden_state_size, item_count):
         super(ItemPurchaser, self).__init__()
+
+
+class SimpleDrafter(nn.Module):
+    """Works by encoding one-hot vectors of heroes to a dense vector which makes the internal state of the model.
+    Decoders are then used to extract which pick or ban should be made given the information present
+
+    Examples
+    --------
+    >>> _ = torch.manual_seed(0)
+    >>> draft_status = torch.zeros((obs.DraftFields.Size, const.HERO_COUNT))
+
+    Set draft status
+    >>> for i in range(obs.DraftFields.Size):
+    ...     draft_status[i][0] = 1
+
+    Batched version
+    >>> batch_size = 5
+    >>> draft_batch = torch.zeros((batch_size, obs.DraftFields.Size, const.HERO_COUNT))
+
+    Insert draft to batch
+    >>> draft_batch[0, :] = draft_status
+    >>> draft_batch.shape
+    torch.Size([5, 24, 121])
+
+    >>> drafter = SimpleDrafter()
+    >>> select, ban = drafter(draft_batch)
+    >>> select.shape
+    torch.Size([5])
+    >>> hero = select[0]
+    >>> hero
+    tensor(69)
+    """
+
+    # Check logic
+    # >>> batch = torch.randn((batch_size, obs.DraftFields.Size, const.HERO_COUNT))
+    # >>> batch.shape
+    # torch.Size([5, 24, 121])
+    # >>> flat_draft = batch.view(batch_size * obs.DraftFields.Size, const.HERO_COUNT)
+    # >>> flat_draft.shape
+    # torch.Size([120, 121])
+    #
+    # >>> for b in range(batch_size):
+    # ...     for d in range(obs.DraftFields.Size):
+    # ...         fb = batch[b, d, :]
+    # ...         nb = flat_draft[b * obs.DraftFields.Size + d, :]
+    # ...         print((nb - fb).square().sum())
+
+    def __init__(self):
+        super(SimpleDrafter, self).__init__()
+        self.encoded_vector = 64
+        self.hero_encoder = CategoryEncoder(const.HERO_COUNT, self.encoded_vector)
+
+        self.hidden_size = obs.DraftFields.Size * self.encoded_vector
+
+        self.hero_select = SelectionCategorical(self.hidden_size, const.HERO_COUNT)
+        self.hero_ban    = SelectionCategorical(self.hidden_size, const.HERO_COUNT)
+
+    def forward(self, draft):
+        # draft         : (batch_size x 24 x const.HERO_COUNT)
+        # flat_draft    : (batch_size * 24 x const.HERO_COUNT)
+        # encoded_flat  : (batch_size * 24 x 64)
+        # encoded_draft : (batch_size x 24 * 64)
+
+        batch_size = draft.shape[0]
+        flat_draft = draft.view(batch_size * obs.DraftFields.Size, const.HERO_COUNT)
+
+        encoded_flat = self.hero_encoder(flat_draft)
+        encoded_draft = encoded_flat.view(batch_size, self.hidden_size)
+
+        select, _, _ = self.hero_select(encoded_draft)
+        ban, _, _ = self.hero_ban(encoded_draft)
+
+        return select, ban
 
 
 class HeroModel(nn.Module):
@@ -263,8 +324,6 @@ class HeroModel(nn.Module):
         vec = self.position(hidden)
 
 
-
-
 class ActorCritic(nn.Module):
     """Generic Implementation of the ActorCritic you should subclass to implement your model"""
     def __init__(self, actor, critic):
@@ -285,7 +344,7 @@ class ActorCritic(nn.Module):
         with torch.no_grad():
             action_probs = self.actor(state)
 
-            dist = nn.Categorical(action_probs)
+            dist = distributions.Categorical(action_probs)
             action = dist.sample()
             action_logprobs = dist.log_prob(action)
 
@@ -296,7 +355,7 @@ class ActorCritic(nn.Module):
         with torch.enable_grad():
             # Do the forward pass so we have gradients for the optimization
             action_probs = self.actor(state)
-            dist = nn.Categorical(action_probs)
+            dist = distributions.Categorical(action_probs)
             action_logprobs = dist.log_prob(action)
             dist_entropy = dist.entropy()
 

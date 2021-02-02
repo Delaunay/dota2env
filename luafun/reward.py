@@ -6,8 +6,8 @@ Team = 1
 values = [
     ('Win'                 ,    5      , Team),
     ('Hero Death'          ,   -1      , Solo),
-    ('Courier Death'       ,   -2      , Team), 
-    ('XP Gained'           ,    0.002  , Solo), 
+    ('Courier Death'       ,   -2      , Team),
+    ('XP Gained'           ,    0.002  , Solo),
     ('Gold Gained'         ,    0.006  , Solo),
     ('Gold Spent'          ,    0.0006 , Solo),
     ('Health Changed'      ,    2      , Solo), # %of health = ( x + 1 - (1 - x) ^ 4) / 2

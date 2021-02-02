@@ -3,21 +3,18 @@ that is suitable for machine learning
 """
 import asyncio
 import logging
-import os
 import traceback
 
 from luafun.game.game import Dota2Game
+from luafun.game.modes import DOTA_GameMode
 import luafun.game.dota2.state_types as msg
 from luafun.game.ipc_send import TEAM_RADIANT, TEAM_DIRE
+from luafun.game.action import action_space
 
-from luafun.openai import models, stichers, states
+from luafun.stitcher import Stitcher
+from luafun.reward import Reward
 
 log = logging.getLogger(__name__)
-
-
-registered_states = states
-registered_models = models
-registered_stich = stichers
 
 
 def team_name(faction):
@@ -43,22 +40,49 @@ class Dota2Env(Dota2Game):
     so the ML can work on a consistent dataset
 
     Although leaving it inconsistent could be an interesting experiment
+
+    Parameters
+    ----------
+    path: str
+        Path to the game folder `.../dota 2 beta`
+
+    dedicated: bool
+        Server only
+
+    stitcher: Stitcher
+        Stitch game state together
+
+    reward: Reward
+        Used to compute reward after every step
+
+    _config:
+        Internal argument used when the HTTP server controls the environment
     """
-    def __init__(self, path, dedicated=True, config=None):
-        super(Dota2Env, self).__init__(path, dedicated, config=config)
+    def __init__(self, path, dedicated=True, draft=0, stitcher=None, reward=None, _config=None):
+        super(Dota2Env, self).__init__(path, dedicated, draft, config=_config)
         # For debugging only
         self.radiant_message = open(self.paths.bot_file('out_radiant.txt'), 'w')
         self.dire_message = open(self.paths.bot_file('out_dire.txt'), 'w')
 
-        # Get factories necessary for our model
-        self.setup_name = 'openai-mid'
+        self._action_space = action_space()
 
         # Function to stich state together
-        self.sticher = stichers[self.setup_name]
+        if stitcher is None:
+            stitcher = Stitcher()
+
+        self.sticher = stitcher
 
         # State per faction
-        self._radiant_state = states[self.setup_name]()
-        self._dire_state = states[self.setup_name]()
+        self._radiant_state = self.sticher.initial_state()
+        self._dire_state = self.sticher.initial_state()
+        # ---
+
+        # Reward function
+        if reward is None:
+            reward = Reward()
+
+        self.reward = reward
+        # ----
 
     def cleanup(self):
         self.radiant_message.close()
@@ -74,7 +98,7 @@ class Dota2Env(Dota2Game):
     def update_dire_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for dire"""
         try:
-            self.sticher(self._dire_state, message)
+            self.sticher.apply_diff(self._dire_state, message)
         except Exception as e:
             log.error(f'Error happened during state stiching {e}')
             log.error(traceback.format_exc())
@@ -86,7 +110,7 @@ class Dota2Env(Dota2Game):
     def update_radiant_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for radiant"""
         try:
-            self.sticher(self._radiant_state, message)
+            self.sticher.apply_diff(self._radiant_state, message)
         except Exception as e:
             log.error(f'Error happened during state stiching {e}')
             log.error(traceback.format_exc())
@@ -110,24 +134,173 @@ class Dota2Env(Dota2Game):
         radiant = acquire_state(self._radiant_state)
         pass
 
-    # Action
-    def send_bot_actions(self, action):
-        pass
+    def _action_preprocessor(self, message):
+        return message
+
+    # Gym Environment API
+    # -------------------
+    def render(self):
+        self.options.dedicated = False
+
+    def reset(self):
+        """
+
+        Returns
+        -------
+        observation: Tuple[FactionState, FactionState]
+            state observation (radiant, dire)
+        """
+        if self.running:
+            self.__exit__(None, None, None)
+            self._radiant_state = self.sticher.initial_state()
+            self._dire_state = self.sticher.initial_state()
+
+        self.__enter__()
+        return self._radiant_state, self._dire_state
+
+    def close(self):
+        self.__exit__(None, None, None)
+
+    @property
+    def action_space(self):
+        """This comes from the action encoding work we did
+
+        Notes
+        -----
+
+        .. code-block:: python
+
+            {
+                'Radiant': {
+                    # Player 1
+                    '0': {
+                        action       = One of 25 base actions
+                        vloc         = Location Vector x, y
+                        hUnit        = Unit handle
+                        abilities    = Ability/Item slot to use (40)
+                        tree         = Tree ID
+                        runes        = Rune ID
+                        items        = Which item to buy
+                        ix2          = Inventory Item slot for swapping
+                    },
+                    # Player 2
+                    '1' : {
+                        ...
+                    },
+
+                    ...
+
+                    # Hero Selection command
+                    'HS'            = {
+                        select = spaces.Discrete(const.HERO_COUNT),
+                        ban    = spaces.Discrete(const.HERO_COUNT)
+                    }
+                }
+                'Dire': [
+                    ...
+                ]
+            }
+
+        """
+        return self._action_space
+
+    @property
+    def observation_space(self):
+        return self.sticher.observation_space
+
+    def step(self, action):
+        """Make an action and return the resulting state
+
+        Returns
+        -------
+        observation: Tuple[FactionState, FactionState]
+            state observation (radiant, dire)
+
+        reward: float
+            amount of reward that state
+
+        done: bool
+            is the game is done
+
+        info: Optional[dict]
+            returns nothing
+        """
+        # 1. send action
+        # 1.1 Preprocess the actions (remapping)
+        preprocessed = self._action_preprocessor(action)
+
+        # 1.2 Send the action
+        self.send_message(preprocessed)
+
+        # 2. Wait for the new stitched state
+        rs = self.radiant_state()
+        ds = self.dire_state()
+
+        obs = (rs, ds)
+
+        # 3. Compute the reward
+        reward = self.reward(*obs)
+
+        done = self.state.get('win', None) is not None
+
+        info = dict()
+
+        return obs, reward, done, info
+
+
+def _default_game(path, dedicated=True, config=None):
+    game = Dota2Env(path, dedicated=dedicated, _config=config)
+    game.options.ticks_per_observation = 4
+    game.options.host_timescale = 2
+    return game
+
+
+def sfmid1v1(path, config=None):
+    game = _default_game(path, config=config)
+    game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_1V1MID)
+    return game
+
+
+def mid1v1(path, config=None):
+    game = _default_game(path, config=config)
+    game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_1V1MID)
+    return game
+
+
+def allpick_nobans(path, config=None):
+    game = _default_game(path, config=config)
+    game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_AP)
+    return game
+
+
+def ranked_allpick(path, config=None):
+    game = _default_game(path, config=config)
+    game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_ALL_DRAFT)
+    return game
+
+
+def allrandom(path, config=None):
+    game = _default_game(path, config=config)
+    game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_AR)
+    return game
+
+
+_environments = {
+    'sf1v1mid': sfmid1v1,
+    'mid1v1': mid1v1,
+    'allpick_nobans': allpick_nobans,
+    'ranked_allpick': ranked_allpick,
+    'allrandom': allrandom
+}
 
 
 def main(path, config=None):
-    from luafun.game.modes import DOTA_GameMode
-    from luafun.game.ipc_send import new_ipc_message
     logging.basicConfig(level=logging.DEBUG)
 
-    game = Dota2Env(path, False, config=config)
-    # game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_AP)
-    game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_1V1MID)
-    game.options.ticks_per_observation = 4
-    game.options.host_timescale = 2
+    game = sfmid1v1(path, config=config)
+    game.options.dedicated = False
 
     with game:
-        #
         game.wait()
 
     print('Done')

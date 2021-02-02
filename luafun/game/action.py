@@ -1,7 +1,14 @@
+"""This file works on encoding the game action into a ML friendly format"""
 from enum import IntEnum
 from luafun.game.ipc_send import new_ipc_message, TEAM_RADIANT, TEAM_DIRE
 
+
 # Game mapping
+class Lanes(IntEnum):
+    Roam = 0
+    Top = 1
+    Mid = 2
+    Bot = 3
 
 
 class RuneSlot(IntEnum):
@@ -288,6 +295,69 @@ class Player:
         self.act[ARG.action] = Action.CourierTransfer
 
 
+def action_space():
+    from gym import spaces
+    import numpy as np
+    import luafun.game.constants as const
+
+    def player_space():
+        action = spaces.Discrete(len(Action))
+        vloc = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+        # We set the max number of unit on the map to 256
+        # the ids are remapped to actual handle id
+        hUnit = spaces.Discrete(256)
+        abilities = spaces.Discrete(len(ItemSlot) + len(AbilitySlot))
+        # Tree ID
+        tree = spaces.Discrete(const.TREE_COUNT)
+        runes = spaces.Discrete(len(RuneSlot))
+        items = spaces.Discrete(const.ITEM_COUNT)
+        ix2 = spaces.Discrete(len(ItemSlot))
+
+        return spaces.Tuple((
+            action,
+            vloc,
+            hUnit,
+            abilities,
+            tree,
+            runes,
+            items,
+            ix2))
+
+    def team_space(s):
+        return spaces.Dict({
+            f'{s + 0}': player_space(),
+            f'{s + 1}': player_space(),
+            f'{s + 2}': player_space(),
+            f'{s + 3}': player_space(),
+            f'{s + 4}': player_space(),
+
+            # Hero Selection
+            'HS': spaces.Dict({
+                'select': spaces.Discrete(const.HERO_COUNT),
+                'ban': spaces.Discrete(const.HERO_COUNT),
+                'lane': spaces.Discrete(len(Lanes))
+            })
+        })
+
+    full_space = spaces.Dict({
+        f'{TEAM_RADIANT}': team_space(0),
+        f'{TEAM_DIRE}': team_space(5),
+    })
+    return full_space
+
+
+class HeroSelection:
+    def __init__(self, fac):
+        self.fac = fac
+
+    def select(self, hero, lane):
+        self.fac[0] = hero
+        self.fac[2] = lane
+
+    def ban(self, hero):
+        self.fac[1]: hero
+
+
 class IPCMessageBuilder:
     def __init__(self, game=None):
         self.message = new_ipc_message()
@@ -300,6 +370,15 @@ class IPCMessageBuilder:
             faction = TEAM_DIRE
 
         return Player(self.message[faction][idx])
+
+    def hero_selection(self, faction):
+        self.message[faction]['HS'] = [
+            1,      # Enable ML Bot Drafter (vs hardcoded bots)
+            None,   # Selected Hero
+            None,   # Banned Hero
+            None    # Lane Assignment
+        ]
+        return HeroSelection(self.message[faction]['HS'])
 
     def build(self):
         return self.message

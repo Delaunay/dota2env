@@ -5,9 +5,15 @@ TEAM_RADIANT = 2
 TEAM_DIRE = 3
 
 
-def new_ipc_message():
-    """Basic ipc message we can send to the bots"""
-    return {
+def new_ipc_message(draft=None):
+    """Basic ipc message we can send to the bots
+
+    Parameters
+    ----------
+    draft: Optional[int]
+        0, or 1, 0 to disable ML drafting and fallback to hardcoded hero selection.
+    """
+    base = {
         'uid': 0,
         TEAM_RADIANT: {
             0: dict(),
@@ -24,6 +30,12 @@ def new_ipc_message():
             9: dict(),
         }
     }
+
+    if draft is not None:
+        base[TEAM_RADIANT]['HS'] = [draft, None, None, None]
+        base[TEAM_DIRE]['HS'] = [draft, None, None, None]
+
+    return base
 
 
 def ipc_send(f2, data, uid):

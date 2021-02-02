@@ -10,7 +10,7 @@ Why dota2 is the ultimate RL environment
 Like in real life you need to
 1. Choose the relevant data to solve the problem and discard unnecessary data
 2. Choose the correct rewards balance early rewards and late rewards
-3. Encode the action
+3. Encode a variety of actions for efficient processing
 
 # Assets
 
@@ -41,6 +41,10 @@ Most assets located in `luafun/game/resources` are owned by Valve.
 
 [1]: https://www.anaconda.com/products/individual
 
+# Features
+
+* Full draft control
+* Full Hero take over
 
 
 # The Game

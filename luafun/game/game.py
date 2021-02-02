@@ -85,7 +85,7 @@ class Dota2Game:
     We use multiprocess, asyncio was not given the required performance.
     A huge part of performance is used to receive messages from the game itself
     """
-    def __init__(self, path=None, dedicated=True, config=None):
+    def __init__(self, path=None, dedicated=True, draft=0, config=None):
         self.paths = DotaPaths(path)
         self.options = DotaOptions(dedicated=dedicated)
         self.args = None
@@ -110,6 +110,7 @@ class Dota2Game:
         self.http_rpc_send = None
         self.http_rpc_recv = None
 
+        self.draft = draft
         self.uid = StateHolder()
         self.ready = False
         self.pending_ready = True
@@ -412,8 +413,8 @@ class Dota2Game:
         self.launch_dota()
         self.start_ipc()
         log.debug("Game has started")
-        # Create a file to avoid errors
-        self.send_message(new_ipc_message())
+        # Create a file to say if we want to draft or not
+        self.send_message(new_ipc_message(draft=self.draft))
         return self
 
     def __exit__(self, exception_type, exception_value, exception_traceback):
@@ -431,7 +432,6 @@ class Dota2Game:
 
 
 def main(path='F:/SteamLibrary/steamapps/common/dota 2 beta/', config=None):
-    from luafun.game.ipc_send import new_ipc_message
     logging.basicConfig(level=logging.DEBUG)
 
     game = Dota2Game(
