@@ -1,4 +1,4 @@
-local ipc = require('bots/ipc')
+local dkjson = require('game/dkjson')
 
 local RECV_MSG = 'bots/IPC_recv'
 local faction = GetTeam()
@@ -71,19 +71,39 @@ function ThinkOverride()
     if msg ~= nil then
         send_message({E = 'Not Implemented'})
     end
+    -- int GetHeroPickState()
+    -- int GetGameMode()
+    -- bool IsPlayerInHeroSelectionControl( nPlayerID )
 
-    if GetTeam() == TEAM_RADIANT then
-        SelectHero(0, 'npc_dota_hero_antimage')
-        SelectHero(1, 'npc_dota_hero_axe')
-        SelectHero(2, 'npc_dota_hero_bane')
-        SelectHero(3, 'npc_dota_hero_bloodseeker')
-        SelectHero(4, 'npc_dota_hero_crystal_maiden')
+    -- 1v1 or mid only
+    if GetGameMode() == GAMEMODE_1V1MID or GetGameMode() == GAMEMODE_MO then
+        if GetTeam() == TEAM_RADIANT then
+            SelectHero(0, 'npc_dota_hero_nevermore')
+            SelectHero(1, 'npc_dota_hero_target_dummy')
+            SelectHero(2, 'npc_dota_hero_target_dummy')
+            SelectHero(3, 'npc_dota_hero_target_dummy')
+            SelectHero(4, 'npc_dota_hero_target_dummy')
+        else
+            SelectHero(5, 'npc_dota_hero_nevermore')
+            SelectHero(6, 'npc_dota_hero_target_dummy')
+            SelectHero(7, 'npc_dota_hero_target_dummy')
+            SelectHero(8, 'npc_dota_hero_target_dummy')
+            SelectHero(9, 'npc_dota_hero_target_dummy')
+        end
     else
-        SelectHero(5, 'npc_dota_hero_drow_ranger')
-        SelectHero(6, 'npc_dota_hero_earthshaker')
-        SelectHero(7, 'npc_dota_hero_juggernaut')
-        SelectHero(8, 'npc_dota_hero_mirana')
-        SelectHero(9, 'npc_dota_hero_nevermore')
+        if GetTeam() == TEAM_RADIANT then
+            SelectHero(0, 'npc_dota_hero_antimage')
+            SelectHero(1, 'npc_dota_hero_axe')
+            SelectHero(2, 'npc_dota_hero_bane')
+            SelectHero(3, 'npc_dota_hero_bloodseeker')
+            SelectHero(4, 'npc_dota_hero_crystal_maiden')
+        else
+            SelectHero(5, 'npc_dota_hero_drow_ranger')
+            SelectHero(6, 'npc_dota_hero_earthshaker')
+            SelectHero(7, 'npc_dota_hero_juggernaut')
+            SelectHero(8, 'npc_dota_hero_mirana')
+            SelectHero(9, 'npc_dota_hero_nevermore')
+        end
     end
 end
 
