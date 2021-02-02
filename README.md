@@ -1,4 +1,4 @@
-Dota 2 C++ Bot
+Dota 2 ML Bots
 ==============
 
 Why dota2 is the ultimate RL environment
@@ -19,7 +19,7 @@ Most assets located in `luafun/game/resources` are owned by Valve.
 # Platform
 
 * works best on linux
-* there is a bug in windows where state stop updating after 1000 timestep
+* there is a bug in windows where state are being dropped randomly (unknown reason)
 
 #  Install
 

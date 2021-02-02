@@ -4,14 +4,13 @@ local dkjson = require('game/dkjson')
 local pprint = require('bots/pprint')
 
 local RECV_MSG = 'bots/IPC_recv'
-
 local player_id = GetBot():GetPlayerID()
 local faction = GetBot():GetTeam()
 
 local str_faction = '' .. faction
 local str_player_id = '' .. player_id
 
-local uid = 0
+local uid = nil
 local ipc_prefix = '[IPC]' .. faction .. '.' .. player_id
 
 -- Simply print something we can parse in the logs
@@ -38,6 +37,9 @@ end
 -- About efficiency: we only update a single file that is going to be fairly small and
 -- read 10 times before being overriden, the file should always be cached in RAM
 -- so this method in terms of speed should be fine
+--
+-- I tried to move this out into its own package but integration test started failing
+-- package seems slower
 local function receive_message()
     local file = loadfile(RECV_MSG)
 
@@ -53,7 +55,11 @@ local function receive_message()
 
             -- Make sure we do not execute a message twice
             local new_uid = internal['uid']
-            if new_uid <= uid then
+
+            -- First message setup the uid
+            if uid == nil then
+                uid = new_uid - 1
+            elseif new_uid <= uid then
                 -- This is expected to happen relatively often
                 -- send_message({E = "Message already read " .. uid .. " " .. new_uid})
                 return nil

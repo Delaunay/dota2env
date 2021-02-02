@@ -233,7 +233,7 @@ class Dota2Game:
             self.http_rpc_recv = self.config.rpc_recv
             self.http_rpc_send = self.config.rpc_send
 
-    def stop(self):
+    def stop(self, timeout=2):
         """Stop the game in progress
 
         Notes
@@ -241,6 +241,15 @@ class Dota2Game:
         On windows the dota2 game is not stopped but the underlying python processes are
         """
         self.state['running'] = False
+
+        # wait the game to finish before exiting
+        total = 0
+        while self.process.poll() is None and total < timeout:
+            time.sleep(0.01)
+            total += 0.01
+
+        if total < timeout:
+            log.debug('Process was not terminating forcing close')
 
         if self.process.poll() is None:
             self.process.terminate()
@@ -345,10 +354,6 @@ class Dota2Game:
         except KeyboardInterrupt:
             pass
 
-        # wait the game to finish before exiting
-        while self.process.poll() is None:
-            time.sleep(0.01)
-
         self.stop()
 
     def _receive_message(self, faction: int, player_id: int, message: dict):
@@ -364,6 +369,7 @@ class Dota2Game:
             self.players[int(faction)] += 1
             if self.is_game_ready():
                 log.debug('All bots accounted for, Game is ready')
+                self.ready = True
             return
 
         # Message ack
@@ -373,7 +379,6 @@ class Dota2Game:
             if self.reply_count[ack] == self.bot_count:
                 log.debug(f'(uid: {ack}) message received by all {self.bot_count} bots')
                 self.reply_count.pop(ack)
-                self.ready = True
             return
 
         # Message Info
@@ -406,9 +411,9 @@ class Dota2Game:
     def __enter__(self):
         self.launch_dota()
         self.start_ipc()
-        # this is to create the file bots listens to
-        self.send_message(new_ipc_message())
         log.debug("Game has started")
+        # Create a file to avoid errors
+        self.send_message(new_ipc_message())
         return self
 
     def __exit__(self, exception_type, exception_value, exception_traceback):
