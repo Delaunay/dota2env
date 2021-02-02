@@ -351,11 +351,11 @@ class HeroSelection:
         self.fac = fac
 
     def select(self, hero, lane):
-        self.fac[0] = hero
-        self.fac[2] = lane
+        self.fac[1] = hero
+        self.fac[3] = lane
 
     def ban(self, hero):
-        self.fac[1]: hero
+        self.fac[2]: hero
 
 
 class IPCMessageBuilder:

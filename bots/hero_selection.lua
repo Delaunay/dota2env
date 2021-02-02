@@ -100,6 +100,10 @@ local lanes = {
 -- Same as SelectHero but checks for errors
 local n = 0
 local function pick_hero(player_id, hero_name, lane)
+    if hero_name == nil then
+        return
+    end
+
     if GetSelectedHeroName(player_id) == '' then
 
         SelectHero(player_id, hero_name)
@@ -196,7 +200,6 @@ function ThinkOverride()
     local msg = receive_message()
 
     if msg == nil then
-        send_message({E = 'No Hero selection message'})
         return
     end
 
@@ -204,7 +207,7 @@ function ThinkOverride()
 
     if ml_draft ~= nil and ml_draft == 0 then
          default_logic()
-    else
+    elseif msg ~= nil then
         -- Bots are manually drafting
         local selected = msg[2]
         local banned = msg[3]

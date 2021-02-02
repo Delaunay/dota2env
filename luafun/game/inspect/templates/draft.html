@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<table class="table">
+    <tr>
+        <th>Raw State</th>
+        <th>Actions</th>
+    </tr>
+    <tr>
+        <td>
+            <pre>
+                {{ code|safe }}
+            </pre>
+        </td>
+        <td>
+            <h4>Actions</h4>
+            <table>
+                <tbody>
+                    <tr><td>Radiant</td><td>Dire</td></tr>
+                    <tr>
+                        <td><a class="btn btn-secondary" href="/draft/2/select/npc_dota_hero_centaur">Select Hero</a></td>
+                        <td><a class="btn btn-secondary" href="/draft/3/select/npc_dota_hero_centaur">Select Hero</a></td>
+                    </tr>
+                    <tr>
+                        <td><a class="btn btn-secondary" href="/draft/2/ban/npc_dota_hero_centaur">Select Hero</a></td>
+                        <td><a class="btn btn-secondary" href="/draft/3/ban/npc_dota_hero_centaur">Select Hero</a></td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+
+{% endblock %}

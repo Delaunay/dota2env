@@ -295,10 +295,16 @@ _environments = {
 
 
 def main(path, config=None):
+    from argparse import ArgumentParser
     logging.basicConfig(level=logging.DEBUG)
+
+    parser = ArgumentParser()
+    parser.add_argument('--draft', action='store_true', default=False)
+    args = parser.parse_args()
 
     game = sfmid1v1(path, config=config)
     game.options.dedicated = False
+    game.draft = int(args.draft)
 
     with game:
         game.wait()

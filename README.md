@@ -49,7 +49,13 @@ Most assets located in `luafun/game/resources` are owned by Valve.
 
 # Steam Web API
 
+Steam Web API is only used to bootstrap some components to gain some time when training.
+You might be able to skip these steps
+
 * register a key https://steamcommunity.com/dev/registerkey
+* set it inside `config.json`
+* Prevent git from picking up the change
+    git update-index --assume-unchanged config.json
 
 # The Game
 
