@@ -31,10 +31,12 @@ class DotaTestEnvironment(Dota2Env):
         for send_action in self.send_actions:
             ds = self.dire_state()
             rs = self.radiant_state()
+
             msg = send_action(ds, rs, **self.kwargs)
             self.send_message(msg)
+
+            time.sleep(0.26)
             self._tick()
-            time.sleep(0.13)
 
         self.action_sent = True
 
@@ -62,7 +64,11 @@ class DotaTestEnvironment(Dota2Env):
                 # Send
                 # ---
                 if self.ready:
-                    self.send_all_actions()
+                    try:
+                        self.send_all_actions()
+                    except Exception as err:
+                        stop = True
+                        self.err = err
                 else:
                     stop = self._tick()
                 # ---
@@ -70,7 +76,10 @@ class DotaTestEnvironment(Dota2Env):
                 # Check
                 # --
                 if self.action_sent and self.ready:
-                    self.check_all_actions()
+                    try:
+                        self.check_all_actions()
+                    except Exception as err:
+                        self.err = err
                     stop = True
                 # --
 
@@ -347,7 +356,6 @@ def test_swap_item(pid=0):
     run_env([purchase_item, swap_item], was_success, state=state)
 
 
-@pytest.mark.skip
 def test_drop_item(pid=0):
     def purchase_item(ds, rs, state):
         b = IPCMessageBuilder()
@@ -369,6 +377,45 @@ def test_drop_item(pid=0):
     state = dict()
     run_env([purchase_item, drop_item], was_success, state=state)
 
+
+def test_pick_item(pid=0):
+    def purchase_item(ds, rs, state):
+        b = IPCMessageBuilder()
+        p = b.player(pid)
+        p.PurchaseItem('item_tango')
+        return b.build()
+
+    def drop_item(ds, rs, state):
+        b = IPCMessageBuilder()
+        p = b.player(pid)
+        p.DropItem(0, (-6700.0, -6700.0))
+
+        s = get_player(pid, ds, rs)
+        items = s.get('items')
+
+        tango = None
+        for item in items:
+            if item['slot'] == 0:
+                tango = item
+                break
+
+        state['item'] = tango['handle']
+        return b.build()
+
+    def pick_item(ds, rs, state):
+        b = IPCMessageBuilder()
+        p = b.player(pid)
+        p.PickUpItem(state['item'] )
+        return b.build()
+
+    def was_success(ds, rs, state):
+        s = get_player(pid, ds, rs)
+        items = s.get('items')
+        return items is not None and len(items) == 1
+
+    state = dict()
+    run_env([purchase_item, drop_item, pick_item], was_success, state=state)
+
 # def use_ability(ds, rs, state):
 #     b = IPCMessageBuilder()
 #     p = b.player(pid)
@@ -389,5 +436,5 @@ def test_drop_item(pid=0):
 
 
 if __name__ == '__main__':
-    test_drop_item()
+    test_pick_item()
 
