@@ -2,6 +2,7 @@
 that is suitable for machine learning
 """
 import asyncio
+from itertools import chain
 import logging
 import traceback
 
@@ -10,9 +11,12 @@ from luafun.game.modes import DOTA_GameMode
 import luafun.game.dota2.state_types as msg
 from luafun.game.ipc_send import TEAM_RADIANT, TEAM_DIRE
 from luafun.game.action import action_space
+import luafun.game.constants as const
+import luafun.game.action as actions
 
 from luafun.stitcher import Stitcher
 from luafun.reward import Reward
+from luafun.draft import DraftTracker
 
 log = logging.getLogger(__name__)
 
@@ -82,7 +86,11 @@ class Dota2Env(Dota2Game):
             reward = Reward()
 
         self.reward = reward
-        # ----
+
+        # Draft tracker for the drafting AI
+        self.draft_tracker = DraftTracker()
+        self._radiant_state.draft = self.draft_tracker.draft
+        self._dire_state.draft = self.draft_tracker.draft
 
     def cleanup(self):
         self.radiant_message.close()
@@ -133,9 +141,6 @@ class Dota2Env(Dota2Game):
         dire = acquire_state(self._dire_state)
         radiant = acquire_state(self._radiant_state)
         pass
-
-    def _action_preprocessor(self, message):
-        return message
 
     # Gym Environment API
     # -------------------
@@ -247,17 +252,42 @@ class Dota2Env(Dota2Game):
 
         return obs, reward, done, info
 
+    # Helpers
+    # -------
+    def _action_preprocessor(self, message):
+        self.draft_tracker.update(
+            message[TEAM_RADIANT].get('HS', dict()),
+            message[TEAM_DIRE].get('HS', dict())
+        )
+
+        players = chain(message[TEAM_RADIANT].items(), message[TEAM_DIRE].item())
+
+        for pid, action in players:
+            if pid == 'HS':
+                continue
+
+            # slots needs to be remapped from our unified slot
+            # to the game internal slot
+            hid = self.heroes[pid]['hid']
+            slot = action[actions.ARG.nSlot]
+            slot = const.HERO_LOOKUP.ability_from_id(hid, slot)
+            action[actions.ARG.nSlot] = slot
+
+            # Remap Trees
+
+            # Remap Entity Handles
+
+            # Remap Item Name
+
+            # Remap vloc to be across al map
+
+        return message
+
 
 def _default_game(path, dedicated=True, config=None):
     game = Dota2Env(path, dedicated=dedicated, _config=config)
     game.options.ticks_per_observation = 4
     game.options.host_timescale = 2
-    return game
-
-
-def sfmid1v1(path, config=None):
-    game = _default_game(path, config=config)
-    game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_1V1MID)
     return game
 
 
@@ -286,7 +316,6 @@ def allrandom(path, config=None):
 
 
 _environments = {
-    'sf1v1mid': sfmid1v1,
     'mid1v1': mid1v1,
     'allpick_nobans': allpick_nobans,
     'ranked_allpick': ranked_allpick,
@@ -294,15 +323,31 @@ _environments = {
 }
 
 
-def main(path, config=None):
+def main(path=None, config=None):
+    """This simply runs the environment forever with NO MODELS
+    It means bots will not do anything, if drafting is enabled nothing will be drafted
+
+    This function is used for testing purposes
+    """
     from argparse import ArgumentParser
     logging.basicConfig(level=logging.DEBUG)
 
     parser = ArgumentParser()
-    parser.add_argument('--draft', action='store_true', default=False)
-    args = parser.parse_args()
+    parser.add_argument('--draft', action='store_true', default=False,
+                        help='Enable bot drafting')
 
-    game = sfmid1v1(path, config=config)
+    parser.add_argument('--mode', type=str, default='allpick_nobans',
+                        help='Game mode')
+
+    parser.add_argument('--path', type=str, default=path,
+                        help='Custom Dota2 game location')
+
+    args = parser.parse_args()
+    factory = _environments.get(args.mode)
+    if factory is None:
+        return
+
+    game = factory(args.path, config=config)
     game.options.dedicated = False
     game.draft = int(args.draft)
 
@@ -312,22 +357,5 @@ def main(path, config=None):
     print('Done')
 
 
-def guess_path():
-    from sys import platform
-
-    s = 'F:/SteamLibrary/steamapps/common/dota 2 beta/'
-
-    if platform == "linux" or platform == "linux2":
-        s = '/media/setepenre/local/SteamLibraryLinux/steamapps/common/dota2/'
-
-    return s
-
-
 if __name__ == '__main__':
-    import sys
-
-    from luafun.utils.options import option
-    sys.stderr = sys.stdout
-
-    p = option('dota.path', guess_path())
-    main(p)
+    main()

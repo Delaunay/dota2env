@@ -12,6 +12,7 @@ class Draft(BasePage):
         return [
             '/draft',
             '/draft/<int:faction>/<string:action>/<string:hero>',
+            '/draft/<int:faction>/<string:action>/<string:hero>/<int:lane>',
         ]
 
     def __init__(self, app):
@@ -23,12 +24,12 @@ class Draft(BasePage):
         self.rpc_send.put(dict(attr='send_message', args=[action]))
         _ = self.fetch()
 
-    def main(self, faction=None, action=None, hero=None):
+    def main(self, faction=None, action=None, hero=None, lane=0):
         if faction and action and hero:
             b = IPCMessageBuilder()
             draft = b.hero_selection(faction)
             if action == 'select':
-                draft.select(hero, 0)
+                draft.select(hero, lane)
             else:
                 draft.ban(hero)
             self.send_action(b.build())

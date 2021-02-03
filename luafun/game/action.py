@@ -362,6 +362,7 @@ class HeroSelection:
         self.fac[DraftAction.Lane] = lane
 
     def ban(self, hero):
+        """Ban does not work for bots, which makes sense in the case of players wanting to practice annoying hero"""
         self.fac[DraftAction.BanHero] = hero
 
 

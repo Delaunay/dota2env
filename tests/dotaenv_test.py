@@ -1,12 +1,17 @@
+from itertools import chain
 import logging
 import time
+
 
 import pytest
 
 from luafun.game.modes import DOTA_GameMode
-from luafun.dotaenv import Dota2Env, guess_path
+from luafun.dotaenv import Dota2Env
 from luafun.utils.options import option
 from luafun.game.action import IPCMessageBuilder, SpellSlot
+
+from luafun.scratch import guess_path
+
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -589,12 +594,7 @@ def test_full_draft():
     heroes = {h: 0 for _, h in heroes}
 
     def was_success(ds, rs, state):
-        for pid, player in rs._players.items():
-            name = player.get('name')
-            if name in heroes:
-                heroes[name] += 1
-
-        for pid, player in ds._players.items():
+        for pid, player in chain(rs._players.items(), ds._players.items()):
             name = player.get('name')
             if name in heroes:
                 heroes[name] += 1
@@ -624,12 +624,7 @@ def test_1v1_draft():
     heroes['npc_dota_hero_target_dummy'] = 0
 
     def was_success(ds, rs, state):
-        for pid, player in rs._players.items():
-            name = player.get('name')
-            if name in heroes:
-                heroes[name] += 1
-
-        for pid, player in ds._players.items():
+        for pid, player in chain(rs._players.items(), ds._players.items()):
             name = player.get('name')
             if name in heroes:
                 heroes[name] += 1

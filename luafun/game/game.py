@@ -13,6 +13,7 @@ from luafun.game.ipc_recv import ipc_recv
 from luafun.game.ipc_send import ipc_send, TEAM_RADIANT, TEAM_DIRE, new_ipc_message
 import luafun.game.dota2.state_types as msg
 from luafun.game.extractor import Extractor
+import luafun.game.constants as const
 from luafun.game.states import world_listener_process
 
 
@@ -110,6 +111,7 @@ class Dota2Game:
         self.http_rpc_send = None
         self.http_rpc_recv = None
 
+        self.heroes = None
         self.draft = draft
         self.uid = StateHolder()
         self.ready = False
@@ -357,6 +359,30 @@ class Dota2Game:
 
         self.stop()
 
+    def _set_hero_info(self, info):
+        """Get the game hero info"""
+        self.heroes = dict()
+
+        # Message example
+        # {"P":[
+        #   {"is_bot":true,"team_id":2,"hero":"npc_dota_hero_antimage","id":0},
+        #   {"is_bot":true,"team_id":2,"hero":"npc_dota_hero_axe","id":1},
+        #   {"is_bot":true,"team_id":2,"hero":"npc_dota_hero_bane","id":2},
+        #   {"is_bot":true,"team_id":2,"hero":"npc_dota_hero_bloodseeker","id":3},
+        #   {"is_bot":true,"team_id":2,"hero":"npc_dota_hero_crystal_maiden","id":4},
+        #   {"is_bot":true,"team_id":3,"hero":"npc_dota_hero_drow_ranger","id":5},
+        #   {"is_bot":true,"team_id":3,"hero":"npc_dota_hero_earthshaker","id":6},
+        #   {"is_bot":true,"team_id":3,"hero":"npc_dota_hero_juggernaut","id":7},
+        #   {"is_bot":true,"team_id":3,"hero":"npc_dota_hero_mirana","id":8},
+        #   {"is_bot":true,"team_id":3,"hero":"npc_dota_hero_nevermore","id":9}]
+        #   }
+        for p in info:
+            self.heroes[p['id']] = {
+                'name': p['hero'],
+                'bot': p['is_bit'],
+                'hid': const.HERO_LOOKUP.from_name(p['hero'])['id']
+            }
+
     def _receive_message(self, faction: int, player_id: int, message: dict):
         # error processing
         error = message.get('E')
@@ -369,6 +395,7 @@ class Dota2Game:
         if info is not None:
             self.players[int(faction)] += 1
             if self.is_game_ready():
+                self._set_hero_info(info)
                 self.state['game'] = True
                 log.debug('All bots accounted for, Game is ready')
                 self.ready = True
@@ -441,22 +468,3 @@ class Dota2Game:
 
         self.cleanup()
         log.debug("Game has finished")
-
-
-def main(path='F:/SteamLibrary/steamapps/common/dota 2 beta/', config=None):
-    logging.basicConfig(level=logging.DEBUG)
-
-    game = Dota2Game(
-        path,
-        False,
-        config=config)
-
-    with game:
-        #
-        game.wait()
-
-    print('Done')
-
-
-if __name__ == '__main__':
-    main()
