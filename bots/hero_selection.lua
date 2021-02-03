@@ -118,7 +118,7 @@ local function pick_hero(player_id, hero_name, lane)
         lanes[player_id] = lane
         n = n + 1
     else
-        send_message({E = 'Hero not available ' .. hero_name})
+        send_message({E = 'Player already selected an hero ' .. GetSelectedHeroName(player_id)})
     end
 end
 
@@ -128,7 +128,7 @@ local function ban_hero(hero_name)
         return
     end
 
-    -- CMBanHero(hero_name)
+    CMBanHero(hero_name)
     send_message({E = 'Wanted to ban: ' .. hero_name})
 end
 
@@ -154,6 +154,7 @@ function block_picks()
             pick_hero(8, nohero)
             pick_hero(9, nohero)
         end
+        n = 0
     end
 end
 
@@ -185,6 +186,23 @@ local function default_logic()
 end
 
 
+local function get_total_pick_count()
+    local count = 5
+
+    if GetGameMode() == GAMEMODE_1V1MID or GetGameMode() == GAMEMODE_MO then
+        count = 1
+    end
+
+    return count
+end
+
+local total_pick_count = get_total_pick_count()
+
+local EnableDraft = '0'
+local SelectHero = '1'
+local BanHero = '2'
+local Lane = '3'
+
 -- Called every frame. Responsible for selecting heroes for bots.
 function ThinkOverride()
     -- first call block unavailable player slots
@@ -203,22 +221,25 @@ function ThinkOverride()
         return
     end
 
-    local ml_draft = msg[1]
+    local ml_draft = msg[EnableDraft]
 
     if ml_draft ~= nil and ml_draft == 0 then
          default_logic()
     elseif msg ~= nil then
         -- Bots are manually drafting
-        local selected = msg[2]
-        local banned = msg[3]
-        local lane = msg[4]
+        local selected = msg[SelectHero]
+        local banned = msg[BanHero]
+        local lane = msg[Lane]
 
         local pid = offset + n
+
         pick_hero(pid, selected, lane)
+
+        print(banned)
         ban_hero(banned)
     end
 
-    if n >= 5 then
+    if n >= total_pick_count then
         send_message({P = 'Draft Over'})
     end
 end

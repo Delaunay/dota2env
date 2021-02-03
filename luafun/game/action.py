@@ -346,16 +346,23 @@ def action_space():
     return full_space
 
 
+class DraftAction(IntEnum):
+    EnableDraft = 0
+    SelectHero = 1
+    BanHero = 2
+    Lane = 3
+
+
 class HeroSelection:
     def __init__(self, fac):
         self.fac = fac
 
     def select(self, hero, lane):
-        self.fac[1] = hero
-        self.fac[3] = lane
+        self.fac[DraftAction.SelectHero] = hero
+        self.fac[DraftAction.Lane] = lane
 
     def ban(self, hero):
-        self.fac[2]: hero
+        self.fac[DraftAction.BanHero] = hero
 
 
 class IPCMessageBuilder:
@@ -372,12 +379,12 @@ class IPCMessageBuilder:
         return Player(self.message[faction][idx])
 
     def hero_selection(self, faction):
-        self.message[faction]['HS'] = [
-            1,      # Enable ML Bot Drafter (vs hardcoded bots)
-            None,   # Selected Hero
-            None,   # Banned Hero
-            None    # Lane Assignment
-        ]
+        self.message[faction]['HS'] = {
+            DraftAction.EnableDraft: 1,
+            DraftAction.SelectHero: None,
+            DraftAction.BanHero: None,
+            DraftAction.Lane: None
+        }
         return HeroSelection(self.message[faction]['HS'])
 
     def build(self):

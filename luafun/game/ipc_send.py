@@ -1,8 +1,20 @@
 import json
 import os
 
+
 TEAM_RADIANT = 2
 TEAM_DIRE = 3
+
+
+def get_draft_message(draft):
+    from luafun.game.action import DraftAction
+
+    return {
+        DraftAction.EnableDraft: draft,
+        DraftAction.SelectHero: None,
+        DraftAction.BanHero: None,
+        DraftAction.Lane: None
+    }
 
 
 def new_ipc_message(draft=None):
@@ -32,8 +44,8 @@ def new_ipc_message(draft=None):
     }
 
     if draft is not None:
-        base[TEAM_RADIANT]['HS'] = [draft, None, None, None]
-        base[TEAM_DIRE]['HS'] = [draft, None, None, None]
+        base[TEAM_RADIANT]['HS'] = get_draft_message(draft)
+        base[TEAM_DIRE]['HS'] = get_draft_message(draft)
 
     return base
 
