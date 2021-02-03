@@ -235,12 +235,11 @@ function ThinkOverride()
 
         pick_hero(pid, selected, lane)
 
-        print(banned)
         ban_hero(banned)
     end
 
     if n >= total_pick_count then
-        send_message({P = 'Draft Over'})
+        send_message({DE = 'Draft Over'})
     end
 end
 
@@ -255,8 +254,7 @@ function GetBotNamesOverride()
 end
 
 
-print('Hero Selection')
-
+send_message({DS = 'Draft Starting'})
 GetBotNames = GetBotNamesOverride
 UpdateLaneAssignments = UpdateLaneAssignmentsOverride
 Think = ThinkOverride

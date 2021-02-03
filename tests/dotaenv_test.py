@@ -12,8 +12,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 class DotaTestEnvironment(Dota2Env):
-    def __init__(self, send_actions, check_action, action_wait=0.26, timeout=1, **kwargs):
-        super(DotaTestEnvironment, self).__init__(option('dota.path', guess_path()), True)
+    def __init__(self, send_actions, check_action, draft=0, action_wait=0.26, timeout=1, **kwargs):
+        super(DotaTestEnvironment, self).__init__(option('dota.path', guess_path()), True, draft=draft)
 
         self.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_AP)
         self.options.ticks_per_observation = 4
@@ -67,9 +67,12 @@ class DotaTestEnvironment(Dota2Env):
                 stop = False
                 time.sleep(0.01)
 
+                if self.draft == 1 and self.state.get('draft', False):
+                    self.send_all_actions()
+
                 # Send
                 # ---
-                if self.ready:
+                if self.ready and self.draft == 0:
                     if not self.options.dedicated:
                         time.sleep(10)
 
@@ -99,8 +102,11 @@ class DotaTestEnvironment(Dota2Env):
             pass
 
 
-def run_env(send_actions, check_action, timeout=1, action_wait=0.26, **kwargs):
-    game = DotaTestEnvironment(send_actions, check_action, action_wait, timeout, **kwargs)
+def run_env(send_actions, check_action, draft=0, timeout=1, action_wait=0.26, mode=None, **kwargs):
+    game = DotaTestEnvironment(send_actions, check_action, draft=draft, action_wait=action_wait, timeout=timeout, **kwargs)
+
+    if mode is not None:
+        game.options.game_mode = mode
 
     with game:
         game.exec()
@@ -557,6 +563,82 @@ def test_courier_secret(pid=0):
     run_env([go_secret], was_success, state=state)
 
 
+def test_full_draft():
+    heroes = [
+        (2, 'npc_dota_hero_hoodwink'),
+        (2, 'npc_dota_hero_snapfire'),
+        (2, 'npc_dota_hero_void_spirit'),
+        (2, 'npc_dota_hero_mars'),
+        (2, 'npc_dota_hero_grimstroke'),
+        (3, 'npc_dota_hero_dark_willow'),
+        (3, 'npc_dota_hero_pangolier'),
+        (3, 'npc_dota_hero_monkey_king'),
+        (3, 'npc_dota_hero_abyssal_underlord'),
+        (3, 'npc_dota_hero_arc_warden')
+    ]
+
+    def make_selection_message(fac, hero):
+        def fun(*args, **kwargs):
+            b = IPCMessageBuilder()
+            d = b.hero_selection(fac)
+            d.select(hero, 0)
+            return b.build()
+        return fun
+
+    messages = [make_selection_message(*arg) for arg in heroes]
+    heroes = {h: 0 for _, h in heroes}
+
+    def was_success(ds, rs, state):
+        for pid, player in rs._players.items():
+            name = player.get('name')
+            if name in heroes:
+                heroes[name] += 1
+
+        for pid, player in ds._players.items():
+            name = player.get('name')
+            if name in heroes:
+                heroes[name] += 1
+
+        return sum([c for _, c in heroes.items()]) == 10
+
+    state = dict()
+    run_env(messages, was_success, draft=1, state=state)
+
+
+def test_1v1_draft():
+    heroes = [
+        (2, 'npc_dota_hero_hoodwink'),
+        (3, 'npc_dota_hero_dark_willow'),
+    ]
+
+    def make_selection_message(fac, hero):
+        def fun(*args, **kwargs):
+            b = IPCMessageBuilder()
+            d = b.hero_selection(fac)
+            d.select(hero, 0)
+            return b.build()
+        return fun
+
+    messages = [make_selection_message(*arg) for arg in heroes]
+    heroes = {h: 0 for _, h in heroes}
+    heroes['npc_dota_hero_target_dummy'] = 0
+
+    def was_success(ds, rs, state):
+        for pid, player in rs._players.items():
+            name = player.get('name')
+            if name in heroes:
+                heroes[name] += 1
+
+        for pid, player in ds._players.items():
+            name = player.get('name')
+            if name in heroes:
+                heroes[name] += 1
+
+        return sum([c for _, c in heroes.items()]) == 10 and heroes['npc_dota_hero_target_dummy'] == 8
+
+    state = dict()
+    run_env(messages, was_success, mode=int(DOTA_GameMode.DOTA_GAMEMODE_1V1MID), draft=1, state=state)
+
 
 #
 # def use_ability_unit(ds, rs, state):
@@ -570,4 +652,4 @@ if __name__ == '__main__':
     # this does not work
     # test_stop_ability()
     # test_courier_return()
-    test_use_ability_on_unit()
+    test_1v1_draft()

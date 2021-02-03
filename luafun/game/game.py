@@ -369,6 +369,7 @@ class Dota2Game:
         if info is not None:
             self.players[int(faction)] += 1
             if self.is_game_ready():
+                self.state['game'] = True
                 log.debug('All bots accounted for, Game is ready')
                 self.ready = True
             return
@@ -381,6 +382,17 @@ class Dota2Game:
                 log.debug(f'(uid: {ack}) message received by all {self.bot_count} bots')
                 self.reply_count.pop(ack)
             return
+
+        # Draft message
+        ds = message.get('DS')
+        if ds is not None:
+            self.state['draft'] = True
+            log.debug(f'draft has started')
+
+        de = message.get('DE')
+        if de is not None:
+            self.state['draft'] = False
+            log.debug(f'draft has ended')
 
         # Message Info
         info = message.get('I')

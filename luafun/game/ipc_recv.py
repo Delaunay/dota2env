@@ -12,6 +12,8 @@ from pygtail import Pygtail
 log = logging.getLogger(__name__)
 
 IPC_RECV = re.compile(r'\[IPC\](?P<faction>[0-9])\.(?P<player>[0-9])\t(?P<message>.*)')
+IPC_RECV_DRAFT = re.compile(r'\[IPC\](?P<faction>[0-9])\.HS\t(?P<message>.*)')
+
 DIRE_WIN = re.compile(r'Building: npc_dota_goodguys_fort destroyed at')
 RADIANT_WIN = re.compile(r'Building: npc_dota_badguys_fort destroyed at')
 
@@ -71,6 +73,11 @@ class IPCRecv:
             if result:
                 self.state['win'] = 'RADIANT'
                 continue
+
+            result = IPC_RECV_DRAFT.search(line)
+            if result:
+                msg = result.groupdict()
+                self.queue.put((msg.get('faction'), 'HS', json.loads(msg.get('message'))))
 
         # no new message
         self.state['ipc_recv'] = datetime.utcnow()
