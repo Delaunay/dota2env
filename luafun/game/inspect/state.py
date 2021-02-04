@@ -99,6 +99,11 @@ class DrawMap(BasePage):
             3: '#FF0000'
         }
 
+        self.trees = {
+            'ignored': '#6bff33',
+            'duplicated': '#fff633',
+        }
+
     def load_image(self, name):
         """Load an image"""
         with open(name, 'br') as f:
@@ -137,6 +142,25 @@ class DrawMap(BasePage):
             units.append(h)
         return units
 
+    def show_bad_trees(self):
+        bad_trees = []
+
+        for k, loc in const.IGNORED_TREES.items():
+            x = (loc[0] + const.BOUNDS[1][0]) * 1024 / const.SIZE[0]
+            y = (const.BOUNDS[1][1] - loc[1]) * 1024 / const.SIZE[0]
+            c = self.trees['ignored']
+            h = f'<circle id="{k}" cx="{x}" cy="{y}" stroke="black" r="8" fill="{c}"/>'
+            bad_trees.append(h)
+
+        for k, loc in const.DUP_TREES.items():
+            x = (loc[0] + const.BOUNDS[1][0]) * 1024 / const.SIZE[0]
+            y = (const.BOUNDS[1][1] - loc[1]) * 1024 / const.SIZE[0]
+            c = self.trees['duplicated']
+            h = f'<circle id="{k}" cx="{x}" cy="{y}" stroke="black" r="8" fill="{c}"/>'
+            bad_trees.append(h)
+
+        return bad_trees
+
     def main(self, faction, player=None):
         radiant = faction.lower() in ('rad', 'radiant')
 
@@ -152,13 +176,14 @@ class DrawMap(BasePage):
         heroes = []
         buildings = []
         units = []
+        trees = self.show_bad_trees()
 
         if state:
             heroes = self.show_units(state._players, 'hero')
             buildings = self.show_units(state._buildings, 'building')
             units = self.show_units(state._units, 'unit')
 
-        units = '\n'.join(heroes + buildings + units)
+        units = '\n'.join(heroes + buildings + units + trees)
 
         svg = f"""
         <svg height="1024px" width="1024px" style="background-image: url({self.background})">

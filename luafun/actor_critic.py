@@ -107,13 +107,13 @@ class SelectionCategorical(nn.Module):
             nn.Softmax(dim=-1)
         )
 
-    def eval(self, x):
+    def argmax(self, x):
         """Evaluation mode without exploration"""
         with torch.no_grad():
             action_probs = self.selector(x)
             return torch.argmax(action_probs)
 
-    def forward(self, x):
+    def sampled(self, x):
         action_probs = self.selector(x)
 
         # instead of picking the most likely
@@ -134,7 +134,8 @@ class SelectionCategorical(nn.Module):
 #   * Trees might be fairly far from the hero (Timbersaw) or fairly close (tango)
 #   * Enemy entities could be far and close as well (Spirit breaker)
 #   * allies need to be there as well for buff spell
-
+#
+#  We fix that issue by simply finding the tree closest to the selected location
 class EntitySelector(nn.Module):
     """Select the entity we want to move/attack/use ability on.
     It takes a variable number of entites it needs to select from
@@ -153,6 +154,12 @@ class ItemPurchaser(SelectionCategorical):
 class SimpleDrafter(nn.Module):
     """Works by encoding one-hot vectors of heroes to a dense vector which makes the internal state of the model.
     Decoders are then used to extract which pick or ban should be made given the information present
+
+    Notes
+    -----
+    The drafter as a whole can only be trained on finished matches, but
+    underlying parts of the network such as the ``hero_encoder`` can and will
+    be trained continuously during the game.
 
     Examples
     --------
@@ -233,95 +240,191 @@ class HeroModel(nn.Module):
     and then selected one of those actions.
 
     We are having a small network for each action argument
+
+    OpenAI used 16 observations
+
+    Examples
+    --------
+
+    >>> from luafun.game.action import ARG
+
+    >>> _ = torch.manual_seed(0)
+    >>> input_size = 1024
+    >>> seq = 16
+    >>> batch_size = 10
+
+    >>> model = HeroModel(batch_size, seq, input_size)
+
+    >>> batch = torch.randn(batch_size, seq, input_size)
+
+    >>> with torch.no_grad():
+    ...     act, _, _ = model.sampled(batch)
+
+    Returns the actions to take for each bots/players
+    >>> act[ARG.action].shape
+    torch.Size([10])
+
+    >>> player = 0
+
+    Selected action
+    >>> act[ARG.action][player]
+    tensor(12)
+
+    Vector location
+    >>> act[ARG.vLoc][player]
+    tensor([ 0.0105, -0.0105])
+
+    Ability to use
+    >>> act[ARG.nSlot][player]
+    tensor(15)
+
+    Item Swap
+    >>> act[ARG.ix2][player]
+    tensor(12)
+
+    Item to buy
+    >>> act[ARG.sItem][player]
+    tensor(134)
     """
 
-    def __init__(self, input_size):
+    def __init__(self, batch_size, seq, input_size):
         super(HeroModel, self).__init__()
-
-        # Abilities
-        # --- Inventory Abilities (size 16)
-        # 0
-        # .
-        # .
-        # 5
-        #
-        #
-        # 15
-        # --- Abilities Abilities (size 24)
-        # 16 Q
-        # 17 W
-        # 18 E
-        # 19 D
-        # 20 F
-        # 21 R
-        #  .
-        #  .
-        # 32 Talent 1.1
-        # 33 Talent 1.2
-        #  .
-        #  .
-        # 39 Talent 4.1
-        # 40 Talent 4.2
-        # ------------------------
-        # Total = 16 + 24  = 40
-
         # preprocess a spacial observation with a specialized network
         self.state_preprocessor = nn.Module()
 
-        # Process our flatten world obersation vector
+        # Process our flatten world observation vector
         # Generates a hidden state that is decoded by smaller network
         # which returns the actual action to take
 
         self.hidden_size = int(input_size * 0.55)
         self.input_size = int(input_size)
+        self.lstm_layer = 3
+
+        # input of shape  (batch, seq_len, input_size)
+        # output of shape (batch, seq_len, hidden_size)
         self.internal_model = nn.LSTM(
             input_size=self.input_size,
             hidden_size=self.hidden_size,
-            num_layers=3,
-            bias=True
+            num_layers=self.lstm_layer,
+            bias=True,
+            batch_first=True,
         )
+
+        self.batch_size = batch_size
+        # Learn the initial parameters
+        self.h0_init = nn.Parameter(torch.zeros(self.lstm_layer, self.batch_size, self.hidden_size))
+        self.c0_init = nn.Parameter(torch.zeros(self.lstm_layer, self.batch_size, self.hidden_size))
+
+        self.h0 = None
+        self.c0 = None
 
         ability_count = len(actions.ItemSlot) + len(actions.AbilitySlot)
 
         # Those sub networks are small and act as state decoder
         # to return the precise action that is the most suitable
-        self.ability = SelectionCategorical(self.hidden_size, ability_count + 1)
-        self.runes = SelectionCategorical(self.hidden_size, len(actions.RuneSlot) + 1)
+        self.ability = SelectionCategorical(self.hidden_size, ability_count)
         self.action = SelectionCategorical(self.hidden_size, len(actions.Action))
         self.swap = SelectionCategorical(self.hidden_size, len(actions.ItemSlot))
+        self.item = SelectionCategorical(self.hidden_size, const.ITEM_COUNT)
 
-        # This is for purchasing only
-        self.item = SelectionCategorical(self.hidden_size, const.ITEM_COUNT + 1)
+        # Normalized Vector location
+        ph = int(self.hidden_size / 2)
+        self.position = nn.Sequential(
+            nn.Linear(self.hidden_size, ph),
+            nn.ReLU(),
+            nn.Linear(ph, 2),
+            nn.Softmax(dim=-1)
+        )
 
-        self.position = Coordinate()
+        # Unit is retrieved from position
+        # self.unit = SelectionHandle()
 
-        # Select a unit in the game for action
-        self.unit = SelectionHandle()
+        # Tree ID is retrieved from position
+        # self.tree = SelectTree()
 
-        # Missing:
-        # * Secondary Inventory Index for swapping
-        # * Vector Output for area targets
-        # * Select Tree
-        # * unit handle selection
+        # Rune ID is retrieved from position
+        # self.runes = SelectionCategorical(self.hidden_size, len(actions.RuneSlot) + 1)
+
         self.ability_embedder = AbilityEncoder()
         self.hero_embedder = HeroEncoder()
 
-        # Vector location
+    def argmax(self, x):
+        """Pure inference, no exploration"""
+        with torch.no_grad():
+            if self.h0 is None:
+                hidden, (hn, cn) = self.internal_model(x, (self.h0_init, self.c0_init))
+            else:
+                hidden, (hn, cn) = self.internal_model(x, (self.h0, self.c0))
 
-        # Unit Selection
+            self.h0, self.c0 = hn, cn
+
+            # select the last state
+            hidden = hidden[:, -1]
+
+            # unit = self.unit(hidden)
+            # tree = self.tree(hidden)
+            # rune = self.runes(hidden)
+
+            # Sampled action
+            action  = self.action.argmax(hidden)
+            ability = self.ability.argmax(hidden)
+            swap    = self.swap.argmax(hidden)
+            item    = self.item.argmax(hidden)
+
+            # change the output from [0, 1] to [-1, 1]
+            vec = self.position(hidden) * 2 - 1
+
+            msg = {
+                actions.ARG.action: action,
+                actions.ARG.vLoc: vec,
+                actions.ARG.sItem: item,
+                actions.ARG.nSlot: ability,
+                actions.ARG.ix2: swap
+            }
+
+            log_progs = None
+            entropy = None
+
+            return msg, log_progs, entropy
+
+    def sampled(self, x):
+        """Inference with space exploration"""
+        if self.h0 is None:
+            hidden, (hn, cn) = self.internal_model(x, (self.h0_init, self.c0_init))
+        else:
+            hidden, (hn, cn) = self.internal_model(x, (self.h0, self.c0))
+
+        self.h0, self.c0 = hn, cn
+
+        hidden = hidden[:, -1]
+        # unit = self.unit(hidden)
+        # tree = self.tree(hidden)
+        # rune = self.runes(hidden)
+
+        # Sampled action
+        action,  lp_ac, ent_ac = self.action.sampled(hidden)
+        ability, lp_ab, ent_ab = self.ability.sampled(hidden)
+        swap,    lp_sw, ent_sw = self.swap.sampled(hidden)
+        item,    lp_it, ent_it = self.item.sampled(hidden)
+
+        # change the output from [0, 1] to [-1, 1]
+        vec = self.position(hidden) * 2 - 1
+
+        msg = {
+            actions.ARG.action: action,
+            actions.ARG.vLoc: vec,
+            actions.ARG.sItem: item,
+            actions.ARG.nSlot: ability,
+            actions.ARG.ix2: swap,
+        }
+
+        log_progs = (lp_ac, lp_ab, lp_sw, lp_it)
+        entropy   = (ent_ac, ent_ab, ent_sw, ent_it)
+
+        return msg, log_progs, entropy
 
     def forward(self, x):
-        hidden, (hn, cn) = self.internal_model(x, (h0, c0))
-
-        action = self.action(hidden)
-        rune = self.runes(hidden)
-        ability = self.ability(hidden)
-        secondary = self.swap(hidden)
-        item = self.item(hidden)
-
-        # Does this handle tree or not ?
-        unit = self.unit(hidden)
-        vec = self.position(hidden)
+        return self.sampled(x)
 
 
 class ActorCritic(nn.Module):

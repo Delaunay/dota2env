@@ -271,6 +271,12 @@ def generate_item_array():
             log.debug(f'Ignoring ability {k} {v}')
             break
 
+        if v.get('ItemIsNeutralDrop', "") == '1':
+            continue
+
+        if v.get('ItemPurchasable', "") == '0':
+            continue
+
         abilities.append(dict(name=k, id=int(v['ID'])))
 
     f = os.path.join(folder, '..', 'game', 'resources', 'items.json')

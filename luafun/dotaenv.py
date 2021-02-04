@@ -4,6 +4,7 @@ that is suitable for machine learning
 import asyncio
 from itertools import chain
 import logging
+import time
 import traceback
 
 from luafun.game.game import Dota2Game
@@ -17,6 +18,7 @@ import luafun.game.action as actions
 from luafun.stitcher import Stitcher
 from luafun.reward import Reward
 from luafun.draft import DraftTracker
+
 
 log = logging.getLogger(__name__)
 
@@ -92,6 +94,8 @@ class Dota2Env(Dota2Game):
         self._radiant_state.draft = self.draft_tracker.draft
         self._dire_state.draft = self.draft_tracker.draft
 
+        self.has_next = 0
+
     def cleanup(self):
         self.radiant_message.close()
         self.dire_message.close()
@@ -107,8 +111,9 @@ class Dota2Env(Dota2Game):
         """Receive a state diff from the game for dire"""
         try:
             self.sticher.apply_diff(self._dire_state, message)
+            self.has_next += 1
         except Exception as e:
-            log.error(f'Error happened during state stiching {e}')
+            log.error(f'Error happened during state stitching {e}')
             log.error(traceback.format_exc())
 
         self.dire_message.write(str(type(message)) + '\n')
@@ -119,8 +124,9 @@ class Dota2Env(Dota2Game):
         """Receive a state diff from the game for radiant"""
         try:
             self.sticher.apply_diff(self._radiant_state, message)
+            self.has_next += 1
         except Exception as e:
-            log.error(f'Error happened during state stiching {e}')
+            log.error(f'Error happened during state stitching {e}')
             log.error(traceback.format_exc())
 
         self.radiant_message.write(str(type(message)) + '\n')
@@ -213,6 +219,29 @@ class Dota2Env(Dota2Game):
     def observation_space(self):
         return self.sticher.observation_space
 
+    def initial(self):
+        return self.radiant_state(), self.dire_state()
+
+    @staticmethod
+    def fix_sampled_actions(act):
+        return {
+            'uid': 0,
+            TEAM_RADIANT: {
+                0: act[TEAM_RADIANT]['0'],
+                1: act[TEAM_RADIANT]['1'],
+                2: act[TEAM_RADIANT]['2'],
+                3: act[TEAM_RADIANT]['3'],
+                4: act[TEAM_RADIANT]['4'],
+            },
+            TEAM_DIRE: {
+                5: act[TEAM_DIRE]['5'],
+                6: act[TEAM_DIRE]['6'],
+                7: act[TEAM_DIRE]['7'],
+                8: act[TEAM_DIRE]['8'],
+                9: act[TEAM_DIRE]['9'],
+            }
+        }
+
     def step(self, action):
         """Make an action and return the resulting state
 
@@ -238,6 +267,12 @@ class Dota2Env(Dota2Game):
         self.send_message(preprocessed)
 
         # 2. Wait for the new stitched state
+        while self.has_next < 2 and self.running:
+            self._tick()
+            time.sleep(0.05)
+
+        self.has_next = 0
+
         rs = self.radiant_state()
         ds = self.dire_state()
 
@@ -245,9 +280,7 @@ class Dota2Env(Dota2Game):
 
         # 3. Compute the reward
         reward = self.reward(*obs)
-
         done = self.state.get('win', None) is not None
-
         info = dict()
 
         return obs, reward, done, info
@@ -260,10 +293,18 @@ class Dota2Env(Dota2Game):
             message[TEAM_DIRE].get('HS', dict())
         )
 
-        players = chain(message[TEAM_RADIANT].items(), message[TEAM_DIRE].item())
+        players = chain(message[TEAM_RADIANT].items(), message[TEAM_DIRE].items())
 
         for pid, action in players:
-            if pid == 'HS':
+            if pid == 'HS' and action[actions.DraftAction.EnableDraft] == 1:
+                # find the name of the hero from its ID
+                hid = action[actions.DraftAction.SelectHero]
+                shero = const.HEROES[hid]['name']
+                action[actions.DraftAction.SelectHero] = shero
+
+                hid = action[actions.DraftAction.SelectHero]
+                shero = const.HEROES[action[hid]]['name']
+                action[actions.DraftAction.BanHero] = shero
                 continue
 
             # slots needs to be remapped from our unified slot
@@ -273,43 +314,57 @@ class Dota2Env(Dota2Game):
             slot = const.HERO_LOOKUP.ability_from_id(hid, slot)
             action[actions.ARG.nSlot] = slot
 
+            # Remap Item Name
+            nitem = action[actions.ARG.sItem]
+            sitem = const.ITEMS[nitem]['name']
+            action[actions.ARG.sItem] = sitem
+
+            # Remap vloc to be across the map
+            pos = action[actions.ARG.vLoc]
+            # print(action)
+            x = pos[0] * const.RANGE[0]
+            y = pos[1] * const.RANGE[1]
+            action[actions.ARG.vLoc] = (x, y)
+
             # Remap Trees
+            action[actions.ARG.iTree] = const.get_tree(x, y)
 
             # Remap Entity Handles
+            state = self.radiant_state()
+            if pid >= 5:
+                state = self.dire_state()
 
-            # Remap Item Name
-
-            # Remap vloc to be across al map
+            action[actions.ARG.hUnit] = state.get_entity(x, y)
 
         return message
 
 
-def _default_game(path, dedicated=True, config=None):
+def _default_game(path=None, dedicated=True, config=None):
     game = Dota2Env(path, dedicated=dedicated, _config=config)
     game.options.ticks_per_observation = 4
     game.options.host_timescale = 2
     return game
 
 
-def mid1v1(path, config=None):
+def mid1v1(path=None, config=None):
     game = _default_game(path, config=config)
     game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_1V1MID)
     return game
 
 
-def allpick_nobans(path, config=None):
+def allpick_nobans(path=None, config=None):
     game = _default_game(path, config=config)
     game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_AP)
     return game
 
 
-def ranked_allpick(path, config=None):
+def ranked_allpick(path=None, config=None):
     game = _default_game(path, config=config)
     game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_ALL_DRAFT)
     return game
 
 
-def allrandom(path, config=None):
+def allrandom(path=None, config=None):
     game = _default_game(path, config=config)
     game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_AR)
     return game
@@ -321,6 +376,10 @@ _environments = {
     'ranked_allpick': ranked_allpick,
     'allrandom': allrandom
 }
+
+
+def dota2_environment(name, *args, **kwargs) -> Dota2Env:
+    return _environments.get(name)(*args, **kwargs)
 
 
 def main(path=None, config=None):

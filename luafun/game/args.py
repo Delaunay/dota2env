@@ -66,7 +66,7 @@ class DotaOptions:
             # '-dota_spectator_auto_spectate_bot_games', 1,
             # Relates to steam client.
             '+clientport', '{}'.format(self.client_port),
-            '+dota_1v1_skip_strategy', '1',
+            # '+dota_1v1_skip_strategy', '1',
             # Close dota when the game is over
             '+dota_surrender_on_disconnect', '0',
             # Make the game start with bots

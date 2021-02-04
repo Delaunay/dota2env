@@ -29,17 +29,15 @@ class ItemSlot(IntEnum):
     Item3 = 3
     Item4 = 4
     Item5 = 5
-    # backpack
-    Item6 = 6
-    Item7 = 7
-    Item8 = 8
-    # Stash
-    Item9 = 9
-    Item10 = 10
-    Item11 = 11
-    Item12 = 12
-    Item13 = 13
-    Item14 = 14
+    Bakcpack1 = 6
+    Bakcpack2 = 7
+    Bakcpack3 = 8
+    Stash1 = 9
+    Stash2 = 10
+    Stash3 = 11
+    Stash4 = 12
+    Stash5 = 13
+    Stash6 = 14
     Item15 = 15     # TP
     Item16 = 16     # Neutral ?
 
@@ -61,30 +59,30 @@ class SpellSlot(IntEnum):
 
 # might have to normalize talent so it is easier to learn
 class AbilitySlot(IntEnum):
-    Ablity0 = 0         # Q
-    Ablity1 = 1         # W
-    Ablity2 = 2         # E
-    Ablity3 = 3         # D generic_hidden
-    Ablity4 = 4         # F generic_hidden
-    Ablity5 = 5         # R                 This is standard
-    Ablity6 = 6
-    Ablity7 = 7
-    Ablity8 = 8
-    Ablity9 = 9         # Talent 1  (usually but the talent offset can be shifted)
-    Ablity10 = 10       # Talent 2  example: rubick, invoker, etc..
-    Ablity11 = 11       # Talent 3
-    Ablity12 = 12       # Talent 4  98 heroes follow the pattern above
-    Ablity13 = 13       # Talent 5
-    Ablity14 = 14       # Talent 6
-    Ablity15 = 15       # Talent 7
-    Ablity16 = 16       # Talent 8
-    Ablity17 = 17
-    Ablity18 = 18
-    Ablity19 = 19
-    Ablity20 = 20
-    Ablity21 = 21
-    Ablity22 = 22
-    Ablity23 = 23
+    Ablity0 = 0         # Q                 | invoker_quas
+    Ablity1 = 1         # W                 | invoker_wex
+    Ablity2 = 2         # E                 | invoker_exort
+    Ablity3 = 3         # D generic_hidden  | invoker_empty1
+    Ablity4 = 4         # F generic_hidden  | invoker_empty2
+    Ablity5 = 5         # R                 | invoker_invoke
+    Ablity6 = 6         # .                 | invoker_cold_snap
+    Ablity7 = 7         # .                 | invoker_ghost_walk
+    Ablity8 = 8         # .                 | invoker_tornado
+    Ablity9 = 9         # .                 | invoker_emp
+    Ablity10 = 10       # .                 | invoker_alacrity
+    Ablity11 = 11       # .                 | invoker_chaos_meteor
+    Ablity12 = 12       # .                 | invoker_sun_strike
+    Ablity13 = 13       # .                 | invoker_forge_spirit
+    Ablity14 = 14       # .                 | invoker_ice_wall
+    Ablity15 = 15       # .                 | invoker_deafening_blast
+    Ablity16 = 16       # Talent 1  (usually but the talent offset can be shifted)
+    Ablity17 = 17       # Talent 2  example: rubick, invoker, etc..
+    Ablity18 = 18       # Talent 3
+    Ablity19 = 19       # Talent 4  98 heroes follow the pattern above
+    Ablity20 = 20       # Talent 5
+    Ablity21 = 21       # Talent 6
+    Ablity22 = 22       # Talent 7
+    Ablity23 = 23       # Talent 8
 
 
 assert len(AbilitySlot) == 24, '24 abilities'
@@ -295,54 +293,108 @@ class Player:
         self.act[ARG.action] = Action.CourierTransfer
 
 
-def action_space():
+def player_space():
+    """
+
+    Examples
+    --------
+    >>> s = player_space()
+    >>> s.seed(0)
+    >>> for k, v in s.sample().items():
+    ...     print(k, v)
+    ActionArgument.action 16
+    ActionArgument.vLoc [-0.8912799  0.9307819]
+    ActionArgument.hUnit 112
+    ActionArgument.nSlot 14
+    ActionArgument.iTree 1083
+    ActionArgument.nRune 0
+    ActionArgument.sItem 112
+    ActionArgument.ix2 16
+
+    """
     from gym import spaces
     import numpy as np
     import luafun.game.constants as const
 
-    def player_space():
-        action = spaces.Discrete(len(Action))
-        vloc = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
-        # We set the max number of unit on the map to 256
-        # the ids are remapped to actual handle id
-        hUnit = spaces.Discrete(256)
-        abilities = spaces.Discrete(len(ItemSlot) + len(AbilitySlot))
-        # Tree ID
-        tree = spaces.Discrete(const.TREE_COUNT)
-        runes = spaces.Discrete(len(RuneSlot))
-        items = spaces.Discrete(const.ITEM_COUNT)
-        ix2 = spaces.Discrete(len(ItemSlot))
+    action = spaces.Discrete(len(Action))
+    vloc = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+    # We set the max number of unit on the map to 256
+    # the ids are remapped to actual handle id
+    hUnit = spaces.Discrete(256)
+    abilities = spaces.Discrete(len(ItemSlot) + len(AbilitySlot))
+    # Tree ID
+    tree = spaces.Discrete(const.TREE_COUNT)
+    runes = spaces.Discrete(len(RuneSlot))
+    items = spaces.Discrete(const.ITEM_COUNT)
+    ix2 = spaces.Discrete(len(ItemSlot))
 
-        return spaces.Tuple((
-            action,
-            vloc,
-            hUnit,
-            abilities,
-            tree,
-            runes,
-            items,
-            ix2))
+    return spaces.Dict({
+        ARG.action: action,
+        ARG.vLoc: vloc,
+        ARG.hUnit: hUnit,
+        ARG.nSlot: abilities,
+        ARG.iTree: tree,
+        ARG.nRune: runes,
+        ARG.sItem: items,
+        ARG.ix2: ix2
+    })
 
-    def team_space(s):
-        return spaces.Dict({
-            f'{s + 0}': player_space(),
-            f'{s + 1}': player_space(),
-            f'{s + 2}': player_space(),
-            f'{s + 3}': player_space(),
-            f'{s + 4}': player_space(),
 
-            # Hero Selection
-            'HS': spaces.Dict({
-                'select': spaces.Discrete(const.HERO_COUNT),
-                'ban': spaces.Discrete(const.HERO_COUNT),
-                'lane': spaces.Discrete(len(Lanes))
-            })
+def team_space(s):
+    """
+
+    Examples
+    --------
+    >>> s = team_space(0)
+     >>> s.seed(0)
+    >>> for k, v in s.sample().items():
+    ...     print(k, v)
+    0 OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])
+    1 OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])
+    2 OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])
+    3 OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])
+    4 OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])
+    HS OrderedDict([('ban', 112), ('lane', 0), ('select', 112)])
+    """
+    from gym import spaces
+    import luafun.game.constants as const
+
+    return spaces.Dict({
+        f'{s + 0}': player_space(),
+        f'{s + 1}': player_space(),
+        f'{s + 2}': player_space(),
+        f'{s + 3}': player_space(),
+        f'{s + 4}': player_space(),
+
+        # Hero Selection
+        'HS': spaces.Dict({
+            'select': spaces.Discrete(const.HERO_COUNT),
+            'ban': spaces.Discrete(const.HERO_COUNT),
+            'lane': spaces.Discrete(len(Lanes))
         })
+    })
+
+
+def action_space():
+    """
+
+    Examples
+    --------
+    >>> s = action_space()
+    >>> s.seed(0)
+    >>> for k, v in s.sample().items():
+    ...     print(k, v)
+    2 OrderedDict([('0', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('1', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('2', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('3', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('4', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('HS', OrderedDict([('ban', 112), ('lane', 0), ('select', 112)]))])
+    3 OrderedDict([('5', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('6', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('7', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('8', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('9', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('HS', OrderedDict([('ban', 112), ('lane', 0), ('select', 112)]))])
+    """
+
+    from gym import spaces
 
     full_space = spaces.Dict({
-        f'{TEAM_RADIANT}': team_space(0),
-        f'{TEAM_DIRE}': team_space(5),
+        TEAM_RADIANT: team_space(0),
+        TEAM_DIRE: team_space(5),
     })
+
     return full_space
 
 

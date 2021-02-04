@@ -84,10 +84,6 @@
     "id": 12
   },
   {
-    "name": "item_stout_shield",
-    "id": 182
-  },
-  {
     "name": "item_recipe_moon_shard",
     "id": 246
   },
@@ -168,10 +164,6 @@
     "id": 27
   },
   {
-    "name": "item_ring_of_tarrasque",
-    "id": 279
-  },
-  {
     "name": "item_sobi_mask",
     "id": 28
   },
@@ -190,10 +182,6 @@
   {
     "name": "item_talisman_of_evasion",
     "id": 32
-  },
-  {
-    "name": "item_cheese",
-    "id": 33
   },
   {
     "name": "item_magic_stick",
@@ -240,28 +228,8 @@
     "id": 43
   },
   {
-    "name": "item_recipe_ward_dispenser",
-    "id": 217
-  },
-  {
-    "name": "item_ward_dispenser",
-    "id": 218
-  },
-  {
     "name": "item_tango",
     "id": 44
-  },
-  {
-    "name": "item_tango_single",
-    "id": 241
-  },
-  {
-    "name": "item_courier",
-    "id": 45
-  },
-  {
-    "name": "item_flying_courier",
-    "id": 286
   },
   {
     "name": "item_tpscroll",
@@ -348,14 +316,6 @@
     "id": 63
   },
   {
-    "name": "item_recipe_grandmasters_glaive",
-    "id": 653
-  },
-  {
-    "name": "item_grandmasters_glaive",
-    "id": 655
-  },
-  {
     "name": "item_recipe_hand_of_midas",
     "id": 64
   },
@@ -386,18 +346,6 @@
   {
     "name": "item_pers",
     "id": 69
-  },
-  {
-    "name": "item_recipe_poor_mans_shield",
-    "id": 70
-  },
-  {
-    "name": "item_poor_mans_shield",
-    "id": 71
-  },
-  {
-    "name": "item_satchel",
-    "id": 731
   },
   {
     "name": "item_recipe_bracer",
@@ -676,10 +624,6 @@
     "id": 116
   },
   {
-    "name": "item_aegis",
-    "id": 117
-  },
-  {
     "name": "item_recipe_shivas_guard",
     "id": 118
   },
@@ -742,18 +686,6 @@
   {
     "name": "item_kaya",
     "id": 259
-  },
-  {
-    "name": "item_trident",
-    "id": 369
-  },
-  {
-    "name": "item_combo_breaker",
-    "id": 276
-  },
-  {
-    "name": "item_refresher_shard",
-    "id": 260
   },
   {
     "name": "item_recipe_spirit_vessel",
@@ -1156,14 +1088,6 @@
     "id": 206
   },
   {
-    "name": "item_recipe_iron_talon",
-    "id": 238
-  },
-  {
-    "name": "item_iron_talon",
-    "id": 239
-  },
-  {
     "name": "item_recipe_abyssal_blade",
     "id": 207
   },
@@ -1178,14 +1102,6 @@
   {
     "name": "item_heavens_halberd",
     "id": 210
-  },
-  {
-    "name": "item_recipe_ring_of_aquila",
-    "id": 211
-  },
-  {
-    "name": "item_ring_of_aquila",
-    "id": 212
   },
   {
     "name": "item_recipe_tranquil_boots",
@@ -1234,377 +1150,5 @@
   {
     "name": "item_river_painter7",
     "id": 1027
-  },
-  {
-    "name": "item_mutation_tombstone",
-    "id": 1028
-  },
-  {
-    "name": "item_super_blink",
-    "id": 1029
-  },
-  {
-    "name": "item_pocket_tower",
-    "id": 1030
-  },
-  {
-    "name": "item_pocket_roshan",
-    "id": 1032
-  },
-  {
-    "name": "item_keen_optic",
-    "id": 287
-  },
-  {
-    "name": "item_grove_bow",
-    "id": 288
-  },
-  {
-    "name": "item_quickening_charm",
-    "id": 289
-  },
-  {
-    "name": "item_philosophers_stone",
-    "id": 290
-  },
-  {
-    "name": "item_force_boots",
-    "id": 291
-  },
-  {
-    "name": "item_desolator_2",
-    "id": 292
-  },
-  {
-    "name": "item_phoenix_ash",
-    "id": 293
-  },
-  {
-    "name": "item_seer_stone",
-    "id": 294
-  },
-  {
-    "name": "item_greater_mango",
-    "id": 295
-  },
-  {
-    "name": "item_elixer",
-    "id": 302
-  },
-  {
-    "name": "item_vampire_fangs",
-    "id": 297
-  },
-  {
-    "name": "item_craggy_coat",
-    "id": 298
-  },
-  {
-    "name": "item_greater_faerie_fire",
-    "id": 299
-  },
-  {
-    "name": "item_timeless_relic",
-    "id": 300
-  },
-  {
-    "name": "item_mirror_shield",
-    "id": 301
-  },
-  {
-    "name": "item_recipe_ironwood_tree",
-    "id": 303
-  },
-  {
-    "name": "item_ironwood_tree",
-    "id": 304
-  },
-  {
-    "name": "item_mango_tree",
-    "id": 328
-  },
-  {
-    "name": "item_royal_jelly",
-    "id": 305
-  },
-  {
-    "name": "item_pupils_gift",
-    "id": 306
-  },
-  {
-    "name": "item_tome_of_aghanim",
-    "id": 307
-  },
-  {
-    "name": "item_repair_kit",
-    "id": 308
-  },
-  {
-    "name": "item_mind_breaker",
-    "id": 309
-  },
-  {
-    "name": "item_third_eye",
-    "id": 310
-  },
-  {
-    "name": "item_spell_prism",
-    "id": 311
-  },
-  {
-    "name": "item_princes_knife",
-    "id": 325
-  },
-  {
-    "name": "item_witless_shako",
-    "id": 330
-  },
-  {
-    "name": "item_imp_claw",
-    "id": 334
-  },
-  {
-    "name": "item_flicker",
-    "id": 335
-  },
-  {
-    "name": "item_spy_gadget",
-    "id": 336
-  },
-  {
-    "name": "item_spider_legs",
-    "id": 326
-  },
-  {
-    "name": "item_helm_of_the_undying",
-    "id": 327
-  },
-  {
-    "name": "item_recipe_vambrace",
-    "id": 329
-  },
-  {
-    "name": "item_vambrace",
-    "id": 331
-  },
-  {
-    "name": "item_horizon",
-    "id": 312
-  },
-  {
-    "name": "item_fusion_rune",
-    "id": 313
-  },
-  {
-    "name": "item_ocean_heart",
-    "id": 354
-  },
-  {
-    "name": "item_broom_handle",
-    "id": 355
-  },
-  {
-    "name": "item_trusty_shovel",
-    "id": 356
-  },
-  {
-    "name": "item_nether_shawl",
-    "id": 357
-  },
-  {
-    "name": "item_dragon_scale",
-    "id": 358
-  },
-  {
-    "name": "item_essence_ring",
-    "id": 359
-  },
-  {
-    "name": "item_clumsy_net",
-    "id": 360
-  },
-  {
-    "name": "item_enchanted_quiver",
-    "id": 361
-  },
-  {
-    "name": "item_ninja_gear",
-    "id": 362
-  },
-  {
-    "name": "item_illusionsts_cape",
-    "id": 363
-  },
-  {
-    "name": "item_havoc_hammer",
-    "id": 364
-  },
-  {
-    "name": "item_panic_button",
-    "id": 365
-  },
-  {
-    "name": "item_apex",
-    "id": 366
-  },
-  {
-    "name": "item_ballista",
-    "id": 367
-  },
-  {
-    "name": "item_woodland_striders",
-    "id": 368
-  },
-  {
-    "name": "item_recipe_trident",
-    "id": 275
-  },
-  {
-    "name": "item_demonicon",
-    "id": 370
-  },
-  {
-    "name": "item_recipe_fallen_sky",
-    "id": 317
-  },
-  {
-    "name": "item_fallen_sky",
-    "id": 371
-  },
-  {
-    "name": "item_pirate_hat",
-    "id": 372
-  },
-  {
-    "name": "item_dimensional_doorway",
-    "id": 373
-  },
-  {
-    "name": "item_ex_machina",
-    "id": 374
-  },
-  {
-    "name": "item_faded_broach",
-    "id": 375
-  },
-  {
-    "name": "item_paladin_sword",
-    "id": 376
-  },
-  {
-    "name": "item_minotaur_horn",
-    "id": 377
-  },
-  {
-    "name": "item_orb_of_destruction",
-    "id": 378
-  },
-  {
-    "name": "item_the_leveller",
-    "id": 379
-  },
-  {
-    "name": "item_arcane_ring",
-    "id": 349
-  },
-  {
-    "name": "item_titan_sliver",
-    "id": 381
-  },
-  {
-    "name": "item_chipped_vest",
-    "id": 565
-  },
-  {
-    "name": "item_wizard_glass",
-    "id": 566
-  },
-  {
-    "name": "item_gloves_of_travel",
-    "id": 570
-  },
-  {
-    "name": "item_elven_tunic",
-    "id": 573
-  },
-  {
-    "name": "item_cloak_of_flames",
-    "id": 574
-  },
-  {
-    "name": "item_venom_gland",
-    "id": 575
-  },
-  {
-    "name": "item_trickster_cloak",
-    "id": 571
-  },
-  {
-    "name": "item_gladiator_helm",
-    "id": 576
-  },
-  {
-    "name": "item_possessed_mask",
-    "id": 577
-  },
-  {
-    "name": "item_ancient_perseverance",
-    "id": 578
-  },
-  {
-    "name": "item_star_mace",
-    "id": 637
-  },
-  {
-    "name": "item_penta_edged_sword",
-    "id": 638
-  },
-  {
-    "name": "item_oakheart",
-    "id": 582
-  },
-  {
-    "name": "item_warhammer",
-    "id": 674
-  },
-  {
-    "name": "item_bullwhip",
-    "id": 680
-  },
-  {
-    "name": "item_psychic_headband",
-    "id": 675
-  },
-  {
-    "name": "item_ceremonial_robe",
-    "id": 676
-  },
-  {
-    "name": "item_quicksilver_amulet",
-    "id": 686
-  },
-  {
-    "name": "item_book_of_shadows",
-    "id": 677
-  },
-  {
-    "name": "item_giants_ring",
-    "id": 678
-  },
-  {
-    "name": "item_vengeances_shadow",
-    "id": 679
-  },
-  {
-    "name": "item_stormcrafter",
-    "id": 585
-  },
-  {
-    "name": "item_overflowing_elixir",
-    "id": 588
-  },
-  {
-    "name": "item_mysterious_hat",
-    "id": 589
   }
 ]

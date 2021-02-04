@@ -133,7 +133,7 @@ class Dota2Game:
 
     @property
     def running(self):
-        return self.state['running']
+        return self.state and self.state.get('running', False)
 
     def is_game_ready(self):
         return self.players[TEAM_RADIANT] + self.players[TEAM_DIRE] == self.bot_count
@@ -343,6 +343,17 @@ class Dota2Game:
 
         return stop
 
+    def wait_end_setup(self):
+        while self.state and self.state.get('draft') is None and self.running:
+            time.sleep(0.01)
+            self._tick()
+
+    def wait_end_draft(self):
+
+        while self.state and self.state.get('game') is not True and not self.ready and self.running:
+            time.sleep(0.01)
+            self._tick()
+
     def wait(self):
         """Wait for the game to finish, this is used for debugging exclusively"""
         try:
@@ -377,11 +388,13 @@ class Dota2Game:
         #   {"is_bot":true,"team_id":3,"hero":"npc_dota_hero_nevermore","id":9}]
         #   }
         for p in info:
-            self.heroes[p['id']] = {
+            hero = {
                 'name': p['hero'],
-                'bot': p['is_bit'],
+                'bot': p['is_bot'],
                 'hid': const.HERO_LOOKUP.from_name(p['hero'])['id']
             }
+            self.heroes[p['id']] = hero
+            self.heroes[str(p['id'])] = hero
 
     def _receive_message(self, faction: int, player_id: int, message: dict):
         # error processing
@@ -454,6 +467,7 @@ class Dota2Game:
         log.debug("Game has started")
         # Create a file to say if we want to draft or not
         self.send_message(new_ipc_message(draft=self.draft))
+        self.wait_end_setup()
         return self
 
     def __exit__(self, exception_type, exception_value, exception_traceback):

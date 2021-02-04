@@ -11,6 +11,7 @@ from typing import List, Dict, Any, Optional
 
 import luafun.game.dota2.state_types as msg
 from luafun.draft import DraftStatus
+from luafun.entity import EntityManager
 
 GAME_START = 30
 NIGHT_DAY_TIME = 5 * 60
@@ -147,11 +148,15 @@ class FactionState:
     _couriers: Dict = field(default_factory=dictionary)
     _units: Dict = field(default_factory=dictionary)
     _buildings: Dict = field(default_factory=dictionary)
+    _manager: EntityManager = field(default_factory=EntityManager)
 
     # State Management
     _s: int = 0
     _e: int = 0
     _r: int = 0
+
+    def get_entity(self, x, y):
+        return self._manager.get_entity(x, y)
 
     def __deepcopy__(self, memo):
         state = FactionState(

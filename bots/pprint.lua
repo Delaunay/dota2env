@@ -52,9 +52,9 @@ pprint.defaults = {
     object_cache = 'local',     -- cache blob and table to give it a id, 'local' cache per print, 'global' cache
                                 -- per process, falsy value to disable (might cause infinite loop)
     -- format settings
-    indent_size = 2,            -- indent for each nested table level
+    indent_size = 0,            -- indent for each nested table level
     level_width = 80,           -- max width per indent level
-    wrap_string = true,         -- wrap string when it's longer than level_width
+    wrap_string = false,         -- wrap string when it's longer than level_width
     wrap_array = false,         -- wrap every array elements
     sort_keys = true,           -- sort table keys
 }
@@ -483,14 +483,23 @@ function pprint.pformat(obj, option, printer)
     return table.concat(buf)
 end
 
+local buffer = ''
+local fake_print = function(a)
+     buffer = buffer .. a
+end
+
 -- pprint all the arguments
 function pprint.pprint( ... )
     local args = {...}
+
     -- select will get an accurate count of array len, counting trailing nils
     local len = select('#', ...)
     for ix = 1,len do
-        pprint.pformat(args[ix], nil, print)
+        pprint.pformat(args[ix], nil, fake_print)
     end
+
+    print(buffer)
+    buffer = ''
 end
 
 setmetatable(pprint, {

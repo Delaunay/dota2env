@@ -133,10 +133,10 @@ local function ban_hero(hero_name)
 end
 
 local offset = 0
-local names = {'Blue', 'Teal', 'Purple', 'Yellow', 'Orange'}
+local names = {'Blue', 'Teal', 'Purple', 'Yellow', 'Orange', ' ', ' ', ' ', ' ', ' '}
 if GetTeam() == TEAM_DIRE then
     offset = 5
-    names = {'Pink', 'Grey', 'Aqua', 'Green', 'Brown'}
+    names = {'Pink', 'Grey', 'Aqua', 'Green', 'Brown', ' ', ' ', ' ', ' ', ' '}
 end
 
 
@@ -174,7 +174,7 @@ local function default_logic()
             pick_hero(1, 'npc_dota_hero_axe')
             pick_hero(2, 'npc_dota_hero_bane')
             pick_hero(3, 'npc_dota_hero_bloodseeker')
-            pick_hero(4, 'npc_dota_hero_crystal_maiden')
+            pick_hero(4, 'npc_dota_hero_invoker')
         else
             pick_hero(5, 'npc_dota_hero_drow_ranger')
             pick_hero(6, 'npc_dota_hero_earthshaker')

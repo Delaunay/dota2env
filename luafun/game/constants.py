@@ -19,6 +19,8 @@ BOUNDS = [
     (8288, 8288)
 ]
 
+RANGE = (8288, 8288)
+
 # Game Unit
 # (16576, 16576)
 SIZE = (
@@ -26,8 +28,92 @@ SIZE = (
     BOUNDS[1][1] - BOUNDS[0][1],    # y_max - y_min
 )
 
+#
+# Max vision comes from the Dota2 Lua API some functions are limited to this range
+# Max Vision = 1600
+# True max vision is 1800, 800 at night
+
+
+def position_to_key(x, y):
+    """Generate a position key to query entities by their position
+
+    Notes
+    -----
+    Collision in dota is standardized so there is only a few sizes we need to worry about.
+    We chose 10 because it seemed a good middle ground.
+
+    This method makes the unit/tree selection a bit fuzzy, if entities are close together
+    they could be mis-selected
+
+    .. code-block:: python
+
+        DOTA_HULL_SIZE_BUILDING 	   = 298 #  Ancient
+        DOTA_HULL_SIZE_TOWER 	       = 144 # Barracks
+        TREES                          = 128
+        DOTA_HULL_SIZE_FILLER 	       =  96 # Fillers / Outpost
+        DOTA_HULL_SIZE_HUGE 	       =  80 # Power Cog
+        DOTA_HULL_SIZE_HERO 	       =  24 # <== Mostly Heroes
+        DOTA_HULL_SIZE_REGULAR 	       =  16 # <== Melee Creep
+        DOTA_HULL_SIZE_SMALL 	       =   8 # <== Range Creep
+        DOTA_HULL_SIZE_SMALLEST 	   =   2 # Zombie
+
+    """
+    return f'{int(x / 10)}{int(y / 10)}'
+
+
+IGNORED_TREES = dict()
+DUP_TREES = dict()
+
+
+def load_trees():
+    trees = load_source_file('resources/trees.json')
+    position_to_tree = dict()
+
+    for tid, x, y, z in trees:
+        tree = {
+            'id': tid,
+            'loc': (x, y, z)
+        }
+
+        key = position_to_key(x, y)
+
+        if key in position_to_tree:
+            x1, y1, z1 = position_to_tree[key]['loc']
+
+            d1 = x1 * x1 + y1 * y1
+            d = x * x + y * y
+
+            # Favor trees that are closer to the origin (0, 0)
+            if d < d1:
+                position_to_tree[key] = tree
+
+                DUP_TREES[key] = (x, y, z)
+                IGNORED_TREES[key] = (x1, y1, z1)
+
+            else:
+                IGNORED_TREES[key] = (x, y, z)
+                DUP_TREES[key] = (x1, y1, z1)
+
+            print(f'Duplicate tree {key:>10}: [({x}, {y}, {z}), ({x1}, {y1}, {z1})]')
+            continue
+
+        position_to_tree[key] = tree
+
+    if len(IGNORED_TREES):
+        print('Total ignored trees:', len(IGNORED_TREES))
+    return position_to_tree
+
+
+def get_tree(x, y):
+    tree_key = position_to_key(x, y)
+    t = TREES.get(tree_key)
+    if t:
+        return t.get('id', -1)
+    return -1
+
+
 # Trees
-TREES = load_source_file('resources/trees.json')
+TREES = load_trees()
 TREE_COUNT = len(TREES)
 
 RUNES = load_source_file('resources/runes.json')
@@ -45,7 +131,9 @@ ABILITY_COUNT = len(ABILITIES)
 HEROES = load_source_file('resources/heroes.json')
 HERO_COUNT = len(HEROES)
 
+
 MAX_ABILITY_COUNT_PER_HEROES = 24
+
 
 
 class HeroLookup:
@@ -204,22 +292,3 @@ HERO_LOOKUP = HeroLookup()
 ITEMS = load_source_file('resources/items.json')
 ITEM_COUNT = len(ITEMS)
 
-# Collision in dota is standardized
-# so there is only a few shapes to worry about
-
-# Max vision comes from the Dota2 Lua API some functions are limited to this range
-# Max Vision = 1600
-# True max vision is 1800, 800 at night
-
-
-# DOTA_HULL_SIZE_BUILDING 	    298 | Ancient
-# DOTA_HULL_SIZE_TOWER 	        144 | Barracks
-#                TREES          128
-# DOTA_HULL_SIZE_FILLER 	     96 | Fillters / Outpost
-# DOTA_HULL_SIZE_HUGE 	         80 | Power Cog
-# DOTA_HULL_SIZE_HERO 	         24 | <== Mostly Heroes
-# DOTA_HULL_SIZE_REGULAR 	     16 | <== Melee Creep
-# DOTA_HULL_SIZE_SMALL 	          8 | <== Range Creep
-# DOTA_HULL_SIZE_SMALLEST 	      2 | Zombie
-
-# print(SIZE)
