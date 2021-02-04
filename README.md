@@ -1,9 +1,11 @@
 Dota 2 ML Bots
 ==============
 
-Random SF doing
+![Dota2 RL Env](doc/sfmid.gif)
 
-```
+Random SF doing random actions
+
+```python
 from luafun.dotaenv import dota2_environment
 
 env = dota2_environment('mid1v1')
@@ -14,6 +16,7 @@ with env:
 
     # Draft here if enabled
     while env.running:
+        # env.step(select_hero)
         break
 
     env.wait_end_draft()
@@ -29,17 +32,16 @@ with env:
         obs, reward, done, info = env.step(action)
 ```
 
-![Dota2 RL Env](https://media.giphy.com/media/EFbT0iaFUTJAuwCqHE/giphy.gif)
 
-
-
-Why dota2 is the ultimate RL environment
+Dota2 is the ultimate RL environment
 
 * Long Time Horizons
 * Partially Observed State
 * High dimensional action and observation spaces
+* Multiple strategies to solve the game
+* Agents needs to cooperate to win
 
-Like in real life you need to
+Like in real life you will need to
 1. Choose the relevant data to solve the problem and discard unnecessary data
 2. Choose the correct rewards balance early rewards and late rewards
 3. Encode a variety of actions for efficient processing

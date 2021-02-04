@@ -353,3 +353,6 @@ int luaopen_genericbot (lua_State* L)
   * Mana
 
 
+Generate GIF
+
+ffmpeg -i luafun_30sec.mp4 -vf "fps=25,scale=320:-1:flags=lanczos" -loop 0 output.gif
