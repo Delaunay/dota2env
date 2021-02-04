@@ -1,7 +1,7 @@
 Dota 2 ML Bots
 ==============
 
-![Dota2 RL Env](doc/sfmid.gif)
+![Dota2 RL Env](docs/_static_/sfmid.gif)
 
 Random SF doing random actions
 
@@ -50,7 +50,7 @@ Like in real life you will need to
 
 Most assets located in `luafun/game/resources` are owned by Valve.
 
-# Platform
+# Platforms
 
 * works best on linux
 * there is a bug in windows where state are being dropped randomly (unknown reason)
@@ -58,10 +58,10 @@ Most assets located in `luafun/game/resources` are owned by Valve.
 #  Install
 
 0. Install Dota2
-1. Download [Anaconda 3][1]
-2. Start > Anaconda Prompt (anaconda)
-3. git clone https://github.com/Delaunay/LuaFun.git
-4. cd LuaFun
+1. Windows Download [Anaconda 3][1]
+2. Windows Start > Anaconda Prompt (anaconda)
+3. `git clone https://github.com/Delaunay/LuaFun.git`
+4. `cd LuaFun`
 4. Install Dependencies
 
 ```
@@ -80,7 +80,7 @@ ln -s ~/work/LuaFun/bots/ bots
 
 6. Run the simulation
 7. Use you browser to see how it is going
-    http://localhost:5000/draw/radiant
+    `http://localhost:5000/draw/radiant`
 
 [1]: https://www.anaconda.com/products/individual
 
@@ -88,11 +88,12 @@ ln -s ~/work/LuaFun/bots/ bots
 
 * Full draft control
 * Full Hero take over
+* No scripted logic
 
 # Known Issues
 
 * Entering spectator mode after drafting phase can cause crashes
-
+* Bots do not control their illusions/minions
 
 # Steam Web API
 
@@ -102,5 +103,5 @@ You might be able to skip these steps
 * register a key https://steamcommunity.com/dev/registerkey
 * set it inside `config.json`
 * Prevent git from picking up the change
-    git update-index --assume-unchanged config.json
+    `git update-index --assume-unchanged config.json`
 

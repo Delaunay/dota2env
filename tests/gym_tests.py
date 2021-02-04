@@ -28,7 +28,7 @@ def base_gym_api_tests(path=None):
 
 def nice_gym_api_tests(path=None):
     env = dota2_environment('mid1v1', path)
-    env.render()
+    # env.render()
 
     with env:
         state = env.initial()
@@ -54,7 +54,6 @@ if __name__ == '__main__':
     nice_gym_api_tests(guess_path())
 
     # from luafun.game.action import action_space
-
     # print(action_space())
 
 

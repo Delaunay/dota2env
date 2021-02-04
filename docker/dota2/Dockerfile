@@ -1,3 +1,4 @@
+# Taken & Updated from https://github.com/TimZaman/dotaservice/blob/master/docker/Dockerfile-dota
 FROM ubuntu:20.04
 
 # Make sure to install steam and Dota first, as those docker layers will be biggest.

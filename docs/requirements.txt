@@ -1,0 +1,7 @@
+sphinx
+sphinx_rtd_theme
+numpydoc
+sphinx-serve
+flask
+eventlet
+flask-socketio

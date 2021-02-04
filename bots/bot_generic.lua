@@ -547,9 +547,7 @@ local function delegate_think()
     -- Ready to process a new message
     -- Usefully for debugging but it pollutes the console
     -- send_message({S = "R"})
-
     -- Do model inference there
-
 
     -- Message uid used to know if we missed a message
     local uid = 0
