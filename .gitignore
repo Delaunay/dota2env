@@ -18,3 +18,4 @@ ipc.lua
 config.json
 _build/
 .coverage*
+coverage.xml
