@@ -167,14 +167,17 @@ class SimpleDrafter(nn.Module):
     >>> draft_status = torch.zeros((obs.DraftFields.Size, const.HERO_COUNT))
 
     Set draft status
+
     >>> for i in range(obs.DraftFields.Size):
     ...     draft_status[i][0] = 1
 
     Batched version
+
     >>> batch_size = 5
     >>> draft_batch = torch.zeros((batch_size, obs.DraftFields.Size, const.HERO_COUNT))
 
     Insert draft to batch
+
     >>> draft_batch[0, :] = draft_status
     >>> draft_batch.shape
     torch.Size([5, 24, 121])

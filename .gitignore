@@ -17,3 +17,4 @@ exported.json
 ipc.lua
 config.json
 _build/
+.coverage*

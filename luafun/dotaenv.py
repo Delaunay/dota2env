@@ -239,7 +239,7 @@ class Dota2Env(Dota2Game):
                 self.space = space
 
             def sample(self):
-                return fix_sampled_actions(self.space.sample)
+                return fix_sampled_actions(self.space.sample())
 
         return _SpaceWrap(self._action_space)
 

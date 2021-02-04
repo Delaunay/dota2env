@@ -23,15 +23,14 @@ Straight forward API with full bot take over
         # Play the game
         while env.running:
             # Start issuing orders here
-            action = env.fix_sampled_actions(
-                env.action_space.sample()
-            )
+            action = env.action_space.sample()
 
             # take a random action
             obs, reward, done, info = env.step(action)
 
 
 .. image:: _static/sfmid.gif
+    :width: 100%
 
 
 .. toctree::
