@@ -128,17 +128,22 @@ class Dota2Game:
 
     @property
     def deadline(self):
-        """Return the inference time limit"""
+        """Return the inference time limit in seconds.
+        i.e it is the time remaining before receiving a new observation
+        """
         return SECONDS_PER_TICK * self.options.ticks_per_observation
 
     @property
     def running(self):
+        """Returns true if the game is running"""
         return self.state and self.state.get('running', False)
 
     def is_game_ready(self):
+        """Returns true if all bots sent us their init message"""
         return self.players[TEAM_RADIANT] + self.players[TEAM_DIRE] == self.bot_count
 
     def launch_dota(self):
+        """Launch dota game without communication processes"""
         # make sure the log is empty so we do not get garbage from the previous run
         try:
             if os.path.exists(self.paths.ipc_recv_handle):
@@ -164,6 +169,7 @@ class Dota2Game:
         self.process = subprocess.Popen(self.args)  # , stdin=subprocess.PIPE
 
     def dire_state_delta(self):
+        """Return a new observation delta if available"""
         if not self.dire_state_delta_queue.empty():
             delta = self.dire_state_delta_queue.get()
             return delta
@@ -171,6 +177,7 @@ class Dota2Game:
         return None
 
     def radiant_state_delta(self):
+        """Return a new observation delta if available"""
         if not self.radiant_state_delta_queue.empty():
             delta = self.radiant_state_delta_queue.get()
             return delta
@@ -178,6 +185,9 @@ class Dota2Game:
         return None
 
     def start_ipc(self):
+        """Start inter-process communication processes.
+        i.e launch all subsystems that enable us to talk to the running game
+        """
         self.manager = mp.Manager()
 
         if self.config is None:
@@ -344,12 +354,13 @@ class Dota2Game:
         return stop
 
     def wait_end_setup(self):
+        """Wait until draft starts"""
         while self.state and self.state.get('draft') is None and self.running:
             time.sleep(0.01)
             self._tick()
 
     def wait_end_draft(self):
-
+        """Wait until draft ends and playing can start"""
         while self.state and self.state.get('game') is not True and not self.ready and self.running:
             time.sleep(0.01)
             self._tick()
@@ -442,7 +453,7 @@ class Dota2Game:
         self.receive_message(faction, player_id, message)
 
     def receive_message(self, faction: int, player_id: int, message: dict):
-        """Receive a message directly from the bot"""
+        """Receive a message directly from the bots"""
         print(f'{faction} {player_id} {message}')
 
     def update_dire_state(self, messsage: msg.CMsgBotWorldState):

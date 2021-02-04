@@ -29,6 +29,7 @@ values = [
 
 
 class Reward:
+    """Base reward function, takes a state and return its resulting reward level"""
     def __init__(self):
         self.constant = {
             k: v for k, v, _ in values

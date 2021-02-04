@@ -55,34 +55,11 @@ Most assets located in `luafun/game/resources` are owned by Valve.
 * works best on linux
 * there is a bug in windows where state are being dropped randomly (unknown reason)
 
-#  Install
+# Install
 
-0. Install Dota2
-1. Windows Download [Anaconda 3][1]
-2. Windows Start > Anaconda Prompt (anaconda)
-3. `git clone https://github.com/Delaunay/LuaFun.git`
-4. `cd LuaFun`
-4. Install Dependencies
+For installation procedure see [Installation][2]
 
-```
-conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
-pip install -r requirements.txt
-pip install -e .
-```
-
-5. change the bot folder
-
-```
-DOTA_PATH=/media/setepenre/local/SteamLibraryLinux/steamapps/common/dota\ 2\ beta
-cd $DOTA_PATH/game/dota/scripts/vscripts
-ln -s ~/work/LuaFun/bots/ bots
-```
-
-6. Run the simulation
-7. Use you browser to see how it is going
-    `http://localhost:5000/draw/radiant`
-
-[1]: https://www.anaconda.com/products/individual
+[2]:
 
 # Features
 

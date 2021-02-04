@@ -35,6 +35,12 @@ Straight forward API with full bot take over
 
 
 .. toctree::
+   :caption: Getting Started
+
+   pages/installation.rst
+
+
+.. toctree::
    :caption: API
    :maxdepth: 1
 

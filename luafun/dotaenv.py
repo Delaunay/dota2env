@@ -50,10 +50,10 @@ class Dota2Env(Dota2Game):
     Parameters
     ----------
     path: str
-        Path to the game folder `.../dota 2 beta`
+        Path to the game folder ``.../dota 2 beta``
 
     dedicated: bool
-        Server only
+        runs server only
 
     stitcher: Stitcher
         Stitch game state together
@@ -151,10 +151,11 @@ class Dota2Env(Dota2Game):
     # Gym Environment API
     # -------------------
     def render(self):
+        """Enable game rendering"""
         self.options.dedicated = False
 
     def reset(self):
-        """
+        """Stop the game if running and start a new game
 
         Returns
         -------
@@ -170,11 +171,12 @@ class Dota2Env(Dota2Game):
         return self._radiant_state, self._dire_state
 
     def close(self):
+        """Stop the game"""
         self.__exit__(None, None, None)
 
     @property
     def action_space(self):
-        """This comes from the action encoding work we did
+        """Returns a gym.Space object which we can use to sample action from
 
         Notes
         -----
@@ -213,34 +215,42 @@ class Dota2Env(Dota2Game):
             }
 
         """
-        return self._action_space
+        def fix_sampled_actions(act):
+            return {
+                'uid': 0,
+                TEAM_RADIANT: {
+                    0: act[TEAM_RADIANT]['0'],
+                    1: act[TEAM_RADIANT]['1'],
+                    2: act[TEAM_RADIANT]['2'],
+                    3: act[TEAM_RADIANT]['3'],
+                    4: act[TEAM_RADIANT]['4'],
+                },
+                TEAM_DIRE: {
+                    5: act[TEAM_DIRE]['5'],
+                    6: act[TEAM_DIRE]['6'],
+                    7: act[TEAM_DIRE]['7'],
+                    8: act[TEAM_DIRE]['8'],
+                    9: act[TEAM_DIRE]['9'],
+                }
+            }
+
+        class _SpaceWrap:
+            def __init__(self, space):
+                self.space = space
+
+            def sample(self):
+                return fix_sampled_actions(self.space.sample)
+
+        return _SpaceWrap(self._action_space)
 
     @property
     def observation_space(self):
+        """Return the observation space we observe at every step"""
         return self.sticher.observation_space
 
     def initial(self):
+        """Return the initial state of the game"""
         return self.radiant_state(), self.dire_state()
-
-    @staticmethod
-    def fix_sampled_actions(act):
-        return {
-            'uid': 0,
-            TEAM_RADIANT: {
-                0: act[TEAM_RADIANT]['0'],
-                1: act[TEAM_RADIANT]['1'],
-                2: act[TEAM_RADIANT]['2'],
-                3: act[TEAM_RADIANT]['3'],
-                4: act[TEAM_RADIANT]['4'],
-            },
-            TEAM_DIRE: {
-                5: act[TEAM_DIRE]['5'],
-                6: act[TEAM_DIRE]['6'],
-                7: act[TEAM_DIRE]['7'],
-                8: act[TEAM_DIRE]['8'],
-                9: act[TEAM_DIRE]['9'],
-            }
-        }
 
     def step(self, action):
         """Make an action and return the resulting state

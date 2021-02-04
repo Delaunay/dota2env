@@ -156,6 +156,7 @@ class FactionState:
     _r: int = 0
 
     def get_entity(self, x, y):
+        """Returns the unit/entity that is closest to the specified location"""
         return self._manager.get_entity(x, y)
 
     def __deepcopy__(self, memo):
@@ -245,6 +246,7 @@ class Stitcher:
 
     @property
     def observation_space(self):
+        """Returns the observation space that we are stiching"""
         return None
 
     @staticmethod
@@ -252,9 +254,11 @@ class Stitcher:
         return FactionState()
 
     def apply_diff(self, state, delta: msg.CMsgBotWorldState):
+        """Take a world state delta and apply it to a previous state"""
         self.generic_apply(state, delta)
 
-    def generic_apply(self,  state, delta: msg.CMsgBotWorldState):
+    def generic_apply(self, state, delta: msg.CMsgBotWorldState):
+        """Take a world state delta and apply it to a previous state"""
         state._s += 1
 
         delta = json.loads(delta)
