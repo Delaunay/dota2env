@@ -63,7 +63,8 @@ Features
 .. toctree::
    :caption: Getting Started
 
-   pages/installation.rst
+   pages/installation
+   pages/interaction
 
 
 .. toctree::
