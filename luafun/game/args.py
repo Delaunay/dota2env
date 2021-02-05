@@ -128,5 +128,4 @@ class DotaOptions:
             '+tv_autorecord', '1',
             '+tv_transmitall', '1',
             # ---
-
         ] + interactive

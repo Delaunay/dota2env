@@ -454,7 +454,8 @@ def main(config=None):
     if factory is None:
         return
 
-    logging.basicConfig(level=logging.INFO)
+    # logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
 
     game = factory(args.path, config=config)
     game.options.dedicated = not args.render
@@ -469,7 +470,9 @@ def main(config=None):
         while game.running:
             break
 
+        print('Draft')
         game.wait_end_draft()
+        print('Play')
 
         # Play the game
         while game.running:

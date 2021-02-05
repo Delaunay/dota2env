@@ -100,12 +100,17 @@ local lanes = {
 -- Same as SelectHero but checks for errors
 local n = 0
 local function pick_hero(player_id, hero_name, lane)
+    if not IsPlayerBot(player_id) then
+        lanes[player_id] = LANE_NONE
+        n = n + 1
+        return
+    end
+
     if hero_name == nil then
         return
     end
 
     if GetSelectedHeroName(player_id) == '' then
-
         SelectHero(player_id, hero_name)
         -- CMPickHero
 

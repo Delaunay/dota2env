@@ -19,3 +19,6 @@ config.json
 _build/
 .coverage*
 coverage.xml
+decode.txt
+console.*.log
+

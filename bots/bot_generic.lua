@@ -14,7 +14,8 @@ local uid = nil
 local ipc_prefix = '[IPC]' .. faction .. '.' .. player_id
 
 local SILENT = 0
-local level = SILENT
+local ALL = 1
+local level = ALL
 
 
 -- Simply print something we can parse in the logs

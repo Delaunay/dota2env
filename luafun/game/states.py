@@ -134,6 +134,9 @@ class SyncWorldListener:
         self.state[self.namespace] = (datetime.utcnow() - s).total_seconds()
 
     def _run(self):
+        if not self.running:
+            return
+
         # this needs to be lower than the game.deadline so in case of disconnect we can reconnect fast
         readable, _, error = select.select([self.sock], [], [self.sock], 0.05)
 

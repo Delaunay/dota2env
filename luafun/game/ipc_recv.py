@@ -6,6 +6,8 @@ import multiprocessing as mp
 import re
 import time
 import traceback
+import glob
+
 
 from pygtail import Pygtail
 
@@ -24,6 +26,8 @@ class IPCRecv:
         self.queue = queue
         self.state = state
         self.got_messages = False
+        self.glob_name = self.logfilename.replace('console.log', 'console.*.log')
+        self.ilogfile = None
 
         # remove offset from previous game
         try:
@@ -49,10 +53,29 @@ class IPCRecv:
             log.error(msg)
             raise RuntimeError(msg)
 
+    def interactive_file(self):
+        files = glob.glob(self.glob_name)
+        if len(files) == 1:
+            return files[0]
+        return None
+
+    def select_logfile(self):
+        """Interactive match create their own log"""
+        logfile = self.logfilename
+
+        if self.ilogfile is None:
+            self.ilogfile = self.interactive_file()
+
+        if self.ilogfile is not None:
+            logfile = self.ilogfile
+
+        return logfile
+
     def _run(self):
         self.got_messages = False
-        win = None
-        for line in Pygtail(self.logfilename):
+        logfile = self.select_logfile()
+
+        for line in Pygtail(logfile):
             self.state['ipc_recv'] = datetime.utcnow()
             result = IPC_RECV.search(line)
 
@@ -82,6 +105,14 @@ class IPCRecv:
         # no new message
         self.state['ipc_recv'] = datetime.utcnow()
 
+        # on win remove log so we can parse next one
+        if self.state.get('WIN'):
+            self.cleanup()
+
+    def cleanup(self):
+        if self.ilogfile:
+            os.remove(self.ilogfile)
+
     def run(self):
         while self.running:
             try:
@@ -96,6 +127,7 @@ class IPCRecv:
                 log.error(traceback.format_exc())
 
         log.debug('IPC recv finished')
+        self.cleanup()
 
 
 def _ipc_recv(logfilename, queue, state, level, retries=10):

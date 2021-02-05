@@ -140,7 +140,8 @@ class Dota2Game:
 
     def is_game_ready(self):
         """Returns true if all bots sent us their init message"""
-        return self.players[TEAM_RADIANT] + self.players[TEAM_DIRE] == self.bot_count
+        print(self.players[TEAM_RADIANT], self.players[TEAM_DIRE], self.bot_count)
+        return self.players[TEAM_RADIANT] + self.players[TEAM_DIRE] >= self.bot_count
 
     def launch_dota(self):
         """Launch dota game without communication processes"""
@@ -369,7 +370,7 @@ class Dota2Game:
 
     def wait_end_draft(self):
         """Wait until draft ends and playing can start"""
-        while self.state and self.state.get('game') is not True and not self.ready and self.running:
+        while self.state and not self.state.get('game', False) and not self.ready and self.running:
             time.sleep(0.01)
             self._tick()
 
@@ -406,6 +407,7 @@ class Dota2Game:
         #   {"is_bot":true,"team_id":3,"hero":"npc_dota_hero_mirana","id":8},
         #   {"is_bot":true,"team_id":3,"hero":"npc_dota_hero_nevermore","id":9}]
         #   }
+        bot_count = 0
         for p in info:
             hero = {
                 'name': p['hero'],
@@ -414,6 +416,9 @@ class Dota2Game:
             }
             self.heroes[p['id']] = hero
             self.heroes[str(p['id'])] = hero
+            bot_count += int(p['is_bot'])
+
+        self.bot_count = bot_count
 
     def _receive_message(self, faction: int, player_id: int, message: dict):
         # error processing
@@ -426,9 +431,15 @@ class Dota2Game:
         # init message
         info = message.get('P')
         if info is not None:
+            # the draft message can be missed
+            self.state['draft'] = False
+
+            # See who is bot or not
+            if not self.heroes:
+                self._set_hero_info(info)
+
             self.players[int(faction)] += 1
             if self.is_game_ready():
-                self._set_hero_info(info)
                 self.state['game'] = True
                 log.debug('All bots accounted for, Game is ready')
                 self.ready = True
