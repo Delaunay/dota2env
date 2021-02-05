@@ -470,9 +470,7 @@ def main(config=None):
         while game.running:
             break
 
-        print('Draft')
         game.wait_end_draft()
-        print('Play')
 
         # Play the game
         while game.running:

@@ -57,6 +57,7 @@ Features
 * Full drafting capabilities
 * Integration tested
 * No scripted logic
+* Humans can play with bots (the game have to be launched from python)
 
 
 .. toctree::
