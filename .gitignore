@@ -21,4 +21,8 @@ _build/
 coverage.xml
 decode.txt
 console.*.log
-
+bots.so
+botcpp_dire.so
+botcpp_radiant.so
+*.pb.h
+*.pb.cc
