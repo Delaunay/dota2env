@@ -69,6 +69,7 @@ For installation procedure see [Installation][2]
 
 * Entering spectator mode after drafting phase can cause crashes
 * Bots do not control their illusions/minions
+* Game can start firing dev warning `Overflow in GetSerializedWorldState!\n`
 
 # Steam Web API
 

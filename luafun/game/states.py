@@ -8,6 +8,7 @@ from struct import unpack
 import traceback
 
 from google.protobuf.json_format import MessageToJson
+from google.protobuf.message import DecodeError
 
 from luafun.game.dota2.dota_gcmessages_common_bot_script_pb2 import CMsgBotWorldState
 
@@ -27,6 +28,7 @@ class SyncWorldListener:
         self.name = name
         self.namespace = f'word-{self.name}'
         self.reason = None
+        self.decode_errors = open('decode.txt', 'bw')
 
     @property
     def running(self):
@@ -109,10 +111,20 @@ class SyncWorldListener:
 
         msg = b''.join(chunks)
         world_state = CMsgBotWorldState()
-        world_state.ParseFromString(msg)
+        try:
+            world_state.ParseFromString(msg)
+
+        except DecodeError:
+            self.reason = f'Decode error'
+            self.decode_errors.write(msg)
+            self.decode_errors.close()
+            self.state['running'] = False
+            return None
+
         return world_state
 
     def insert_message(self, msg, s):
+        # MessageToDict
         json_msg = MessageToJson(
             msg,
             preserving_proto_field_name=True,
@@ -154,6 +166,10 @@ class SyncWorldListener:
                 # dota2 proabaly shutdown
                 self.state['running'] = False
                 log.error('Dota2 shutdown')
+
+            except ValueError:
+                self.state['running'] = False
+                log.error(traceback.format_exc())
 
             except Exception as err:
                 if self.running:

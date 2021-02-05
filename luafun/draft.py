@@ -10,6 +10,7 @@ from luafun.game.ipc_send import TEAM_RADIANT, TEAM_DIRE
 
 
 class DraftFields(IntEnum):
+    """Draft field enumeration used to map fields to tensor index"""
     Pick0 = 0
     Pick1 = auto()
     Pick2 = auto()
@@ -54,6 +55,7 @@ DIRE_DRAFT_REMAP = {
 
 @dataclass
 class DraftStatus:
+    """Draft struct which represent the drafting state of the game"""
     # Picks are first because it will always be 10 picks
     # putting bans last makes it easy to grow/shrink the struct
     Pick0: int = -1
@@ -133,6 +135,9 @@ class DraftStatus:
         return draft_status
 
 
+# TODO make sure actions are correct here
+# i.e no double hero selection
+# respect bans although bots cannot bans in the game
 class DraftTracker:
     """Track Bots decision and reflect it on the draft status"""
     def __init__(self):

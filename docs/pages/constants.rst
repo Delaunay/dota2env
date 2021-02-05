@@ -1,7 +1,7 @@
-Actions
-=======
+Constants
+=========
 
-.. automodule:: luafun.game.action
+.. automodule:: luafun.game.constants
     :members:
     :undoc-members:
     :show-inheritance:

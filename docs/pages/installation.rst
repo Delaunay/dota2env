@@ -7,8 +7,8 @@ Linux
 
 Windows Steps
 
-1. Windows Download `anaconda`_ 3
-2. Windows Start > Anaconda Prompt (anaconda)
+1. Download `anaconda`_ 3
+2. Start > Anaconda Prompt (anaconda)
 
 Common Steps
 
@@ -36,7 +36,7 @@ Common Steps
 
 5. Run the simulation
 
-6. Use you `browser`_ to see how it is going
+6. Render the game or use you `browser`_ to see how it is going
 
 .. image:: ../_static/StateOverview.png
 

@@ -14,6 +14,8 @@ from luafun.game.ipc_send import TEAM_RADIANT, TEAM_DIRE
 from luafun.game.action import action_space
 import luafun.game.constants as const
 import luafun.game.action as actions
+from luafun.utils.options import option
+
 
 from luafun.stitcher import Stitcher
 from luafun.reward import Reward
@@ -47,6 +49,16 @@ class Dota2Env(Dota2Game):
 
     Although leaving it inconsistent could be an interesting experiment
 
+    Notes
+    -----
+    if you installed dota in a custom location you can set the environment variable ``LUAFUN_DOTA_PATH``
+    to make the environment pick it up automatically
+
+    .. code-block::bash
+
+        export LUAFUN_DOTA_PATH=/media/setepenre/local/SteamLibraryLinux/steamapps/common/dota2/
+
+
     Parameters
     ----------
     path: str
@@ -64,7 +76,7 @@ class Dota2Env(Dota2Game):
     _config:
         Internal argument used when the HTTP server controls the environment
     """
-    def __init__(self, path, dedicated=True, draft=0, stitcher=None, reward=None, _config=None):
+    def __init__(self, path=option('dota.path', None), dedicated=True, draft=0, stitcher=None, reward=None, _config=None):
         super(Dota2Env, self).__init__(path, dedicated, draft, config=_config)
         # For debugging only
         self.radiant_message = open(self.paths.bot_file('out_radiant.txt'), 'w')
@@ -95,6 +107,10 @@ class Dota2Env(Dota2Game):
         self._dire_state.draft = self.draft_tracker.draft
 
         self.has_next = 0
+        self.step_start = None
+        self.step_end = 0
+        self.cnt = 0
+        self.avg = 0
 
     def cleanup(self):
         self.radiant_message.close()
@@ -269,6 +285,15 @@ class Dota2Env(Dota2Game):
         info: Optional[dict]
             returns nothing
         """
+        self.step_end = time.time()
+        if self.step_start:
+            t = self.step_end - self.step_start
+            if t > self.deadline:
+                log.warning(f'took too long to take action')
+
+            self.avg += t
+            self.cnt += 1
+
         # 1. send action
         # 1.1 Preprocess the actions (remapping)
         preprocessed = self._action_preprocessor(action)
@@ -293,6 +318,7 @@ class Dota2Env(Dota2Game):
         done = self.state.get('win', None) is not None
         info = dict()
 
+        self.step_start = time.time()
         return obs, reward, done, info
 
     # Helpers
@@ -338,6 +364,9 @@ class Dota2Env(Dota2Game):
 
             # Remap Trees
             action[actions.ARG.iTree] = const.get_tree(x, y)
+
+            # Remap Rune
+            action[actions.ARG.nRune] = const.get_rune(x, y)
 
             # Remap Entity Handles
             state = self.radiant_state()
@@ -392,14 +421,13 @@ def dota2_environment(name, *args, **kwargs) -> Dota2Env:
     return _environments.get(name)(*args, **kwargs)
 
 
-def main(path=None, config=None):
+def main(config=None):
     """This simply runs the environment forever with NO MODELS
     It means bots will not do anything, if drafting is enabled nothing will be drafted
 
     This function is used for testing purposes
     """
     from argparse import ArgumentParser
-    logging.basicConfig(level=logging.DEBUG)
 
     parser = ArgumentParser()
     parser.add_argument('--draft', action='store_true', default=False,
@@ -408,20 +436,53 @@ def main(path=None, config=None):
     parser.add_argument('--mode', type=str, default='allpick_nobans',
                         help='Game mode')
 
-    parser.add_argument('--path', type=str, default=path,
+    parser.add_argument('--path', type=str, default=option('dota.path', None),
                         help='Custom Dota2 game location')
+
+    parser.add_argument('--render', action='store_true', default=False,
+                        help='Custom Dota2 game location')
+
+    parser.add_argument('--speed', type=float, default=4,
+                        help='Speed multiplier')
+
+    parser.add_argument('--interactive', action='store_true', default=False,
+                        help='Make a human create the lobby')
 
     args = parser.parse_args()
     factory = _environments.get(args.mode)
+
     if factory is None:
         return
 
+    logging.basicConfig(level=logging.INFO)
+
     game = factory(args.path, config=config)
-    game.options.dedicated = False
-    game.draft = int(args.draft)
+    game.options.dedicated = not args.render
+    game.options.interactive = args.interactive
+    game.options.host_timescale = args.speed
+    game.options.draft = int(args.draft)
 
     with game:
-        game.wait()
+        state = game.initial()
+
+        # Draft here if enabled
+        while game.running:
+            break
+
+        game.wait_end_draft()
+
+        # Play the game
+        while game.running:
+            # Start issuing orders here
+            action = game.action_space.sample()
+
+            # take a random action
+            obs, reward, done, info = game.step(action)
+
+            if game.cnt > 0 and game.cnt % 100 == 0:
+                print(f'Step time {game.avg / game.cnt:.4f}')
+
+        print('Game Finished')
 
     print('Done')
 

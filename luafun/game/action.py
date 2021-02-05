@@ -1,27 +1,11 @@
-"""This file works on encoding the game action into a ML friendly format"""
+"""This module encodes the game action into a ML friendly format"""
 from enum import IntEnum
+from typing import Tuple
 from luafun.game.ipc_send import new_ipc_message, TEAM_RADIANT, TEAM_DIRE
 
 
-# Game mapping
-class Lanes(IntEnum):
-    Roam = 0
-    Top = 1
-    Mid = 2
-    Bot = 3
-
-
-class RuneSlot(IntEnum):
-    PowerUpTop = 0
-    PowerUpBottom = 1
-    BountyRiverTop = 2
-    BountyRadiant = 3
-    BountyRiverBottom = 4
-    BountyDire = 5
-
-
-# indices are zero based with 0-5 corresponding to inventory, 6-8 are backpack and 9-15 are stash
-class ItemSlot(IntEnum):
+class AbilitySlot(IntEnum):
+    """List all the abilities available to a given hero"""
     # Inventory
     Item0 = 0
     Item1 = 1
@@ -38,54 +22,35 @@ class ItemSlot(IntEnum):
     Stash4 = 12
     Stash5 = 13
     Stash6 = 14
-    Item15 = 15     # TP
-    Item16 = 16     # Neutral ?
+    Item15 = 15         # TP
+    Item16 = 16         # Neutral ?
+    Q = 17              # Q                 | invoker_quas
+    W = 18              # W                 | invoker_wex
+    E = 19              # E                 | invoker_exort
+    D = 20              # D generic_hidden  | invoker_empty1
+    F = 21              # F generic_hidden  | invoker_empty2
+    R = 22              # R                 | invoker_invoke
+    Ablity6 = 23        # .                 | invoker_cold_snap
+    Ablity7 = 24        # .                 | invoker_ghost_walk
+    Ablity8 = 25        # .                 | invoker_tornado
+    Ablity9 = 26        # .                 | invoker_emp
+    Ablity10 = 27       # .                 | invoker_alacrity
+    Ablity11 = 28       # .                 | invoker_chaos_meteor
+    Ablity12 = 29       # .                 | invoker_sun_strike
+    Ablity13 = 30       # .                 | invoker_forge_spirit
+    Ablity14 = 31       # .                 | invoker_ice_wall
+    Ablity15 = 32       # .                 | invoker_deafening_blast
+    Talent11 = 33       # Talent 1  (usually but the talent offset can be shifted)
+    Talent12 = 34       # Talent 2  example: rubick, invoker, etc..
+    Talent21 = 35       # Talent 3
+    Talent22 = 36       # Talent 4  98 heroes follow the pattern above
+    Talent31 = 37       # Talent 5
+    Talent32 = 38       # Talent 6
+    Talent41 = 39       # Talent 7
+    Talent42 = 40       # Talent 8
 
 
-assert len(ItemSlot) == 17, '17 item slots'
-
-
-_n = len(ItemSlot)
-
-
-class SpellSlot(IntEnum):
-    Q = _n + 0
-    W = _n + 1
-    E = _n + 2
-    D = _n + 3
-    F = _n + 4
-    R = _n + 5
-
-
-# might have to normalize talent so it is easier to learn
-class AbilitySlot(IntEnum):
-    Ablity0 = 0         # Q                 | invoker_quas
-    Ablity1 = 1         # W                 | invoker_wex
-    Ablity2 = 2         # E                 | invoker_exort
-    Ablity3 = 3         # D generic_hidden  | invoker_empty1
-    Ablity4 = 4         # F generic_hidden  | invoker_empty2
-    Ablity5 = 5         # R                 | invoker_invoke
-    Ablity6 = 6         # .                 | invoker_cold_snap
-    Ablity7 = 7         # .                 | invoker_ghost_walk
-    Ablity8 = 8         # .                 | invoker_tornado
-    Ablity9 = 9         # .                 | invoker_emp
-    Ablity10 = 10       # .                 | invoker_alacrity
-    Ablity11 = 11       # .                 | invoker_chaos_meteor
-    Ablity12 = 12       # .                 | invoker_sun_strike
-    Ablity13 = 13       # .                 | invoker_forge_spirit
-    Ablity14 = 14       # .                 | invoker_ice_wall
-    Ablity15 = 15       # .                 | invoker_deafening_blast
-    Ablity16 = 16       # Talent 1  (usually but the talent offset can be shifted)
-    Ablity17 = 17       # Talent 2  example: rubick, invoker, etc..
-    Ablity18 = 18       # Talent 3
-    Ablity19 = 19       # Talent 4  98 heroes follow the pattern above
-    Ablity20 = 20       # Talent 5
-    Ablity21 = 21       # Talent 6
-    Ablity22 = 22       # Talent 7
-    Ablity23 = 23       # Talent 8
-
-
-assert len(AbilitySlot) == 24, '24 abilities'
+assert len(AbilitySlot) == 41, '41 abilities'
 
 
 # When looking at Action you might think that dota is not that complex
@@ -97,6 +62,7 @@ assert len(AbilitySlot) == 24, '24 abilities'
 #
 # NB: To take outpost, you can attack them using AttackUnit action
 class Action(IntEnum):
+    """List all the actions available to a hero"""
     Stop                          = 0
     MoveToLocation                = 1   # ( vLocation )
     MoveDirectly                  = 2   # ( vLocation )
@@ -148,20 +114,11 @@ class Action(IntEnum):
 assert len(Action) == 32, '32 actions'
 
 
-# Could bundle the courier action as a hero action
-class CourierAction(IntEnum):
-    BURST               = 0
-    # hidden
-    # ENEMY_SECRET_SHOP   = 1
-    RETURN              = 2
-    SECRET_SHOP         = 3
-    TAKE_STASH_ITEMS    = 4
-    TRANSFER_ITEMS      = 5
-    # bots will have to do 2 actions for those
-    # not a big deal IMO
-    # TAKE_AND_TRANSFER_ITEMS
-    # COURIER_ACTION_SIDE_SHOP
-    # COURIER_ACTION_SIDE_SHOP2
+class DraftAction(IntEnum):
+    EnableDraft = 0
+    SelectHero = 1
+    BanHero = 2
+    Lane = 3
 
 
 # Argument index
@@ -182,71 +139,72 @@ ARG = ActionArgument
 
 # boilerplate to help humans send bot like action to lua
 # this only to debug & allows human to control the lua bots from python
-class Player:
-    def __init__(self, act):
+class PlayerAction:
+    """Player action builder"""
+    def __init__(self, act: dict):
         self.act = act
 
-    def MoveToLocation(self, vLocation):
+    def MoveToLocation(self, vLocation: Tuple[float, float]):
         self.act[ARG.action] = Action.MoveToLocation
         self.act[ARG.vLoc] = vLocation
 
-    def MoveDirectly(self, vLocation):
+    def MoveDirectly(self, vLocation: Tuple[float, float]):
         self.act[ARG.action] = Action.MoveDirectly
         self.act[ARG.vLoc] = vLocation
 
-    def MoveToUnit(self, hUnit):
+    def MoveToUnit(self, hUnit: int):
         self.act[ARG.action] = Action.MoveToUnit
         self.act[ARG.hUnit] = hUnit
 
-    def AttackUnit(self, hUnit):
+    def AttackUnit(self, hUnit: int):
         self.act[ARG.action] = Action.AttackUnit
         self.act[ARG.hUnit] = hUnit
 
-    def AttackMove(self, vLocation):
+    def AttackMove(self, vLocation: Tuple[float, float]):
         self.act[ARG.action] = Action.AttackMove
         self.act[ARG.vLoc] = vLocation
 
-    def UseAbility(self, hAbility):
+    def UseAbility(self, hAbility: int):
         self.act[ARG.action] = Action.UseAbility
         self.act[ARG.nSlot] = hAbility
 
-    def UseAbilityOnEntity(self, hAbility, hTarget):
+    def UseAbilityOnEntity(self, hAbility: int, hTarget: int):
         self.act[ARG.action] = Action.UseAbilityOnEntity
         self.act[ARG.nSlot] = hAbility
         self.act[ARG.hUnit] = hTarget
 
-    def UseAbilityOnLocation(self, hAbility, vLoc):
+    def UseAbilityOnLocation(self, hAbility: int, vLoc: Tuple[float, float]):
         self.act[ARG.action] = Action.UseAbilityOnLocation
         self.act[ARG.nSlot] = hAbility
         self.act[ARG.vLoc] = vLoc
 
-    def UseAbilityOnTree(self, hAbility, iTree):
+    def UseAbilityOnTree(self, hAbility: int, iTree: int):
         self.act[ARG.action] = Action.UseAbilityOnTree
         self.act[ARG.nSlot] = hAbility
         self.act[ARG.iTree] = iTree
 
-    def PickUpRune(self, nRune):
+    def PickUpRune(self, nRune: int):
         self.act[ARG.action] = Action.PickUpRune
         self.act[ARG.nRune] = nRune
 
-    def PickUpItem(self, hItem):
+    def PickUpItem(self, hItem: int):
         self.act[ARG.action] = Action.PickUpItem
         self.act[ARG.hUnit] = hItem
 
-    def DropItem(self, hItem, vLocation):
+    def DropItem(self, hItem: int, vLocation: Tuple[float, float]):
         self.act[ARG.action] = Action.DropItem
         self.act[ARG.vLoc] = vLocation
         self.act[ARG.nSlot] = hItem
 
-    def PurchaseItem(self, sItemName):
+    def PurchaseItem(self, sItemName: str):
         self.act[ARG.action] = Action.PurchaseItem
         self.act[ARG.sItem] = sItemName
 
-    def SellItem(self, hItem):
+    def SellItem(self, hItem: int):
         self.act[ARG.action] = Action.SellItem
         self.act[ARG.nSlot] = hItem
 
-    def DisassembleItem(self, hItem):
+    def DisassembleItem(self, hItem: int):
         self.act[ARG.action] = Action.DisassembleItem
         self.act[ARG.nSlot] = hItem
 
@@ -254,7 +212,7 @@ class Player:
         self.act[ARG.action] = Action.SetItemCombineLock
         self.act[ARG.nSlot] = hItem
 
-    def SwapItems(self, nslot, index2):
+    def SwapItems(self, nslot: int, index2: int):
         # The index order does not matter
         self.act[ARG.action] = Action.SwapItems
         self.act[ARG.nSlot] = nslot
@@ -269,7 +227,7 @@ class Player:
     def Glyph(self):
         self.act[ARG.action] = Action.Glyph
 
-    def LevelAbility(self, nSlot):
+    def LevelAbility(self, nSlot: int):
         self.act[ARG.action] = Action.LevelAbility
         self.act[ARG.nSlot] = nSlot
 
@@ -293,8 +251,58 @@ class Player:
         self.act[ARG.action] = Action.CourierTransfer
 
 
+class DraftBuilder:
+    """Drafting action builder"""
+    def __init__(self, fac: dict):
+        self.fac = fac
+
+    def select(self, hero: int, lane: int):
+        """Select a hero and assign it to a particular lane"""
+        self.fac[DraftAction.SelectHero] = hero
+        self.fac[DraftAction.Lane] = lane
+
+    def ban(self, hero: int):
+        """Ban does not work for bots, which makes sense in the case of players wanting to practice annoying hero"""
+        self.fac[DraftAction.BanHero] = hero
+
+
+class IPCMessageBuilder:
+    """Helper to help users build action using code. Mainly used for testing purposes"""
+    def __init__(self, game=None):
+        self.message = new_ipc_message()
+        self.game = game
+
+    def player(self, idx: int) -> PlayerAction:
+        """Prepare to send an action to a given hero"""
+        faction = TEAM_RADIANT
+
+        if idx > 4:
+            faction = TEAM_DIRE
+
+        return PlayerAction(self.message[faction][idx])
+
+    def hero_selection(self, faction: int) -> DraftBuilder:
+        """Prepare to draft a hero for a given faction"""
+        self.message[faction]['HS'] = {
+            DraftAction.EnableDraft: 1,
+            DraftAction.SelectHero: None,
+            DraftAction.BanHero: None,
+            DraftAction.Lane: None
+        }
+        return DraftBuilder(self.message[faction]['HS'])
+
+    def build(self) -> dict:
+        """Returns the resulting action message"""
+        return self.message
+
+    def send(self):
+        """If game was set, send the message to the game"""
+        if self.game is not None:
+            return self.game.send_message(self.build())
+
+
 def player_space():
-    """
+    """Returns the full action space of a Dota2 bot
 
     Examples
     --------
@@ -321,12 +329,12 @@ def player_space():
     # We set the max number of unit on the map to 256
     # the ids are remapped to actual handle id
     hUnit = spaces.Discrete(256)
-    abilities = spaces.Discrete(len(ItemSlot) + len(AbilitySlot))
+    abilities = spaces.Discrete(len(AbilitySlot))
     # Tree ID
     tree = spaces.Discrete(const.TREE_COUNT)
-    runes = spaces.Discrete(len(RuneSlot))
+    runes = spaces.Discrete(len(const.RuneSlot))
     items = spaces.Discrete(const.ITEM_COUNT)
-    ix2 = spaces.Discrete(len(ItemSlot))
+    ix2 = spaces.Discrete(len(const.ItemSlot))
 
     return spaces.Dict({
         ARG.action: action,
@@ -340,8 +348,8 @@ def player_space():
     })
 
 
-def team_space(s):
-    """
+def team_space(s: int):
+    """Returns the full action space of a Dota2 bot team
 
     Examples
     --------
@@ -370,13 +378,13 @@ def team_space(s):
         'HS': spaces.Dict({
             'select': spaces.Discrete(const.HERO_COUNT),
             'ban': spaces.Discrete(const.HERO_COUNT),
-            'lane': spaces.Discrete(len(Lanes))
+            'lane': spaces.Discrete(len(const.Lanes))
         })
     })
 
 
 def action_space():
-    """
+    """Returns the full action space of a Dota2 bots for all teams
 
     Examples
     --------
@@ -387,7 +395,6 @@ def action_space():
     2 OrderedDict([('0', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('1', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('2', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('3', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('4', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('HS', OrderedDict([('ban', 112), ('lane', 0), ('select', 112)]))])
     3 OrderedDict([('5', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('6', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('7', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('8', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('9', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('HS', OrderedDict([('ban', 112), ('lane', 0), ('select', 112)]))])
     """
-
     from gym import spaces
 
     full_space = spaces.Dict({
@@ -396,53 +403,3 @@ def action_space():
     })
 
     return full_space
-
-
-class DraftAction(IntEnum):
-    EnableDraft = 0
-    SelectHero = 1
-    BanHero = 2
-    Lane = 3
-
-
-class HeroSelection:
-    def __init__(self, fac):
-        self.fac = fac
-
-    def select(self, hero, lane):
-        self.fac[DraftAction.SelectHero] = hero
-        self.fac[DraftAction.Lane] = lane
-
-    def ban(self, hero):
-        """Ban does not work for bots, which makes sense in the case of players wanting to practice annoying hero"""
-        self.fac[DraftAction.BanHero] = hero
-
-
-class IPCMessageBuilder:
-    def __init__(self, game=None):
-        self.message = new_ipc_message()
-        self.game = game
-
-    def player(self, idx):
-        faction = TEAM_RADIANT
-
-        if idx > 4:
-            faction = TEAM_DIRE
-
-        return Player(self.message[faction][idx])
-
-    def hero_selection(self, faction):
-        self.message[faction]['HS'] = {
-            DraftAction.EnableDraft: 1,
-            DraftAction.SelectHero: None,
-            DraftAction.BanHero: None,
-            DraftAction.Lane: None
-        }
-        return HeroSelection(self.message[faction]['HS'])
-
-    def build(self):
-        return self.message
-
-    def send(self):
-        if self.game is not None:
-            return self.game.send_message(self.build())

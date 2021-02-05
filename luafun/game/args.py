@@ -6,6 +6,35 @@ from luafun.game.modes import DOTA_GameMode
 
 @dataclass
 class DotaOptions:
+    """Controls Dota 2 game console arguments
+
+    Parameters
+    ----------
+    host_timescale: int
+        Speed multiplier
+
+    decicated: bool
+        Run the decicated server or rendered game
+
+    ticks_per_observation: int
+        Number of frames before an observation is sent back
+        Server runs at 30 frame per seconds
+
+    game_id: str
+        Game id for logging & replay saves
+
+    port_radiant: int
+        Port for radiant updates the game is listening to
+
+    port_dire: int
+        Port for dire updates the game is listening to
+
+    interactive: bool
+        Do not start the lobby right away and enable human players to jump in
+
+    draft: bool
+        Enable bot drafting
+    """
     # All Pick, Restricted Heroes, 1v1 mid
     game_mode: DOTA_GameMode = int(DOTA_GameMode.DOTA_GAMEMODE_AP)
     # Speed of the game
@@ -27,17 +56,33 @@ class DotaOptions:
     # Steam Client port, you should not modify this
     client_port: int = 27006
 
+    interactive: bool = False
+    draft: bool = False
+
     def args(self, paths):
         """Generate the commandline arguments to pass down to the dota2 executable"""
         additional = []
 
         if self.dedicated:
             additional.append('-dedicated')
+            additional.append('+dota_1v1_skip_strategy')
+            additional.append('1')
 
         from sys import platform
 
         if platform == "linux" or platform == "linux2":
             additional.append('-gl')
+
+        interactive = []
+        if not self.interactive:
+            # Make the game start with bots
+            interactive.append('-fill_with_bots')
+
+            # Start the game right away
+            interactive.append('+map')
+            interactive.append('start')
+            interactive.append('gamemode')
+            interactive.append(f'{int(self.game_mode)}')
 
         return additional + [
             '-botworldstatesocket_threaded',
@@ -66,11 +111,8 @@ class DotaOptions:
             # '-dota_spectator_auto_spectate_bot_games', 1,
             # Relates to steam client.
             '+clientport', '{}'.format(self.client_port),
-            # '+dota_1v1_skip_strategy', '1',
             # Close dota when the game is over
             '+dota_surrender_on_disconnect', '0',
-            # Make the game start with bots
-            '-fill_with_bots',
             # Local Game Speed
             '+host_timescale', '{}'.format(self.host_timescale),
             '+hostname dotaservice',
@@ -86,8 +128,5 @@ class DotaOptions:
             '+tv_autorecord', '1',
             '+tv_transmitall', '1',
             # ---
-            '+map',
-            # Start the game right away
-            'start',
-            'gamemode', '{}'.format(self.game_mode),
-        ]
+
+        ] + interactive

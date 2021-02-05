@@ -33,6 +33,32 @@ Straight forward API with full bot take over
     :width: 100%
 
 
+Dota2 is the ultimate RL environment
+
+* Long Time Horizons (40+ minutes)
+* Partially observed state
+* High dimensional action and observation spaces
+* Multiple strategies to solve the game
+* Multiple challenge in a single game (drafting + playing)
+* Agents needs to cooperate to win
+* trade off between multiple objectives to achieve victory
+
+Luafun comes with a full training pipeline even basic models are available,
+so you can focus on your research and not writing code.
+
+* Drafting: select 5 and ban 7 heroes among 120+ heroes to counter you enemy and give you the advantage in lane
+* Playing chose between 25 base base actions to take, 40 abilities to use, 100+ items to buy.
+
+
+Features
+~~~~~~~~
+
+* Full bot take over
+* Full drafting capabilities
+* Integration tested
+* No scripted logic
+
+
 .. toctree::
    :caption: Getting Started
 
@@ -49,4 +75,4 @@ Straight forward API with full bot take over
    pages/reward
    pages/draft
    pages/model
-
+   pages/constants

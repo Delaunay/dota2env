@@ -15,6 +15,7 @@ import luafun.game.dota2.state_types as msg
 from luafun.game.extractor import Extractor
 import luafun.game.constants as const
 from luafun.game.states import world_listener_process
+from luafun.utils.options import option
 
 
 log = logging.getLogger(__name__)
@@ -86,9 +87,9 @@ class Dota2Game:
     We use multiprocess, asyncio was not given the required performance.
     A huge part of performance is used to receive messages from the game itself
     """
-    def __init__(self, path=None, dedicated=True, draft=0, config=None):
+    def __init__(self, path=option('dota.path', None), dedicated=True, draft=0, config=None):
         self.paths = DotaPaths(path)
-        self.options = DotaOptions(dedicated=dedicated)
+        self.options = DotaOptions(dedicated=dedicated, draft=draft)
         self.args = None
 
         self.process = None
@@ -112,7 +113,6 @@ class Dota2Game:
         self.http_rpc_recv = None
 
         self.heroes = None
-        self.draft = draft
         self.uid = StateHolder()
         self.ready = False
         self.pending_ready = True
@@ -171,6 +171,10 @@ class Dota2Game:
     def dire_state_delta(self):
         """Return a new observation delta if available"""
         if not self.dire_state_delta_queue.empty():
+            n = self.dire_state_delta_queue.qsize()
+            if (self.state.get('draft') or self.ready) and n > 2:
+                log.warning(f'Running late on state processing for dire  (q: {n})')
+
             delta = self.dire_state_delta_queue.get()
             return delta
 
@@ -179,6 +183,10 @@ class Dota2Game:
     def radiant_state_delta(self):
         """Return a new observation delta if available"""
         if not self.radiant_state_delta_queue.empty():
+            n = self.radiant_state_delta_queue.qsize()
+            if (self.state.get('draft') or self.ready) and n > 2:
+                log.warning(f'Running late on state processing for radiant (q: {n})')
+
             delta = self.radiant_state_delta_queue.get()
             return delta
 
@@ -411,7 +419,8 @@ class Dota2Game:
         # error processing
         error = message.get('E')
         if error is not None:
-            log.error(f'recv {team_name(faction)} {player_id} {error}')
+            # error message are far from critical if we were able to receive them
+            log.debug(f'recv {team_name(faction)} {player_id} {error}')
             return
 
         # init message
@@ -477,7 +486,7 @@ class Dota2Game:
         self.start_ipc()
         log.debug("Game has started")
         # Create a file to say if we want to draft or not
-        self.send_message(new_ipc_message(draft=self.draft))
+        self.send_message(new_ipc_message(draft=self.options.draft))
         self.wait_end_setup()
         return self
 

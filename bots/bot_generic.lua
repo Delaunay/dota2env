@@ -28,6 +28,10 @@ local level = SILENT
 -- but it is unclear is that file will be in RAM most of the time
 -- Anyway bots only execute commands sent to them they should not have much to send back
 local function send_message(data)
+    if data['E'] ~= nil and level == SILENT then
+        return
+    end
+
     print(ipc_prefix, dkjson.encode(data))
 end
 
@@ -384,6 +388,10 @@ local function get_action_table()
         -- Note: like in a game the action needs to be called twice
         -- once to discover the rune and another to pick it up
         -- Note: not sure about the difference between ActionQueue and ActionPush
+        if nRune == nil then
+            return
+        end
+
         local loc = GetRuneSpawnLocation(nRune)
         bot:ActionQueue_MoveToLocation(loc)
         return bot:ActionPush_PickUpRune(nRune)
