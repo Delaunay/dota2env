@@ -4,9 +4,8 @@ import logging
 import time 
 
 from luafun.dotaenv import Dota2Env
-from luafun.inference import InferenceEngine
 from luafun.observations import Entry
-from luafun.actor_critic import ActorCritic, BaseActorCritic
+from luafun.model.actor_critic import ActorCritic, BaseActorCritic
 
 log = logging.getLogger(__name__)
 
@@ -146,7 +145,6 @@ def train(obs_receive, weight_send):
 
 
 def main():
-    from luafun.game.ipc_send import new_ipc_message
     logging.basicConfig(level=logging.DEBUG)
 
 

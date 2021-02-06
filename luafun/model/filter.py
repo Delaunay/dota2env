@@ -50,3 +50,5 @@ class ActionFilter:
         # check gold & store proximity (do not forget courier)
         self.items = torch.zeros((len(const.ITEM_COUNT),))
 
+    def get_filter(self, state, unit, rune, tree):
+        pass

@@ -11,7 +11,7 @@ from typing import List, Dict, Any, Optional
 
 import luafun.game.dota2.state_types as msg
 from luafun.draft import DraftStatus
-from luafun.entity import EntityManager
+from luafun.proximity import ProximityMapper
 
 GAME_START = 30
 NIGHT_DAY_TIME = 5 * 60
@@ -149,16 +149,16 @@ class FactionState:
     _couriers: Dict = field(default_factory=dictionary)
     _units: Dict = field(default_factory=dictionary)
     _buildings: Dict = field(default_factory=dictionary)
-    _manager: EntityManager = field(default_factory=EntityManager)
+    _proximity: ProximityMapper = field(default_factory=ProximityMapper)
 
     # State Management
     _s: int = 0
     _e: int = 0
     _r: int = 0
 
-    def get_entity(self, x, y):
+    def get_entities(self, x, y):
         """Returns the unit/entity that is closest to the specified location"""
-        return self._manager.get_entity(x, y)
+        return self._proximity.entities(x, y)
 
     def __deepcopy__(self, memo):
         state = FactionState(
@@ -356,6 +356,10 @@ class Stitcher:
             for field, value in unit.items():
                 udata[field] = value
 
+            handle = unit['handle']
+            x, y, z = unit['location']
+            state._proximity.manager.update_position(handle, x, y)
+
             if remove_dead and not udata.get('is_alive', True):
                 source.pop(unit[key])
         # ---
@@ -370,12 +374,15 @@ class Stitcher:
             pass
         # --
 
-        # Tree destruction event
+        # Tree Event
         for tree_event in delta.get('tree_events', []):
-            tree = state.trees[tree_event['tree_id']]
+            if tree_event.get('destroyed', False):
+                state._proximity.tree.pop_entity(event['tree_id'])
+                continue
 
-            for f, value in tree_event.items():
-                tree[f] = value
+            if tree_event.get('respawned', False):
+                x, y = state._proximity.tid_pos[event['tree_id']]
+                state._proximity.tree.add_entity(event['tree_id'], x, y)
         # --
 
         # Damage Event:

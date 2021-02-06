@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.distributions as distributions
 
 import luafun.stitcher as obs
-import luafun.game.action as actions
+from luafun.game.action import Action, AbilitySlot, ARG
 import luafun.game.constants as const
 
 
@@ -228,7 +228,10 @@ class HeroModel(nn.Module):
 
     We are having a small network for each action argument
 
-    OpenAI used 16 observations
+    OpenAI approach was to make network select action from a set of possible actions and select unit from a set of
+    possible unit.
+
+    We are trying not to do that, our network select from the set of all actions.
 
     Examples
     --------
@@ -281,12 +284,6 @@ class HeroModel(nn.Module):
     >>> act[ARG.sItem][player].shape
     torch.Size([288])
 
-    Notes
-    -----
-    OpenAI approach was to make network select action from a set of possible actions and select unit from a set of
-    possible unit.
-
-    We are trying not to do that, our network select from the set of all actions.
     """
 
     def __init__(self, batch_size, seq, input_size):
@@ -320,12 +317,12 @@ class HeroModel(nn.Module):
         self.h0 = None
         self.c0 = None
 
-        ability_count = len(actions.AbilitySlot)
+        ability_count = len(AbilitySlot)
 
         # Those sub networks are small and act as state decoder
         # to return the precise action that is the most suitable
         self.ability = SelectionCategorical(self.hidden_size, ability_count)
-        self.action = SelectionCategorical(self.hidden_size, len(actions.Action))
+        self.action = SelectionCategorical(self.hidden_size, len(Action))
         self.swap = SelectionCategorical(self.hidden_size, len(const.ItemSlot))
         self.item = SelectionCategorical(self.hidden_size, const.ITEM_COUNT)
 
@@ -350,7 +347,7 @@ class HeroModel(nn.Module):
         self.ability_embedder = AbilityEncoder()
         self.hero_embedder = HeroEncoder()
 
-    def forward(self, x):
+    def forward(self, x, helper=None):
         """Inference with space exploration"""
         if self.h0 is None:
             hidden, (hn, cn) = self.internal_model(x, (self.h0_init, self.c0_init))
@@ -360,9 +357,6 @@ class HeroModel(nn.Module):
         self.h0, self.c0 = hn, cn
 
         hidden = hidden[:, -1]
-        # unit = self.unit(hidden)
-        # tree = self.tree(hidden)
-        # rune = self.runes(hidden)
 
         # Sampled action
         action  = self.action(hidden)
@@ -371,35 +365,41 @@ class HeroModel(nn.Module):
         item    = self.item(hidden)
 
         # change the output from [0, 1] to [-1, 1]
-        vec = self.position(hidden) * 2 - 1
+        vec = (self.position(hidden) * 2 - 1) * const.RANGE[0]
 
         msg = {
-            actions.ARG.action: action,
-            actions.ARG.vLoc: vec,
-            actions.ARG.sItem: item,
-            actions.ARG.nSlot: ability,
-            actions.ARG.ix2: swap,
+            ARG.action: action,
+            ARG.vLoc: vec,
+            ARG.sItem: item,
+            ARG.nSlot: ability,
+            ARG.ix2: swap,
         }
+
+        if helper:
+            # this is not batched
+            unit, rune, tree = helper.get_entities(vec)
+            msg[ARG.nRune] = rune
+            msg[ARG.iTree] = tree
+            msg[ARG.hUnit] = unit
 
         return msg
 
 
-class SelectAction:
+class ActionSampler:
     """Select and preprocess action retuned by our model"""
-    CATEGORICAL_FIELDS = [actions.ARG.action, actions.ARG.sItem, actions.ARG.nSlot, actions.ARG.ix2]
+    CATEGORICAL_FIELDS = [ARG.action, ARG.sItem, ARG.nSlot, ARG.ix2]
 
-    def __init__(self):
-        pass
-
-    def argmax(self, msg):
+    def argmax(self, msg, filter):
         """Inference only no exploration"""
-        fields = SelectAction.CATEGORICAL_FIELDS
+        fields = ActionSampler.CATEGORICAL_FIELDS
         logprobs = None
         entropy = None
 
         for i, field in enumerate(fields):
             prob = msg[field]
+
             # Apply the filter here
+            prob = filter(prob)
 
             # Sample the action
             selected = torch.argmax(prob)
@@ -407,9 +407,9 @@ class SelectAction:
 
         return msg, logprobs, entropy
 
-    def sampled(self, msg):
+    def sampled(self, msg, filter):
         """Inference with exploration to help training"""
-        fields = SelectAction.CATEGORICAL_FIELDS
+        fields = ActionSampler.CATEGORICAL_FIELDS
 
         logprobs = [None] * len(fields)
         entropy = [None] * len(fields)
@@ -419,7 +419,9 @@ class SelectAction:
             # we sample from a distribution
             # this makes our actor discover need strategies
             prob = msg[field]
+
             # Apply the filter here
+            prob = filter(prob)
 
             # Sample the action
             dist = distributions.Categorical(prob)
