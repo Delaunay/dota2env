@@ -107,26 +107,8 @@ class SelectionCategorical(nn.Module):
             nn.Softmax(dim=-1)
         )
 
-    def argmax(self, x):
-        """Evaluation mode without exploration"""
-        with torch.no_grad():
-            action_probs = self.selector(x)
-            return torch.argmax(action_probs)
-
-    def sampled(self, x):
-        action_probs = self.selector(x)
-
-        # instead of picking the most likely
-        # we sample from a distribution
-        # this makes our actor discover need strategies
-        dist = distributions.Categorical(action_probs)
-        action = dist.sample()
-
-        # Used for the cost function
-        logprobs = dist.log_prob(action)
-        entropy = dist.entropy()
-
-        return action, logprobs, entropy
+    def forward(self, x):
+        return self.selector(x)
 
 
 # I think the most challenging is probably how to make the network select an Entity
@@ -234,7 +216,9 @@ class SimpleDrafter(nn.Module):
 
 
 class HeroModel(nn.Module):
-    """Change the batch size to group Hero computation
+    """Change the batch size to group Hero computation.
+    This Module returns only the probabilities the actual action will be selected later,
+    when the action filter is applied
 
     Notes
     -----
@@ -261,33 +245,41 @@ class HeroModel(nn.Module):
     >>> batch = torch.randn(batch_size, seq, input_size)
 
     >>> with torch.no_grad():
-    ...     act, _, _ = model.sampled(batch)
+    ...     act = model(batch)
 
     Returns the actions to take for each bots/players
     >>> act[ARG.action].shape
-    torch.Size([10])
+    torch.Size([10, 32])
 
     >>> player = 0
 
-    Selected action
+     Which action we want to use by probabilities
     >>> act[ARG.action][player]
-    tensor(12)
+    tensor([0.0291, 0.0303, 0.0330, 0.0347, 0.0268, 0.0281, 0.0314, 0.0324, 0.0276,
+            0.0353, 0.0272, 0.0326, 0.0353, 0.0298, 0.0324, 0.0280, 0.0269, 0.0354,
+            0.0285, 0.0263, 0.0275, 0.0370, 0.0314, 0.0343, 0.0334, 0.0298, 0.0284,
+            0.0356, 0.0335, 0.0298, 0.0353, 0.0332])
 
     Vector location
     >>> act[ARG.vLoc][player]
-    tensor([ 0.0105, -0.0105])
+    tensor([-0.0377,  0.0377])
 
-    Ability to use
+    Which ability we want to use by probabilities
     >>> act[ARG.nSlot][player]
-    tensor(15)
+    tensor([0.0258, 0.0211, 0.0266, 0.0246, 0.0256, 0.0248, 0.0222, 0.0252, 0.0227,
+            0.0250, 0.0270, 0.0203, 0.0273, 0.0224, 0.0252, 0.0261, 0.0207, 0.0266,
+            0.0242, 0.0240, 0.0210, 0.0244, 0.0274, 0.0240, 0.0267, 0.0234, 0.0253,
+            0.0251, 0.0250, 0.0265, 0.0251, 0.0223, 0.0267, 0.0235, 0.0263, 0.0270,
+            0.0215, 0.0208, 0.0225, 0.0271, 0.0208])
 
-    Item Swap
+    Item Swap probabilities
     >>> act[ARG.ix2][player]
-    tensor(12)
+    tensor([0.0470, 0.0580, 0.0639, 0.0531, 0.0612, 0.0557, 0.0458, 0.0738, 0.0472,
+            0.0654, 0.0647, 0.0609, 0.0666, 0.0558, 0.0590, 0.0599, 0.0619])
 
     Item to buy
-    >>> act[ARG.sItem][player]
-    tensor(134)
+    >>> act[ARG.sItem][player].shape
+    torch.Size([288])
 
     Notes
     -----
@@ -328,13 +320,13 @@ class HeroModel(nn.Module):
         self.h0 = None
         self.c0 = None
 
-        ability_count = len(actions.ItemSlot) + len(actions.AbilitySlot)
+        ability_count = len(actions.AbilitySlot)
 
         # Those sub networks are small and act as state decoder
         # to return the precise action that is the most suitable
         self.ability = SelectionCategorical(self.hidden_size, ability_count)
         self.action = SelectionCategorical(self.hidden_size, len(actions.Action))
-        self.swap = SelectionCategorical(self.hidden_size, len(actions.ItemSlot))
+        self.swap = SelectionCategorical(self.hidden_size, len(const.ItemSlot))
         self.item = SelectionCategorical(self.hidden_size, const.ITEM_COUNT)
 
         # Normalized Vector location
@@ -358,46 +350,7 @@ class HeroModel(nn.Module):
         self.ability_embedder = AbilityEncoder()
         self.hero_embedder = HeroEncoder()
 
-    def argmax(self, x):
-        """Pure inference, no exploration"""
-        with torch.no_grad():
-            if self.h0 is None:
-                hidden, (hn, cn) = self.internal_model(x, (self.h0_init, self.c0_init))
-            else:
-                hidden, (hn, cn) = self.internal_model(x, (self.h0, self.c0))
-
-            self.h0, self.c0 = hn, cn
-
-            # select the last state
-            hidden = hidden[:, -1]
-
-            # unit = self.unit(hidden)
-            # tree = self.tree(hidden)
-            # rune = self.runes(hidden)
-
-            # Sampled action
-            action  = self.action.argmax(hidden)
-            ability = self.ability.argmax(hidden)
-            swap    = self.swap.argmax(hidden)
-            item    = self.item.argmax(hidden)
-
-            # change the output from [0, 1] to [-1, 1]
-            vec = self.position(hidden) * 2 - 1
-
-            msg = {
-                actions.ARG.action: action,
-                actions.ARG.vLoc: vec,
-                actions.ARG.sItem: item,
-                actions.ARG.nSlot: ability,
-                actions.ARG.ix2: swap
-            }
-
-            log_progs = None
-            entropy = None
-
-            return msg, log_progs, entropy
-
-    def sampled(self, x):
+    def forward(self, x):
         """Inference with space exploration"""
         if self.h0 is None:
             hidden, (hn, cn) = self.internal_model(x, (self.h0_init, self.c0_init))
@@ -412,10 +365,10 @@ class HeroModel(nn.Module):
         # rune = self.runes(hidden)
 
         # Sampled action
-        action,  lp_ac, ent_ac = self.action.sampled(hidden)
-        ability, lp_ab, ent_ab = self.ability.sampled(hidden)
-        swap,    lp_sw, ent_sw = self.swap.sampled(hidden)
-        item,    lp_it, ent_it = self.item.sampled(hidden)
+        action  = self.action(hidden)
+        ability = self.ability(hidden)
+        swap    = self.swap(hidden)
+        item    = self.item(hidden)
 
         # change the output from [0, 1] to [-1, 1]
         vec = self.position(hidden) * 2 - 1
@@ -428,13 +381,59 @@ class HeroModel(nn.Module):
             actions.ARG.ix2: swap,
         }
 
-        log_progs = (lp_ac, lp_ab, lp_sw, lp_it)
-        entropy   = (ent_ac, ent_ab, ent_sw, ent_it)
+        return msg
 
-        return msg, log_progs, entropy
 
-    def forward(self, x):
-        return self.sampled(x)
+class SelectAction:
+    """Select and preprocess action retuned by our model"""
+    CATEGORICAL_FIELDS = [actions.ARG.action, actions.ARG.sItem, actions.ARG.nSlot, actions.ARG.ix2]
+
+    def __init__(self):
+        pass
+
+    def argmax(self, msg):
+        """Inference only no exploration"""
+        fields = SelectAction.CATEGORICAL_FIELDS
+        logprobs = None
+        entropy = None
+
+        for i, field in enumerate(fields):
+            prob = msg[field]
+            # Apply the filter here
+
+            # Sample the action
+            selected = torch.argmax(prob)
+            msg[field] = selected
+
+        return msg, logprobs, entropy
+
+    def sampled(self, msg):
+        """Inference with exploration to help training"""
+        fields = SelectAction.CATEGORICAL_FIELDS
+
+        logprobs = [None] * len(fields)
+        entropy = [None] * len(fields)
+
+        for i, field in enumerate(fields):
+            # instead of picking the most likely
+            # we sample from a distribution
+            # this makes our actor discover need strategies
+            prob = msg[field]
+            # Apply the filter here
+
+            # Sample the action
+            dist = distributions.Categorical(prob)
+            selected = dist.sample()
+
+            # Used for the cost function
+            lp_sel = dist.log_prob(selected)
+            en_sel = dist.entropy()
+
+            logprobs[i] = lp_sel
+            entropy[i] = en_sel
+            msg[field] = selected
+
+        return msg, logprobs, entropy
 
 
 class ActorCritic(nn.Module):
