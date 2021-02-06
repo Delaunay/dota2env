@@ -7,9 +7,14 @@ log = logging.getLogger(__name__)
 
 class EntityManager:
     """Manages all the entity in the game"""
-    def __init__(self):
+    def __init__(self, div):
         self.handle_to_key = {}
         self.key_to_handle = {}
+        self.div = div
+
+    def dump(self):
+        for k, v in self.key_to_handle.items():
+            print(k, v)
 
     def get_entity(self, x, y):
         """Get the entity at that position
@@ -20,7 +25,7 @@ class EntityManager:
 
         Examples
         --------
-        >>> em = EntityManager()
+        >>> em = EntityManager(10)
         >>> em.add_entity('123', 100, 100)
         True
         >>> em.get_entity(100, 100)
@@ -30,7 +35,8 @@ class EntityManager:
         >>> em.get_entity(120, 120)
 
         """
-        return self.key_to_handle.get(position_to_key(x, y))
+        k = position_to_key(x, y, div=self.div)
+        return self.key_to_handle.get(k)
 
     def update_position(self, handle, x, y):
         """Update the position of a given entity
@@ -41,7 +47,7 @@ class EntityManager:
 
         Examples
         --------
-        >>> em = EntityManager()
+        >>> em = EntityManager(10)
         >>> em.add_entity('123', 10, 10)
         True
         >>> em.update_position('123', 12, 12)
@@ -49,7 +55,7 @@ class EntityManager:
         >>> em.update_position('124', 12, 12)
         False
         """
-        return self._update_position(handle, position_to_key(x, y))
+        return self._update_position(handle, position_to_key(x, y, div=self.div))
 
     def _update_position(self, handle, key):
         good = False
@@ -72,14 +78,14 @@ class EntityManager:
 
         Examples
         --------
-        >>> em = EntityManager()
+        >>> em = EntityManager(10)
         >>> em.add_entity('123', 10, 10)
         True
         >>> em.add_entity('123', 10, 10)
         False
         """
         dup = False
-        key = position_to_key(x, y)
+        key = position_to_key(x, y, div=self.div)
 
         if key in self.key_to_handle:
             log.debug('Duplicate key for entities')
@@ -97,7 +103,7 @@ class EntityManager:
 
         Examples
         --------
-        >>> em = EntityManager()
+        >>> em = EntityManager(10)
         >>> em.add_entity('123', 10, 10)
         True
         >>> em.pop_entity('123')

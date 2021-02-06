@@ -51,6 +51,15 @@ def position_to_key(x, y, div=27):
 
     .. image:: ../_static/position_mapping.png
 
+    >>> position_to_key(-6016, -6784, 37)
+    '-162-183'
+
+    >>> position_to_key(-6016 - 14, -6784, 37)
+    '-162-183'
+
+    >>> position_to_key(-6016 + 99, -6784, 37)
+    '-159-183'
+
     Notes
     -----
     This essentially capture anything in a ``div`` unit square.
@@ -142,7 +151,7 @@ def get_tree(x, y):
     return -1
 
 
-TREES = load_trees()
+TREES = load_source_file('resources/trees.json')
 TREE_COUNT = len(TREES)
 
 
@@ -167,7 +176,7 @@ def get_rune(x, y):
     return RUNES.get(key)
 
 
-RUNES = rune_lookup()
+RUNES = load_source_file('resources/runes.json')
 RUNE_COUNT = len(RUNES)
 
 SHOPS = load_source_file('resources/shops.json')
