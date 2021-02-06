@@ -14,7 +14,10 @@ update-doc: build-doc serve-doc
 yolo: rm-doc build-doc serve-doc
 
 run-1v1:
-	coverage run tests/gym_tests.py
+	COVERAGE_FILE=.coverage.e2e coverage run --concurrency=multiprocessing tests/integrations/gym_tests.py
+
+run-doctest:
+	COVERAGE_FILE=.coverage.doct coverage run --parallel-mode -m pytest --cov=luafun --doctest-modules luafun
 
 cov-combine:
 	coverage combine

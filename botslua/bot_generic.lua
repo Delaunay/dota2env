@@ -383,6 +383,10 @@ local function get_action_table()
         return bot:Action_UseAbilityOnLocation(hAbility, vLoc)
     end
     actionHandler[AUseAbilityOnTree]     = function(vLoc, hUnit, nSlot, iTree, nRune, sItem, ix2)
+        if iTree == nil then
+            return
+        end
+
         local hAbility = get_ability_handle(nSlot)
             if hAbility == nil then
                 return

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.distributions as distributions
 
-import luafun.stitcher as obs
+from luafun.draft import DraftFields
 from luafun.game.action import Action, AbilitySlot, ARG
 import luafun.game.constants as const
 
@@ -146,17 +146,17 @@ class SimpleDrafter(nn.Module):
     Examples
     --------
     >>> _ = torch.manual_seed(0)
-    >>> draft_status = torch.zeros((obs.DraftFields.Size, const.HERO_COUNT))
+    >>> draft_status = torch.zeros((DraftFields.Size, const.HERO_COUNT))
 
     Set draft status
 
-    >>> for i in range(obs.DraftFields.Size):
+    >>> for i in range(DraftFields.Size):
     ...     draft_status[i][0] = 1
 
     Batched version
 
     >>> batch_size = 5
-    >>> draft_batch = torch.zeros((batch_size, obs.DraftFields.Size, const.HERO_COUNT))
+    >>> draft_batch = torch.zeros((batch_size, DraftFields.Size, const.HERO_COUNT))
 
     Insert draft to batch
 
@@ -192,7 +192,7 @@ class SimpleDrafter(nn.Module):
         self.encoded_vector = 64
         self.hero_encoder = CategoryEncoder(const.HERO_COUNT, self.encoded_vector)
 
-        self.hidden_size = obs.DraftFields.Size * self.encoded_vector
+        self.hidden_size = DraftFields.Size * self.encoded_vector
 
         self.hero_select = SelectionCategorical(self.hidden_size, const.HERO_COUNT)
         self.hero_ban    = SelectionCategorical(self.hidden_size, const.HERO_COUNT)
@@ -204,13 +204,23 @@ class SimpleDrafter(nn.Module):
         # encoded_draft : (batch_size x 24 * 64)
 
         batch_size = draft.shape[0]
-        flat_draft = draft.view(batch_size * obs.DraftFields.Size, const.HERO_COUNT)
+        flat_draft = draft.view(batch_size * DraftFields.Size, const.HERO_COUNT)
 
         encoded_flat = self.hero_encoder(flat_draft)
         encoded_draft = encoded_flat.view(batch_size, self.hidden_size)
 
-        select, _, _ = self.hero_select(encoded_draft)
-        ban, _, _ = self.hero_ban(encoded_draft)
+        probs_select = self.hero_select(encoded_draft)
+        pros_ban = self.hero_ban(encoded_draft)
+
+        dist = distributions.Categorical(probs_select)
+        select = dist.sample()
+        # action_logprobs = dist.log_prob(select)
+        # dist_entropy = dist.entropy()
+
+        dist = distributions.Categorical(pros_ban)
+        ban = dist.sample()
+        # action_logprobs = dist.log_prob(ban)
+        # dist_entropy = dist.entropy()
 
         return select, ban
 
@@ -347,7 +357,7 @@ class HeroModel(nn.Module):
         self.ability_embedder = AbilityEncoder()
         self.hero_embedder = HeroEncoder()
 
-    def forward(self, x, helper=None):
+    def forward(self, x):
         """Inference with space exploration"""
         if self.h0 is None:
             hidden, (hn, cn) = self.internal_model(x, (self.h0_init, self.c0_init))
@@ -365,7 +375,7 @@ class HeroModel(nn.Module):
         item    = self.item(hidden)
 
         # change the output from [0, 1] to [-1, 1]
-        vec = (self.position(hidden) * 2 - 1) * const.RANGE[0]
+        vec = (self.position(hidden) * 2 - 1)
 
         msg = {
             ARG.action: action,
@@ -374,13 +384,6 @@ class HeroModel(nn.Module):
             ARG.nSlot: ability,
             ARG.ix2: swap,
         }
-
-        if helper:
-            # this is not batched
-            unit, rune, tree = helper.get_entities(vec)
-            msg[ARG.nRune] = rune
-            msg[ARG.iTree] = tree
-            msg[ARG.hUnit] = unit
 
         return msg
 

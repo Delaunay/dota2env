@@ -2,8 +2,8 @@ from luafun.dotaenv import action_space, Dota2Env
 
 
 class MockState:
-    def get_entity(self, x, y):
-        return 0
+    def get_entities(self, x, y):
+        return None, None, None
 
 
 class MockDraftTracker:
@@ -47,12 +47,9 @@ def dump(act):
 
 
 def preprocessor_test():
-    act = Dota2Env.fix_sampled_actions(action_space().sample())
-
+    act = action_space().sample()
     dump(act)
-
     result = Dota2Env._action_preprocessor(MockEnv(), act)
-
     dump(result)
 
 

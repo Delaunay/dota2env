@@ -16,6 +16,12 @@ class EntityManager:
         for k, v in self.key_to_handle.items():
             print(k, v)
 
+    def get_range(self, x, y):
+        rx = int(x) % self.div
+        ry = int(y) % self.div
+
+        return (x - rx) + self.div / 2, (y - ry) + self.div / 2
+
     def get_entity(self, x, y):
         """Get the entity at that position
 

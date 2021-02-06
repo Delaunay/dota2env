@@ -312,10 +312,7 @@ def player_space():
     ...     print(k, v)
     ActionArgument.action 16
     ActionArgument.vLoc [-0.8912799  0.9307819]
-    ActionArgument.hUnit 112
     ActionArgument.nSlot 14
-    ActionArgument.iTree 1083
-    ActionArgument.nRune 0
     ActionArgument.sItem 112
     ActionArgument.ix2 16
 
@@ -359,11 +356,11 @@ def team_space(s: int):
      >>> s.seed(0)
     >>> for k, v in s.sample().items():
     ...     print(k, v)
-    0 OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])
-    1 OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])
-    2 OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])
-    3 OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])
-    4 OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])
+    0 OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])
+    1 OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])
+    2 OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])
+    3 OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])
+    4 OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])
     HS OrderedDict([('ban', 112), ('lane', 0), ('select', 112)])
     """
     from gym import spaces
@@ -394,8 +391,9 @@ def action_space():
     >>> s.seed(0)
     >>> for k, v in s.sample().items():
     ...     print(k, v)
-    2 OrderedDict([('0', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('1', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('2', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('3', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('4', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('HS', OrderedDict([('ban', 112), ('lane', 0), ('select', 112)]))])
-    3 OrderedDict([('5', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('6', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('7', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('8', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('9', OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.hUnit: 2>, 112), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.iTree: 4>, 1083), (<ActionArgument.nRune: 5>, 0), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])), ('HS', OrderedDict([('ban', 112), ('lane', 0), ('select', 112)]))])
+    uid 0
+    2 {0: OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)]), 1: OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)]), 2: OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)]), 3: OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)]), 4: OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])}
+    3 {5: OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)]), 6: OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)]), 7: OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)]), 8: OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)]), 9: OrderedDict([(<ActionArgument.action: 0>, 16), (<ActionArgument.vLoc: 1>, array([-0.8912799,  0.9307819], dtype=float32)), (<ActionArgument.nSlot: 3>, 14), (<ActionArgument.sItem: 6>, 112), (<ActionArgument.ix2: 7>, 16)])}
     """
     from gym import spaces
 
@@ -426,6 +424,9 @@ def action_space():
     class _SpaceWrap:
         def __init__(self, space):
             self.space = space
+
+        def seed(self, seed):
+            self.space.seed(seed)
 
         def sample(self):
             return fix_sampled_actions(self.space.sample())

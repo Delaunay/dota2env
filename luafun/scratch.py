@@ -1,7 +1,5 @@
 """You can ignore that file"""
 
-from luafun.dotaenv import main
-
 
 def guess_path():
     from sys import platform

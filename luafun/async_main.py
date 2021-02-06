@@ -21,7 +21,7 @@ def play(obs_send, weight_recv):
     game = Dota2Env('F:/SteamLibrary/steamapps/common/dota 2 beta/', False)
     deadline = game.deadline    
 
-    objective = # ...
+    # objective = # ...
     model: ActorCritic = BaseActorCritic()
 
     w = weight_recv.recv()
@@ -86,10 +86,10 @@ def train(obs_receive, weight_send):
     when training using multiple games in parallel the optimizer needs to be initialized per game?
     """
     policy: ActorCritic = BaseActorCritic()
-    optimizer = torch.optim.Adam(policy.parameters(), lr=lr, betas=betas)
-    dataset = # ...
-    eps_clip = # ...
-    loss = nn.MSELoss()
+    # optimizer = torch.optim.Adam(policy.parameters(), lr=lr, betas=betas)
+    #  dataset = # ...
+    # eps_clip = # ...
+    # loss = nn.MSELoss()
 
     while True:
         new_obs = obs_receive.recv()
