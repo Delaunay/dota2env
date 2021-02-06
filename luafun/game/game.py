@@ -6,6 +6,7 @@ import multiprocessing as mp
 import subprocess
 import time
 
+from luafun.game.modes import DOTA_GameMode
 from luafun.game.config import DotaPaths
 from luafun.game.args import DotaOptions
 from luafun.game.inspect import http_inspect
@@ -125,6 +126,17 @@ class Dota2Game:
 
         self.extractor = Extractor()
         log.debug(f'Main Process: {os.getpid()}')
+        self._bots = []
+
+    @property
+    def batch_size(self):
+        """A single dota2 environment generates a batch of observations (10 if all players are controlled by bots)"""
+        return len(self._bots)
+
+    @property
+    def bot_ids(self):
+        """Returns the list of player id that are controlled by bots"""
+        return self._bots
 
     @property
     def deadline(self):
@@ -140,7 +152,7 @@ class Dota2Game:
 
     def is_game_ready(self):
         """Returns true if all bots sent us their init message"""
-        return self.players[TEAM_RADIANT] + self.players[TEAM_DIRE] >= self.bot_count
+        return len(self._bots) >= self.bot_count
 
     def launch_dota(self):
         """Launch dota game without communication processes"""
@@ -436,9 +448,16 @@ class Dota2Game:
             if not self.heroes:
                 self._set_hero_info(info)
 
-            self.players[int(faction)] += 1
+            self._bots.append(player_id)
             if self.is_game_ready():
                 self.state['game'] = True
+
+                self._bots.sort()
+                # 1v1 Mid is buggy and all bots are spawned
+                # as a hack we ignore them
+                if self.options.game_mode == DOTA_GameMode.DOTA_GAMEMODE_1V1MID:
+                    self._bots = [0, 5]
+
                 log.debug('All bots accounted for, Game is ready')
                 self.ready = True
             return

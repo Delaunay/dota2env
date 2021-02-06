@@ -70,6 +70,9 @@ def main(config=None):
 
         game.wait_end_draft()
 
+        for pid in game.bot_ids:
+            print(f'Player {pid} is a bot')
+
         # Play the game
         while game.running:
             # Start issuing orders here
@@ -84,9 +87,6 @@ def main(config=None):
         print('Game Finished')
 
     print('Done')
-
-
-
 
 
 if __name__ == '__main__':
