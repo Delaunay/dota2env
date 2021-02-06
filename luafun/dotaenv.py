@@ -330,23 +330,21 @@ class Dota2Env(Dota2Game):
 
             # Remap vloc to be across the map
             pos = action[actions.ARG.vLoc]
+
             # print(action)
-            x = pos[0] * const.RANGE[0]
-            y = pos[1] * const.RANGE[1]
+            x = pos[0] * 8288
+            y = pos[1] * 8288
             action[actions.ARG.vLoc] = (x, y)
 
-            # Remap Trees
-            action[actions.ARG.iTree] = const.get_tree(x, y)
-
-            # Remap Rune
-            action[actions.ARG.nRune] = const.get_rune(x, y)
-
-            # Remap Entity Handles
             state = self.radiant_state()
             if pid >= 5:
                 state = self.dire_state()
 
-            action[actions.ARG.hUnit] = state.get_entity(x, y)
+            unit, rune, tree = state.get_entities(x, y)
+
+            action[actions.ARG.iTree] = tree
+            action[actions.ARG.nRune] = rune
+            action[actions.ARG.hUnit] = unit
 
         return message
 

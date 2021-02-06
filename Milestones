@@ -356,3 +356,25 @@ int luaopen_genericbot (lua_State* L)
 Generate GIF
 
 ffmpeg -i luafun_30sec.mp4 -vf "fps=25,scale=320:-1:flags=lanczos" -loop 0 output.gif
+
+
+def a1(action):
+    from luafun.game.action import ARG, Action
+    import luafun.game.constants as const
+
+    p1 = action[2][0]
+    p1[ARG.action] = Action.PurchaseItem
+    p1[ARG.sItem] = const.get_item('item_tango')
+
+def a2(action):
+    from luafun.game.action import ARG, Action
+    p1 = action[2][0]
+    p1[ARG.action] = Action.MoveToLocation
+    p1[ARG.vLoc] = [-6016 / 8288, -6784 / 8288]
+
+def a3(action):
+    from luafun.game.action import ARG, Action
+
+    p1 = action[2][0]
+    p1[ARG.action] = Action.UseAbilityOnTree
+    p1[ARG.vLoc] = [-6016 / 8288, -6784 / 8288]

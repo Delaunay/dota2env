@@ -34,7 +34,7 @@ SIZE = (
 # True max vision is 1800, 800 at night
 
 
-def position_to_key(x, y, div=10):
+def position_to_key(x, y, div=27):
     """Generate a position key to query entities by their position
 
     Examples
@@ -57,7 +57,7 @@ def position_to_key(x, y, div=10):
     The unit/entity is not at the center of the square.
 
     Collision in dota is standardized so there is only a few sizes we need to worry about.
-    We chose ``div = 10`` because it seemed a good middle ground.
+    We chose ``div = 27`` because it is close to the hero collision size
 
     This method makes the unit/tree selection a bit fuzzy, if entities are close together
     they could be mis-selected
@@ -78,13 +78,16 @@ def position_to_key(x, y, div=10):
     """
     # Extract the fractional part
     # so if we are close to a frontier we cover it
-    ox = (x - int(x / div) * div)
-    oy = (y - int(y / div) * div)
-
-    x = x + ox / 2
-    y = y + oy / 2
-
-    return f'{int(x / div)}{int(y / div)}'
+    # ox = (x - int(x / div) * div)
+    # oy = (y - int(y / div) * div)
+    # #
+    # x = x + ox / 8
+    # y = y + oy / 8
+    #
+    # return f'{int(x / div)}{int(y / div)}'
+    x = int(x / div)
+    y = int(y / div)
+    return f'{x}{y}'
 
 
 IGNORED_TREES = dict()
@@ -360,6 +363,13 @@ HERO_LOOKUP = HeroLookup()
 
 ITEMS = load_source_file('resources/items.json')
 ITEM_COUNT = len(ITEMS)
+
+
+def get_item(name):
+    for n, item in enumerate(ITEMS):
+        if item['name'] == name:
+            return n
+    return None
 
 
 class Lanes(IntEnum):

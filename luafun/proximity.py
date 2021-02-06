@@ -4,6 +4,41 @@ from luafun.entity import EntityManager
 
 
 class ProximityMapper:
+    """Find an entity close to a given location (few pixel away)
+
+    Notes
+    -----
+    The standard attack range for melee units is 150.
+    and hero collision has a size of 24
+
+
+    Examples
+    --------
+    >>> proxymapper = ProximityMapper()
+
+    Exact match is found
+
+    >>> proxymapper.entities(-6016, -6784)
+    (None, None, 10)
+
+    >>> max_i = 0
+    >>> min_i = 0
+    >>> min_j = 0
+    >>> max_j = 0
+    >>> for i in range(-100, 100):
+    ...     for j in range(-100, 100):
+    ...         tree = proxymapper.entities(-6016 + i, -6784 + j)[2]
+    ...         if tree:
+    ...             max_i = max(max_i, i)
+    ...             min_i = min(min_i, i)
+    ...             max_j = max(max_j, j)
+    ...             min_j = min(min_j, j)
+    >>> (min_i, max_i), max_i - min_i
+    ((-100, 16), 116)
+    >>> (min_j, max_j), max_j - min_j
+    ((-15, 99), 114)
+
+    """
     def __init__(self):
         self.manager = EntityManager()
 
@@ -15,6 +50,7 @@ class ProximityMapper:
             x, y, _ = tree['loc']
             self.tree.add_entity(tree['id'], x, y)
             self.tid_pos[tree['id']] = x, y
+            # print(x, y)
 
     def update(self, delta):
         self._update_trees(delta)

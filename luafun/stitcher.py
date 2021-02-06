@@ -357,8 +357,8 @@ class Stitcher:
                 udata[field] = value
 
             handle = unit['handle']
-            x, y, z = unit['location']
-            state._proximity.manager.update_position(handle, x, y)
+            pos = unit['location']
+            state._proximity.manager.update_position(handle, pos['x'], pos['y'])
 
             if remove_dead and not udata.get('is_alive', True):
                 source.pop(unit[key])
