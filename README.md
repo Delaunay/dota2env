@@ -81,3 +81,11 @@ You might be able to skip these steps
 * Prevent git from picking up the change
     `git update-index --assume-unchanged config.json`
 
+# Color Palette
+
+https://colorhunt.co/palette/252860
+
+75cfb8
+bbdfc8
+f0e5d8
+ffc478
