@@ -1,6 +1,10 @@
 Dota2 Gym Environment
 =====================
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.4514210.svg
+   :target: https://doi.org/10.5281/zenodo.4514210
+
+
 Straight forward API with full bot take over
 
 .. code-block:: python
@@ -90,3 +94,17 @@ Features
    pages/training
    pages/performance
 
+
+
+.. code-block::
+
+    @software{pierre_delaunay_2021_4514210,
+      author       = {Pierre Delaunay},
+      title        = {{LuaFun a complete RL training environment for
+                       dota2}},
+      month        = feb,
+      year         = 2021,
+      publisher    = {Zenodo},
+      doi          = {10.5281/zenodo.4514210},
+      url          = {https://doi.org/10.5281/zenodo.4514210}
+    }
