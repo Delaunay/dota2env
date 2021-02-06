@@ -140,7 +140,6 @@ class Dota2Game:
 
     def is_game_ready(self):
         """Returns true if all bots sent us their init message"""
-        print(self.players[TEAM_RADIANT], self.players[TEAM_DIRE], self.bot_count)
         return self.players[TEAM_RADIANT] + self.players[TEAM_DIRE] >= self.bot_count
 
     def launch_dota(self):
@@ -166,7 +165,6 @@ class Dota2Game:
 
         # save the arguments of the current game for visibility
         self.args = path + self.options.args(self.paths)
-        print(self.args)
         self.process = subprocess.Popen(self.args)  # , stdin=subprocess.PIPE
 
     def dire_state_delta(self):

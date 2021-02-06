@@ -100,6 +100,7 @@ class Unit:
     unit_type_BARRACKS: int = 0
     unit_type_SHRINE: int = 0
     unit_type_FORT: int = 0
+
     unit_type_BUILDING: int = 0
     unit_type_COURIER: int = 0
     unit_type_WARD: int = 0
@@ -261,7 +262,7 @@ class Stitcher:
         """Take a world state delta and apply it to a previous state"""
         state._s += 1
 
-        delta = json.loads(delta)
+        # delta = json.loads(delta)
         g = state.global_state
 
         dota_time = delta['dota_time']

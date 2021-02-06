@@ -43,18 +43,17 @@ def acquire_state(state):
 
 
 class Dota2Env(Dota2Game):
-    """Currently the state is simply built as we go, but we should probably do something
-    with a bit more guarantees, in particular the state should be for a particular frame
-    so the ML can work on a consistent dataset
+    """Dota2 Game Environment
 
-    Although leaving it inconsistent could be an interesting experiment
+    .. image:: ../_static/env_diagram.png
+
 
     Notes
     -----
     if you installed dota in a custom location you can set the environment variable ``LUAFUN_DOTA_PATH``
     to make the environment pick it up automatically
 
-    .. code-block::bash
+    .. code-block:: bash
 
         export LUAFUN_DOTA_PATH=/media/setepenre/local/SteamLibraryLinux/steamapps/common/dota2/
 
@@ -231,33 +230,7 @@ class Dota2Env(Dota2Game):
             }
 
         """
-        def fix_sampled_actions(act):
-            return {
-                'uid': 0,
-                TEAM_RADIANT: {
-                    0: act[TEAM_RADIANT]['0'],
-                    1: act[TEAM_RADIANT]['1'],
-                    2: act[TEAM_RADIANT]['2'],
-                    3: act[TEAM_RADIANT]['3'],
-                    4: act[TEAM_RADIANT]['4'],
-                },
-                TEAM_DIRE: {
-                    5: act[TEAM_DIRE]['5'],
-                    6: act[TEAM_DIRE]['6'],
-                    7: act[TEAM_DIRE]['7'],
-                    8: act[TEAM_DIRE]['8'],
-                    9: act[TEAM_DIRE]['9'],
-                }
-            }
-
-        class _SpaceWrap:
-            def __init__(self, space):
-                self.space = space
-
-            def sample(self):
-                return fix_sampled_actions(self.space.sample())
-
-        return _SpaceWrap(self._action_space)
+        return self._action_space
 
     @property
     def observation_space(self):
@@ -418,75 +391,9 @@ _environments = {
 
 
 def dota2_environment(name, *args, **kwargs) -> Dota2Env:
-    return _environments.get(name)(*args, **kwargs)
+    factory = _environments.get(name)
 
+    if factory:
+        return factory(*args, **kwargs)
 
-def main(config=None):
-    """This simply runs the environment forever with NO MODELS
-    It means bots will not do anything, if drafting is enabled nothing will be drafted
-
-    This function is used for testing purposes
-    """
-    from argparse import ArgumentParser
-
-    parser = ArgumentParser()
-    parser.add_argument('--draft', action='store_true', default=False,
-                        help='Enable bot drafting')
-
-    parser.add_argument('--mode', type=str, default='allpick_nobans',
-                        help='Game mode')
-
-    parser.add_argument('--path', type=str, default=option('dota.path', None),
-                        help='Custom Dota2 game location')
-
-    parser.add_argument('--render', action='store_true', default=False,
-                        help='Custom Dota2 game location')
-
-    parser.add_argument('--speed', type=float, default=4,
-                        help='Speed multiplier')
-
-    parser.add_argument('--interactive', action='store_true', default=False,
-                        help='Make a human create the lobby')
-
-    args = parser.parse_args()
-    factory = _environments.get(args.mode)
-
-    if factory is None:
-        return
-
-    # logging.basicConfig(level=logging.INFO)
-    logging.basicConfig(level=logging.DEBUG)
-
-    game = factory(args.path, config=config)
-    game.options.dedicated = not args.render
-    game.options.interactive = args.interactive
-    game.options.host_timescale = args.speed
-    game.options.draft = int(args.draft)
-
-    with game:
-        state = game.initial()
-
-        # Draft here if enabled
-        while game.running:
-            break
-
-        game.wait_end_draft()
-
-        # Play the game
-        while game.running:
-            # Start issuing orders here
-            action = game.action_space.sample()
-
-            # take a random action
-            obs, reward, done, info = game.step(action)
-
-            if game.cnt > 0 and game.cnt % 100 == 0:
-                print(f'Step time {game.avg / game.cnt:.4f}')
-
-        print('Game Finished')
-
-    print('Done')
-
-
-if __name__ == '__main__':
-    main()
+    return None

@@ -52,6 +52,8 @@ class GameInspector(BasePage):
             state = asdict(state)
 
         if state is not None:
+            if '_manager' in state:
+                state['_manager'] = None
             raw = json.dumps(state, indent=2)
 
         page = self.env.get_template(page)

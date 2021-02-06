@@ -326,23 +326,25 @@ def player_space():
 
     action = spaces.Discrete(len(Action))
     vloc = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
-    # We set the max number of unit on the map to 256
-    # the ids are remapped to actual handle id
-    hUnit = spaces.Discrete(256)
+
     abilities = spaces.Discrete(len(AbilitySlot))
     # Tree ID
-    tree = spaces.Discrete(const.TREE_COUNT)
-    runes = spaces.Discrete(len(const.RuneSlot))
+    # tree = spaces.Discrete(const.TREE_COUNT)
+    # runes = spaces.Discrete(len(const.RuneSlot))
+    # We set the max number of unit on the map to 256
+    # the ids are remapped to actual handle id
+    # hUnit = spaces.Discrete(256)
+
     items = spaces.Discrete(const.ITEM_COUNT)
     ix2 = spaces.Discrete(len(const.ItemSlot))
 
     return spaces.Dict({
         ARG.action: action,
         ARG.vLoc: vloc,
-        ARG.hUnit: hUnit,
+        # ARG.hUnit: hUnit,
         ARG.nSlot: abilities,
-        ARG.iTree: tree,
-        ARG.nRune: runes,
+        # ARG.iTree: tree,
+        # ARG.nRune: runes,
         ARG.sItem: items,
         ARG.ix2: ix2
     })
@@ -402,4 +404,31 @@ def action_space():
         TEAM_DIRE: team_space(5),
     })
 
-    return full_space
+    def fix_sampled_actions(act):
+        return {
+            'uid': 0,
+            TEAM_RADIANT: {
+                0: act[TEAM_RADIANT]['0'],
+                1: act[TEAM_RADIANT]['1'],
+                2: act[TEAM_RADIANT]['2'],
+                3: act[TEAM_RADIANT]['3'],
+                4: act[TEAM_RADIANT]['4'],
+            },
+            TEAM_DIRE: {
+                5: act[TEAM_DIRE]['5'],
+                6: act[TEAM_DIRE]['6'],
+                7: act[TEAM_DIRE]['7'],
+                8: act[TEAM_DIRE]['8'],
+                9: act[TEAM_DIRE]['9'],
+            }
+        }
+
+    class _SpaceWrap:
+        def __init__(self, space):
+            self.space = space
+
+        def sample(self):
+            return fix_sampled_actions(self.space.sample())
+
+    return _SpaceWrap(full_space)
+

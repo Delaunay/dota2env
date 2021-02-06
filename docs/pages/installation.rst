@@ -15,7 +15,6 @@ Common Steps
 0. Install Dota2
 
 1. ``git clone https://github.com/Delaunay/LuaFun.git``
-
 2. ``cd LuaFun``
 
 3. Install Dependencies
@@ -26,13 +25,12 @@ Common Steps
     pip install -r requirements.txt
     pip install -e .
 
-4. change the bot folder
+4. Change the bot folder
 
 .. code-block:: bash
 
     DOTA_PATH=/media/setepenre/local/SteamLibraryLinux/steamapps/common/dota\ 2\ beta
-    cd $DOTA_PATH/game/dota/scripts/vscripts
-    ln -s ~/work/LuaFun/bots/ bots
+    ln -f -s botslua/ $DOTA_PATH/game/dota/scripts/vscripts/bots
 
 5. Run the simulation
 

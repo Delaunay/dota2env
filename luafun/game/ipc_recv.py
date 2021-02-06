@@ -34,6 +34,9 @@ class IPCRecv:
             os.remove(f'{logfilename}.offset')
         except:
             pass
+
+        for f in glob.glob(self.glob_name):
+            os.remove(f)
         # ---
 
     @property
@@ -112,6 +115,7 @@ class IPCRecv:
     def cleanup(self):
         if self.ilogfile:
             os.remove(self.ilogfile)
+            os.remove(self.ilogfile + '.offset')
 
     def run(self):
         while self.running:

@@ -33,6 +33,14 @@ Straight forward API with full bot take over
     :width: 100%
 
 
+You can call that code by simply executing the command below
+
+.. code-block:: bash
+
+    luafun --render --speed 1
+
+
+
 Dota2 is the ultimate RL environment
 
 * Long Time Horizons (40+ minutes)
@@ -71,6 +79,7 @@ Features
    :caption: API
    :maxdepth: 1
 
+   pages/options
    pages/dotaenv
    pages/action
    pages/observation
@@ -78,3 +87,4 @@ Features
    pages/draft
    pages/model
    pages/constants
+   pages/performance

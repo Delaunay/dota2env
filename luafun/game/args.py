@@ -127,5 +127,14 @@ class DotaOptions:
             '+tv_title', '{}'.format(self.game_id),
             '+tv_autorecord', '1',
             '+tv_transmitall', '1',
+            #
+            '-skiptensorflow'
             # ---
         ] + interactive
+
+# LANE_TYPE_UNKNOWN
+# LANE_TYPE_SAFE
+# LANE_TYPE_OFF
+# LANE_TYPE_MID
+# LANE_TYPE_JUNGLE
+# LANE_TYPE_ROAM

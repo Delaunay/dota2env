@@ -7,7 +7,7 @@ import multiprocessing as mp
 from struct import unpack
 import traceback
 
-from google.protobuf.json_format import MessageToJson
+from google.protobuf.json_format import MessageToDict
 from google.protobuf.message import DecodeError
 
 from luafun.game.dota2.dota_gcmessages_common_bot_script_pb2 import CMsgBotWorldState
@@ -124,8 +124,7 @@ class SyncWorldListener:
         return world_state
 
     def insert_message(self, msg, s):
-        # MessageToDict
-        json_msg = MessageToJson(
+        json_msg = MessageToDict(
             msg,
             preserving_proto_field_name=True,
             use_integers_for_enums=True)

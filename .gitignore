@@ -26,3 +26,4 @@ botcpp_dire.so
 botcpp_radiant.so
 *.pb.h
 *.pb.cc
+bots/
