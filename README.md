@@ -89,3 +89,6 @@ https://colorhunt.co/palette/252860
 bbdfc8
 f0e5d8
 ffc478
+
+Font: Comfortaa
+

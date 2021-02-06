@@ -288,6 +288,13 @@ class HeroModel(nn.Module):
     Item to buy
     >>> act[ARG.sItem][player]
     tensor(134)
+
+    Notes
+    -----
+    OpenAI approach was to make network select action from a set of possible actions and select unit from a set of
+    possible unit.
+
+    We are trying not to do that, our network select from the set of all actions.
     """
 
     def __init__(self, batch_size, seq, input_size):

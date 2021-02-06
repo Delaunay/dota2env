@@ -87,4 +87,6 @@ Features
    pages/draft
    pages/model
    pages/constants
+   pages/training
    pages/performance
+

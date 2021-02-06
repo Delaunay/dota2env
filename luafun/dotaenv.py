@@ -391,6 +391,7 @@ _environments = {
 
 
 def dota2_environment(name, *args, **kwargs) -> Dota2Env:
+    """Returns pre configured dota2 environment for convenience"""
     factory = _environments.get(name)
 
     if factory:
