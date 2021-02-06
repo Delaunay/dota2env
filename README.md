@@ -3,6 +3,9 @@ Dota 2 ML Bots
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4514210.svg)](https://doi.org/10.5281/zenodo.4514210)
 
+[![codecov](https://codecov.io/gh/Delaunay/LuaFun/branch/master/graph/badge.svg?token=ILL29DPOE3)](https://codecov.io/gh/Delaunay/LuaFun)
+
+
 ![Dota2 RL Env](docs/_static_/sfmid.gif)
 
 Random SF doing random actions

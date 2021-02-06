@@ -6,7 +6,10 @@ omit =
     # exporting utilities only use to generate data
     # once in while
     luafun/exporter/*
+    # Protobufs
+    luafun/game/dota2
     # debug layer
     luafun/game/inspect/*
     # misc utilities
     luafun/utils/*
+    tests/**

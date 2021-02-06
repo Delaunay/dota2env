@@ -5,6 +5,10 @@ Dota2 Gym Environment
    :target: https://doi.org/10.5281/zenodo.4514210
 
 
+.. image:: https://codecov.io/gh/Delaunay/LuaFun/branch/master/graph/badge.svg?token=ILL29DPOE3
+   :target: https://codecov.io/gh/Delaunay/LuaFun
+
+
 Straight forward API with full bot take over
 
 .. code-block:: python
