@@ -1,9 +1,8 @@
 
 from luafun.model.filter import ActionFilter
 from luafun.model.actor_critic import ActionSampler, HeroModel
-from luafun.proximity import ProximityMapper
-from luafun.game.action import ARG
-from luafun.observations import StateBuilder
+
+from luafun.dotaenv import Dota2Env
 
 
 class InferenceEngine:
@@ -11,22 +10,36 @@ class InferenceEngine:
     The newest model is pulled from time to time to make sure it keeps improving
     """
 
-    def __init__(self, nbots, initial_state):
-        s = StateBuilder()
-        input_size = s.total_size
+    def __init__(self, model):
+        self.bots = None
+        self.model = None
+        self.state_space = None
+        self.sampler = None
+        self.filter = None
+        self.action_space = None
 
-        self.filter = ActionFilter()
-        self.sampler = ActionSampler()
+    def init_draft(self):
+        pass
 
-        self.model = HeroModel(nbots, input_size, 16)
+    def close_draft(self):
+        pass
 
-        self.filter = lambda *args: lambda x: x
+    def init_play(self, game: Dota2Env):
+        """Initialize using environment config"""
+        self.bots = game.bot_ids
+        self.state_space = game.observation_space
+        self.action_space = game.action_space
 
-    def __call__(self, state):
-        msg = self.model(state)
+        input_size = self.state_space.total_size
+        # self.model = HeroModel(len(self.bots), input_size, 16)
+        # self.filter = ActionFilter()
+        # self.sampler = ActionSampler()
+        # self.filter = lambda *args: lambda x: x
 
-        filter = self.filter(state, unit, rune, tree)
-
-        action = self.sampler.sampled(msg, filter)
-
+    def action(self, state):
+        """Build the observation batch and the action to take"""
+        action = self.action_space.sample()
+        # msg = self.model(state)
+        # filter = self.filter(state, unit, rune, tree)
+        # action = self.sampler.sampled(msg, filter)
         return action

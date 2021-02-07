@@ -243,6 +243,9 @@ class HeroModel(nn.Module):
 
     We are trying not to do that, our network select from the set of all actions.
 
+    The returned vector act as an attention mechanism as it is with this vector that
+    entities will be selected
+
     Examples
     --------
 

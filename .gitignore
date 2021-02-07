@@ -27,3 +27,4 @@ botcpp_radiant.so
 *.pb.h
 *.pb.cc
 bots/
+.codecov

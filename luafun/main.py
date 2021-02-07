@@ -3,15 +3,7 @@ import logging
 
 from luafun.dotaenv import dota2_environment
 from luafun.utils.options import option
-
-
-class InferenceEngine:
-    def __init__(self, factory):
-        from luafun.game.action import action_space
-        self.action_space = action_space()
-
-    def action(self, state):
-        return self.action_space.sample()
+from luafun.model.inference import InferenceEngine
 
 
 def main(config=None):
@@ -60,6 +52,11 @@ def main(config=None):
     with game:
         state = game.initial()
 
+        # Initialize Drafter & Encoders
+        if game.options.draft:
+            model.init_draft()
+        # ---
+
         # Draft here if enabled
         while game.running:
 
@@ -69,9 +66,8 @@ def main(config=None):
             break
 
         game.wait_end_draft()
-
-        for pid in game.bot_ids:
-            print(f'Player {pid} is a bot')
+        model.close_draft()
+        model.init_play(game)
 
         # Play the game
         while game.running:

@@ -247,8 +247,9 @@ class Stitcher:
 
     @property
     def observation_space(self):
-        """Returns the observation space that we are stiching"""
-        return None
+        """Returns the observation space that we are stitching"""
+        from luafun.observations import StateBuilder
+        return StateBuilder()
 
     @staticmethod
     def initial_state():

@@ -138,6 +138,12 @@ def _ipc_recv(logfilename, queue, state, level, retries=10):
     """The only way for bots to send message back is through the log file
     we have standardized our log lines so we know which bot is sending us a message
     """
+    try:
+        import coverage
+        coverage.process_startup()
+    except ImportError:
+        pass
+
     logging.basicConfig(level=level)
     recv = IPCRecv(logfilename, queue, state)
     recv.connect()

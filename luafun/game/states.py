@@ -183,6 +183,12 @@ class SyncWorldListener:
 
 
 def sync_world_listener(host, port, queue, state, stats, level, name):
+    try:
+        import coverage
+        coverage.process_startup()
+    except ImportError:
+        pass
+
     logging.basicConfig(level=level)
     wl = SyncWorldListener(host, port, queue, state, stats, name)
     wl.run()
