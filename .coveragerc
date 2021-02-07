@@ -7,7 +7,7 @@ omit =
     # once in while
     luafun/exporter/*
     # Protobufs
-    luafun/game/dota2
+    luafun/game/dota2/*
     # debug layer
     luafun/game/inspect/*
     # misc utilities

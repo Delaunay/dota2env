@@ -11,9 +11,10 @@
 extern "C" void Init(int team_id, void *b, void *c) {
     logfile(team_id);
     print("Init (team:", team_id, ')');
+    // This line is printed dota2/game/bin/linuxsteamrt64/cpp_2.log
 }
 
-// Note that because we only receive our time state
+// Note that because we only receive our team state
 // this is not suited for training because we need both state to compute the
 // symmetric reward
 

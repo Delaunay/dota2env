@@ -78,8 +78,8 @@ class Dota2Env(Dota2Game):
     def __init__(self, path=option('dota.path', None), dedicated=True, draft=0, stitcher=None, reward=None, _config=None):
         super(Dota2Env, self).__init__(path, dedicated, draft, config=_config)
         # For debugging only
-        self.radiant_message = open(self.paths.bot_file('out_radiant.txt'), 'w')
-        self.dire_message = open(self.paths.bot_file('out_dire.txt'), 'w')
+        # self.radiant_message = open(self.paths.bot_file('out_radiant.txt'), 'w')
+        # self.dire_message = open(self.paths.bot_file('out_dire.txt'), 'w')
 
         self._action_space = action_space()
 
@@ -112,8 +112,9 @@ class Dota2Env(Dota2Game):
         self.avg = 0
 
     def cleanup(self):
-        self.radiant_message.close()
-        self.dire_message.close()
+        # self.radiant_message.close()
+        # self.dire_message.close()
+        pass
 
     def dire_state(self):
         return self._dire_state
@@ -131,9 +132,9 @@ class Dota2Env(Dota2Game):
             log.error(f'Error happened during state stitching {e}')
             log.error(traceback.format_exc())
 
-        self.dire_message.write(str(type(message)) + '\n')
-        self.dire_message.write(str(message))
-        self.dire_message.write('-------\n')
+        # self.dire_message.write(str(type(message)) + '\n')
+        # self.dire_message.write(str(message))
+        # self.dire_message.write('-------\n')
 
     def update_radiant_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for radiant"""
@@ -144,9 +145,9 @@ class Dota2Env(Dota2Game):
             log.error(f'Error happened during state stitching {e}')
             log.error(traceback.format_exc())
 
-        self.radiant_message.write(str(type(message)) + '\n')
-        self.radiant_message.write(str(message))
-        self.radiant_message.write('-------\n')
+        # self.radiant_message.write(str(type(message)) + '\n')
+        # self.radiant_message.write(str(message))
+        # self.radiant_message.write('-------\n')
 
     def receive_message(self, faction: int, player_id: int, message: dict):
         """We only use log to get errors back if any"""

@@ -6,3 +6,4 @@ The API is not documented so it will involve a lot of reverse engineering to get
 
 Playing with bots it still possible with python but dota needs to be launched from python and bots
 can not be easily shared.
+

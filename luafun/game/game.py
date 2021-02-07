@@ -177,6 +177,7 @@ class Dota2Game:
 
         # save the arguments of the current game for visibility
         self.args = path + self.options.args(self.paths)
+        print(' '.join(self.args))
         self.process = subprocess.Popen(self.args)  # , stdin=subprocess.PIPE
 
     def dire_state_delta(self):
