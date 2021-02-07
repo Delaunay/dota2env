@@ -28,3 +28,4 @@ botcpp_radiant.so
 *.pb.cc
 bots/
 .codecov
+botscpp/rev/
