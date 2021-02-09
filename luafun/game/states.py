@@ -81,6 +81,8 @@ class SyncWorldListener:
             # it critically flawed because of those disconnects
             # After a bit of investigation it seems the disconnects is coming from Dota itself
             # there is no resolution in sight
+            # Just tested it again it has not happened in a while
+            # could be resolved now
             if msg_size == b'':
                 self.sock.close()
                 self.sock = self.connect(10)

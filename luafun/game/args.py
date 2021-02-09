@@ -132,6 +132,8 @@ class DotaOptions:
             # ---
         ] + interactive
 
+        # sv_script_think_interval ?
+
 # LANE_TYPE_UNKNOWN
 # LANE_TYPE_SAFE
 # LANE_TYPE_OFF

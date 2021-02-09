@@ -20,6 +20,9 @@ extern "C" void Init(int team_id, void *b, void *c) {
 
 // v21 = &a1->CMsgBot[751];
 // Observe(libraryTeamID, &a1->CMsgBot[751]);
+extern "C" void Ob(int team_id, const CMsgBotWorldState& ws) {
+    return Observe(team_id, ws);
+}
 extern "C" void Observe(int team_id, const CMsgBotWorldState& ws) {
     print("Observe (team:", team_id, ')');
 

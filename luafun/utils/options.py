@@ -69,7 +69,10 @@ def fetch_option(name, default, type=str):
     value = os.getenv(f'LUAFUN_{env_name}', None)
 
     if value is None:
-        return type(_options.get(name, default))
+        value = _options.get(name, default)
+
+    if value is None:
+        return value
 
     return type(value)
 

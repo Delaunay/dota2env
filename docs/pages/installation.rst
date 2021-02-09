@@ -29,8 +29,12 @@ Common Steps
 
 .. code-block:: bash
 
+    # Linux
     DOTA_PATH=/media/setepenre/local/SteamLibraryLinux/steamapps/common/dota\ 2\ beta
     ln -f -s botslua/ $DOTA_PATH/game/dota/scripts/vscripts/bots
+
+    # Windows
+    mklink /D $DOTA_PATH/game/dota/scripts/vscripts/bots botslua
 
 5. Run the simulation
 
