@@ -18,20 +18,20 @@ WINDOWS_APP_PATH = "C:/Program Files (x86)/Steam/steamapps/common/dota 2 beta"
 class DotaPaths:
     """Class to hold system specific configuration"""
     def __init__(self, path=None):
-        self.path = path
+        if path is None:
+            path = self.guess()
 
-        if self.path is None:
-            self.path = self.guess()
+        self.path = path
 
     def guess(self):
         from sys import platform
 
         if platform == "linux" or platform == "linux2":
             return os.path.expanduser(LINUX_APP_PATH)
-       
+
         elif platform == "darwin":
             return os.path.expanduser(OSX_APP_PATH)
-    
+
         return WINDOWS_APP_PATH
 
     @property
