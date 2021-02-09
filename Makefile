@@ -40,6 +40,6 @@ install-lua:
 install-cpp:
 	# rm -f bots/bot_generic.lua
 	# rm -f bots/hero_selection.lua
-	cp -f botscpp/bin/bots.so bots/botcpp_radiant.so
+	ln -f botscpp/bin/bots.so bots/botcpp_radiant.so
 	# cp -f botscpp/bin/bots.so bots/botcpp_dire.so
 

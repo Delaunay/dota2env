@@ -7,12 +7,35 @@
 #include "utility.h"
 #include "protos/dota_gcmessages_common_bot_script.pb.h"
 
+#define VERSION "1"
 
 extern "C" void Init(int team_id, void *b, void *c) {
     logfile(team_id);
-    print("Init (team:", team_id, ')');
+    print("Init (team:", team_id, ") " VERSION);
     // This line is printed dota2/game/bin/linuxsteamrt64/cpp_2.log
 }
+
+// call    _dlopen
+// test    rax, rax
+// mov     [BotObj+8], rax    BotObj.Handle = rax
+//
+// lea     rsi, aInit      ; "Init"
+// mov     dllHandle, rax  ; handle
+// call    _dlsym
+// test    rax, rax
+// mov     [BotObj+10h], rax            BotObj.Init
+// mov     [BotObj+18h], rax            BotObj.Observe
+// mov     [BotObj+20h], rax            BotObj.Act
+// mov     [BotObj+28h], rax            BotObj.Shutdown
+//
+// Initialize
+// call    qword ptr [BotObj+10h]
+
+
+// Close the dll
+//
+
+
 
 // Note that because we only receive our team state
 // this is not suited for training because we need both state to compute the
@@ -42,6 +65,8 @@ extern "C" void* Act(int team_id, CMsgBotWorldState &msg) {
     } else {
         print("Message not valid (partial content: ", msg.ShortDebugString(), ")");
     }
+
+    return NULL;
 }
 
 //

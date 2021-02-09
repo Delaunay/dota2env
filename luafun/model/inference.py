@@ -3,6 +3,7 @@ from luafun.model.filter import ActionFilter
 from luafun.model.actor_critic import ActionSampler, HeroModel
 
 from luafun.dotaenv import Dota2Env
+from luafun.observations import generate_game_batch
 
 
 class InferenceEngine:
@@ -38,6 +39,8 @@ class InferenceEngine:
 
     def action(self, state):
         """Build the observation batch and the action to take"""
+        batch = generate_game_batch(state, self.bots)
+
         action = self.action_space.sample()
         # msg = self.model(state)
         # filter = self.filter(state, unit, rune, tree)

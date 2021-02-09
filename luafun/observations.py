@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 from enum import IntEnum, auto
 
+import torch
+
 from luafun.utils.options import option
+from luafun.game.ipc_send import TEAM_RADIANT, TEAM_DIRE
 
 
 class WorldState(IntEnum):
@@ -78,7 +81,6 @@ class UnitState(IntEnum):
     IsCurrentHeroAttackingIt = auto()
     IsAttackingCurrentHero   = auto()
     EtaProjectileToHero      = auto()
-    UnitTypeINVALID          = auto()
     UnitTypeHERO             = auto()
     UnitTypeCREEP_HERO       = auto()
     UnitTypeLANE_CREEP       = auto()
@@ -95,7 +97,7 @@ class UnitState(IntEnum):
 
 
 # OpenAI == 43
-assert UnitState.Size == 54
+assert UnitState.Size == 53
 
 
 class HeroUnit(IntEnum):
@@ -294,6 +296,60 @@ class StateBuilder:
 
     def update_rune(self):
         pass
+
+
+def generate_game_batch(state, player_ids):
+    size = StateBuilder().total_size
+    batch = torch.zeros((len(player_ids), size))
+    cache = {
+        TEAM_RADIANT: dict(),
+        TEAM_DIRE: dict()
+    }
+
+    radiant, dire = state
+
+    for b, pid in enumerate(player_ids):
+        faction = TEAM_RADIANT
+        faction_state = radiant
+        if pid > 4:
+            faction = TEAM_DIRE
+            faction_state = dire
+
+        generate_player(pid, faction_state, batch[b, :], cache[faction])
+
+    return batch
+
+
+class FullState(IntEnum):
+    WorldStateS = 0
+    WorldStateE = len(WorldState)
+    MyHeroS = auto()
+    MyHeroE = MyHeroS + len(AllyHeroState)
+    Ally1S = auto()
+    Ally1E = Ally1S + len(AllyHeroState)
+    Ally2S = auto()
+    Ally2E = Ally2S + len(AllyHeroState)
+    Ally3S = auto()
+    Ally3E = Ally3S + len(AllyHeroState)
+    Ally4S = auto()
+    Ally4E = Ally4S + len(AllyHeroState)
+    Enemy0S = auto()
+    Enemy0E = Enemy0S + len(HeroUnit)
+    Enemy1S = auto()
+    Enemy1E = Enemy1S + len(HeroUnit)
+    Enemy2S = auto()
+    Enemy2E = Enemy2S + len(HeroUnit)
+    Enemy3S = auto()
+    Enemy3E = Enemy3S + len(HeroUnit)
+    Enemy4S = auto()
+    Enemy4E = Enemy4S + len(HeroUnit)
+
+
+def generate_player(pid, state, tensor, cache):
+    myhero = state._players[pid]
+
+
+    #
 
 
 print(f"ImageNet size {3 * 256 * 256}")

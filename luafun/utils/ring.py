@@ -36,6 +36,9 @@ class RingBuffer:
         end_idx = self.offset % self.capacity
         self.array[(end_idx + item) % self.capacity] = value
 
+    def __iter__(self):
+        return iter(self.to_list())
+
     def append(self, item):
         self.array[self.offset % self.capacity] = item
         self.offset += 1

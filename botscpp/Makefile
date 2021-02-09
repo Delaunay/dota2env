@@ -4,11 +4,12 @@ PROTOS := $(wildcard protos/*.pb.cc)
 
 
 generate-protos:
-	protoc -I=../protos  --cpp_out=src/protos/ ../protos/*.proto
+	protoc -I=../protos  --cpp_out=protos/ ../protos/*.proto
 
 # This is the attempt at making a full C++ bot
 compile-botscpp: generate-protos
-	g++ -shared -o bin/bots.so -fPIC src/bot.cpp src/utility.cpp $(PROTOS) -std=c++11 -lprotobuf
+	g++ -I. -shared -o bin/bots.so -fPIC src/bot.cpp src/utility.cpp $(PROTOS) -std=c++11 -lprotobuf
+	cp -f bin/bots.so ../bots/botcpp_radiant.so
 
 # that was an attempt at making a C++ extension for lua
 # does not work because dota does not want to load it
