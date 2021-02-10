@@ -6,109 +6,21 @@ and stitch together a consistent state to be observed by the bots
 from collections import defaultdict
 import copy
 from dataclasses import dataclass, field
-import json
+from math import cos, sin, sqrt
 from typing import List, Dict, Any, Optional
 
+import torch
+
 import luafun.game.dota2.state_types as msg
+from luafun.utils.ring import RingBuffer
 from luafun.draft import DraftStatus
 from luafun.proximity import ProximityMapper
+from luafun.observations import CommonState, ItemState, AbilityState, RuneState, Minimap10x10Tile
+from luafun.observations import UnitState, HeroUnit, AllyHeroState, PreviousActionState, ModifierState
+import luafun.game.constants as const
 
 GAME_START = 30
 NIGHT_DAY_TIME = 5 * 60
-
-
-@dataclass
-class GlobalGameState:
-    game_delta: float = 0
-    game_time: float = 0  # seconds
-    # 0.25-0.75 = DAY
-    time_of_day: float = 0.0  # 0-1 / 5 minutes day - 5 minutes night
-    time_to_next: float = 0.0
-    time_spawn_creep: float = GAME_START  # every 30 seconds
-    time_spawn_neutral: float = 1 + GAME_START  # every 1 minutes
-    time_spawn_bounty: float = GAME_START  # 0:00 and every 5 minutes after
-    time_spawn_runes: float = 4 + GAME_START  # 4:00 and every 2 minutes after
-    time_since_enemy_courier: float = 0  # depecrated?
-    rosh_spawn_min: float = 0
-    rosh_spawn_max: float = 0
-    rosh_alive: bool = True
-    rosh_dead: bool = False
-    rosh_cheese: bool = False
-    rosh_refresher: bool = False
-    rosh_aghs: bool = False  # New
-    rosh_health_rand: float = 0  # Appendix O
-    glyph_cooldown: float = 300
-    glyph_cooldown_enemy: float = 300
-    stock_gem: int = 1
-    stock_smoke: int = 2
-    stock_observer: int = 2
-    stock_sentry: int = 3
-    stock_raindrop: int = 0
-
-
-@dataclass
-class Unit:
-    x: float = 0
-    y: float = 0
-    z: float = 0
-    facing_cos: float = 0
-    facing_sin: float = 0
-    is_attacking: bool = 0
-    time_since_last_attack: float = 0
-    max_health: float = 0
-    health_00: float = 0  # Current health
-    health_01: float = 0
-    health_02: float = 0
-    health_03: float = 0
-    health_04: float = 0
-    health_05: float = 0
-    health_06: float = 0
-    health_07: float = 0
-    health_08: float = 0
-    health_09: float = 0
-    health_10: float = 0
-    health_11: float = 0
-    health_12: float = 0
-    health_13: float = 0
-    health_14: float = 0
-    health_15: float = 0
-    attack_damage: float = 0
-    attack_speed: float = 0
-    physical_resistance: float = 0
-    is_glyphed: bool = 0
-    glyph_time: float = 0
-    movement_speed: float = 0
-    is_ally: bool = False
-    is_neutral: bool = False
-    animation_cycle_time: float = 0
-    eta_incoming_projectile: float = 0
-    number_of_unit_attacking_me: int = 0
-    # shrine_cooldown                   # deprecrated
-    to_current_unit_dx: float = 0
-    to_current_unit_dy: float = 0
-    to_current_unit_l: float = 0
-    is_current_hero_attacking_it: bool = False
-    is_attacking_current_hero: bool = False
-    eta_projectile_to_hero: float = 0
-    unit_type_INVALID: int = 0
-    unit_type_HERO: int = 0
-    unit_type_CREEP_HERO: int = 0
-    unit_type_LANE_CREEP: int = 0
-    unit_type_JUNGLE_CREEP: int = 0
-    unit_type_ROSHAN: int = 0
-    unit_type_TOWER: int = 0
-    unit_type_BARRACKS: int = 0
-    unit_type_SHRINE: int = 0
-    unit_type_FORT: int = 0
-
-    unit_type_BUILDING: int = 0
-    unit_type_COURIER: int = 0
-    unit_type_WARD: int = 0
-
-
-@dataclass
-class Heroes:
-    pass
 
 
 @dataclass
@@ -122,75 +34,6 @@ def none():
 
 def dictionary():
     return defaultdict(dict)
-
-
-@dataclass
-class FactionState:
-    """Keep track of the game state
-
-    Number of units through time with passive bots
-
-    .. image:: ../_static/unitcount.png
-
-    """
-    global_state: GlobalGameState = field(default_factory=GlobalGameState)
-    units: List[Unit] = field(default_factory=list)
-    heroes: List[Heroes] = field(default_factory=list)
-    allied_heroes: List[AlliedHeroes] = field(default_factory=list)
-    nearby_map: Any = field(default_factory=none)
-    previous_action: Any = field(default_factory=none)
-    modifiers: Any = field(default_factory=none)
-    item: Any = field(default_factory=none)
-    ability: Any = field(default_factory=none)
-    pickup: Any = field(default_factory=none)
-    dropitems: list = field(default_factory=list)
-    courier: dict = field(default_factory=dictionary)
-    trees: dict = field(default_factory=dictionary)
-    runes: dict = field(default_factory=dictionary)
-    draft: Optional[DraftStatus] = None
-
-    # internal data to generate some of the field
-    # unit lookup etc...
-    _roshan_dead: int = 0
-    _players: Dict = field(default_factory=dictionary)
-    _couriers: Dict = field(default_factory=dictionary)
-    _units: Dict = field(default_factory=dictionary)
-    _buildings: Dict = field(default_factory=dictionary)
-    _proximity: ProximityMapper = field(default_factory=ProximityMapper)
-
-    # State Management
-    _s: int = 0
-    _e: int = 0
-    _r: int = 0
-
-    def get_entities(self, x, y):
-        """Returns the unit/entity that is closest to the specified location"""
-        return self._proximity.entities(x, y)
-
-    def __deepcopy__(self, memo):
-        state = FactionState(
-            copy.deepcopy(self.global_state, memo),
-            copy.deepcopy(self.units, memo),
-            copy.deepcopy(self.heroes, memo),
-            copy.deepcopy(self.allied_heroes, memo),
-            copy.deepcopy(self.nearby_map, memo),
-            copy.deepcopy(self.previous_action, memo),
-            copy.deepcopy(self.modifiers, memo),
-            copy.deepcopy(self.item, memo),
-            copy.deepcopy(self.ability, memo),
-            copy.deepcopy(self.pickup, memo),
-        )
-
-        state._roshan_dead = copy.deepcopy(self._roshan_dead, memo),
-        state._players = copy.deepcopy(self._players, memo),
-        state._units = copy.deepcopy(self._units, memo),
-        state._s = self._s
-        state._e = self._e
-        state._r = self._r
-        return state
-
-    def copy(self):
-        return copy.deepcopy(self)
 
 
 def time_to_day_night(game_time):
@@ -248,177 +91,493 @@ def time_spawn_neutral(game_time):
     return (1 - (down - int(down))) * 60
 
 
-class Stitcher:
+UNIT_MODIFIER = 2
+HERO_MODIFIER = 10
+HERO_ABILITIES = 6
+HERO_ITEMS = 17
+
+
+class Unit:
     def __init__(self):
-        pass
+        self.unit = torch.zeros((UnitState.Size,))
+        self.modifiers = [torch.zeros((ModifierState.Size,)) for _ in range(UNIT_MODIFIER)]
+
+    @staticmethod
+    def size():
+        return UnitState.Size + ModifierState.Size * 2
+
+    def tensor(self):
+        u = torch.zeros((Unit.size(),))
+
+        s = 0
+        e = UnitState.Size
+        u[s:e] = self.unit
+
+        for i in range(len(self.modifiers)):
+            s = e
+            e = s + ModifierState.Size
+            u[s:e] = self.modifiers[i]
+
+        return u
+
+
+class Player:
+    def __init__(self, ally):
+        self.is_ally = ally
+        self.ally = None
+
+        if self.ally:
+            self.ally = torch.zeros((AllyHeroState.Size,))
+
+        self.unit = torch.zeros((UnitState.Size,))
+        self.hero = torch.zeros((HeroUnit.Size,))
+        self.modifiers = [torch.zeros((ModifierState.Size,)) for _ in range(HERO_MODIFIER)]
+        self.items = [torch.zeros((ItemState.Size,)) for _ in range(HERO_ITEMS)]
+        self.abilities = [torch.zeros((AbilityState.Size,)) for _ in range(HERO_ABILITIES)]
+
+    @staticmethod
+    def size(is_ally):
+        base = (
+            UnitState.Size +
+            HeroUnit.Size +
+            ModifierState.Size * HERO_MODIFIER +
+            ItemState.Size * HERO_ITEMS +
+            AbilityState.Size * HERO_ABILITIES
+        )
+
+        if not is_ally:
+            return base
+
+        return base + AllyHeroState.Size
+
+    def tensor(self):
+        p = torch.zeros((Player.size(self.is_ally),))
+
+        s = 0
+        e = UnitState.Size
+        p[s:e] = self.unit
+
+        s = e
+        e = s + HeroUnit.Size
+        p[s:e] = self.hero
+
+        for i in range(len(self.items)):
+            s = e
+            e = s + ItemState.Size
+            p[s:e] = self.items[i]
+
+        for i in range(len(self.abilities)):
+            s = e
+            e = s + AbilityState.Size
+            p[s:e] = self.abilities[i]
+
+        for i in range(len(self.modifiers)):
+            s = e
+            e = s + ModifierState.Size
+            p[s:e] = self.modifiers[i]
+
+        if self.is_ally:
+            s = e
+            e = s + AllyHeroState.Size
+            p[s:e] = self.ally
+
+        return p
+
+
+def default_buffer(size):
+    def make():
+        b = RingBuffer(size, None)
+        b.offset = size - 1
+        return b
+
+    return make
+
+
+class Stitcher:
+    def __init__(self, faction):
+        self.roshan_death_count = 0
+        self.faction = faction
+        self.minimap = None
+        self.common = None
+        self.draft = None
+        self.latest_message = None
+        self.heroes = dict()
+        self.units = dict()
+        self.runes = dict()
+        self.health_tracker = defaultdict(default_factory=default_buffer(16))
+
+        # Proximity mapping
+        self.proximities = ProximityMapper()
+
+    def get_entities(self, x, y):
+        return self.proximities.entities(x, y)
 
     @property
     def observation_space(self):
         """Returns the observation space that we are stitching"""
-        from luafun.observations import StateBuilder
-        return StateBuilder()
+        return (
+            Player.size(False) * 5 +
+            Player.size(True) * 5 +
+            Unit.size() * (189 - 10) +
+            RuneState.Size * 6 +
+            CommonState.Size
+        )
 
-    @staticmethod
-    def initial_state():
-        return FactionState()
-
-    def apply_diff(self, state, delta: msg.CMsgBotWorldState):
+    def apply_diff(self, delta: msg.CMsgBotWorldState):
         """Take a world state delta and apply it to a previous state"""
-        self.generic_apply(state, delta)
+        self.latest_message = delta
+        self.generic_apply(delta)
 
-    def generic_apply(self, state, delta: msg.CMsgBotWorldState):
-        """Take a world state delta and apply it to a previous state"""
-        state._s += 1
+    def generate_batch(self, botids):
+        return None
 
-        # delta = json.loads(delta)
-        g = state.global_state
+    def generate_player(self, bid):
+        state = torch.zeros((self.observation_space,))
+        s = 0
+        e = 0
 
-        dota_time = delta['dota_time']
+        player = self.heroes.get(bid).unit
+        px, py = player[UnitState.X], player[UnitState.Y]
+
+        s = e
+        e = s + CommonState.Size
+        state[s:e] = self.common
+
+        for i in range(6):
+            s = e
+            e = s + RuneState.Size
+            state[s:e] = self.runes.get(i)
+
+        closest = []
+        for k, unit in self.units.items():
+            x, y = unit[UnitState.X], unit[UnitState.Y]
+            dist = (x - px) ** 2 + (y - py) ** 2
+            closest.append((k, dist))
+
+        closest.sort()
+
+        for i, (k, _) in enumerate(closest):
+            if i > 189 - 10:
+                break
+
+            unit = self.units[k]
+
+            s = e
+            e = s + UnitState.Size
+            state[s:e] = unit
+
+        return None
+
+    def prepare_common(self, state) -> torch.Tensor:
+        g = torch.zeros((CommonState.Size,))
+        f = CommonState
+        dota_time = state['dota_time']
 
         # Game timings
-        g.game_delta = dota_time - g.game_time
-        g.game_time = dota_time
-        g.glyph_cooldown = delta['glyph_cooldown']
-        g.glyph_cooldown_enemy = delta['glyph_cooldown_enemy']
-        g.time_of_day = delta['time_of_day']
-        g.time_to_next = time_to_day_night(g.game_time)
-        g.time_spawn_runes = time_spawn_runes(g.game_time)
-        g.time_spawn_neutral = time_spawn_neutral(g.game_time)
-        g.time_spawn_bounty = time_spawn_bounty(g.game_time)
-        g.time_spawn_creep = time_spawn_creep(g.game_time)
+        g[f.GameTime] = dota_time
+        g[f.GlyphCooldown] = state['glyph_cooldown']
+        g[f.GlyphCooldownEnemy] = state['glyph_cooldown_enemy']
+        g[f.TimeOfDay] = state['time_of_day']
+        g[f.TimeToNext] = time_to_day_night(dota_time)
+        g[f.TimeSpawnRunes] = time_spawn_runes(dota_time)
+        g[f.TimeSpawnNeutral] = time_spawn_neutral(dota_time)
+        g[f.TimeSpawnBounty] = time_spawn_bounty(dota_time)
+        g[f.TimeSpawnCreep] = time_spawn_creep(dota_time)
         # ---
-
-        # Roshan State
-        for event in delta.get('roshan_killed_events', []):
-            state._roshan_dead += 1
-            g.rosh_spawn_min = g.game_time + 8 * 60
-            g.rosh_spawn_max = g.game_time + 11 * 60
-            g.rosh_alive = False
-            g.rosh_dead = True
-            g.rosh_cheese = state._roshan_dead > 1
-            g.rosh_refresher = state._roshan_dead > 2 or state._roshan_dead > 3
-            g.rosh_aghs = state._roshan_dead > 2 or state._roshan_dead > 3
-
-            # TODO: handle the event and update the player which is holding the aegis
-            event = delta.roshan_killed_events[0]
-
-        if g.game_time > g.rosh_spawn_max:
-            g.rosh_alive = True
-        # --
 
         # Item Stock
-        # stock_gem: int = 1
-        # stock_smoke: int = 2
-        # stock_observer: int = 2
-        # stock_sentry: int = 3
-        # stock_raindrop: int = 0
+        # TODO: fix this
+        g[f.StockGem] = 1
+        g[f.StockSmoke] = 2
+        g[f.StockObserver] = 2
+        g[f.StockSentry] = 3
+        g[f.StockRaindrop] = 0
+
+        # Roshan State
+        g[f.RoshAlive] = True
+        for _ in state.get('roshan_killed_events', []):
+            self.roshan_death_count += 1
+            g[f.RoshSpawnMin] = dota_time + 8 * 60
+            g[f.RoshSpawnMax] = dota_time + 11 * 60
+            g[f.RoshAlive] = False
+            g[f.RoshDead] = True
+            g[f.RoshCheese] = self.roshan_death_count > 1
+            g[f.RoshRefresher] = self.roshan_death_count > 2 or self.roshan_death_count > 3
+            g[f.RoshAghs] = self.roshan_death_count > 2 or self.roshan_death_count > 3
+
+        if g[f.GameTime] > g[f.RoshSpawnMax]:
+            g[f.RoshAlive] = True
+
+        return g
+
+    BARRACKS = 7 - 1
+    HERO = 1 - 1
+    TOWER = 6 - 1
+    ROSHAN = 5 - 1
+
+    def prepare_unit(self, msg) -> torch.Tensor:
+        u = torch.zeros((UnitState.Size,))
+        f = UnitState
+
+        uid = msg['handle']
+
+        # --- If dead and not a hero ignore that unit
+        offset = msg['unit_type'] - 1
+        if not msg['is_alive'] and offset not in (self.BARRACKS, self.HERO, self.TOWER, self.ROSHAN):
+            self.units.pop(uid, None)
+            return None
         # ---
 
-        # Unit specific Event
-        # This the base player data
-        for player in delta.get('players', []):
-            pdata = state._players[player['player_id']]
+        pos = (msg['location']['x'], msg['location']['y'], msg['location']['z'])
+        if not msg['is_alive']:
+            pos = (0, 0, 0)
 
-            for field, value in player.items():
-                pdata[field] = value
+        health: RingBuffer = self.health_tracker[uid]
+        health.append(msg['health'])
+        health = health.to_list()
 
-        for unit in delta.get('units', []):
-            remove_dead = False
+        self.proximities.manager.update_position(uid, pos[0], pos[1])
+        u[f.X] = pos[0]
+        u[f.Y] = pos[1]
+        u[f.Z] = pos[2]
+        u[f.FacingCos] = cos(msg['facing'])
+        u[f.FacingSin] = sin(msg['facing'])
+        u[f.IsAttacking] = 'action_type' == 'attacking' or 'attack_target_handle'
+        u[f.TimeSinceLastAttack] = msg['last_attack_time']
+        u[f.MaxHealth] = msg['health_max']
+        u[f.Health00] = health[-1]
+        u[f.Health01] = health[-2]
+        u[f.Health02] = health[-3]
+        u[f.Health03] = health[-4]
+        u[f.Health04] = health[-5]
+        u[f.Health05] = health[-6]
+        u[f.Health06] = health[-7]
+        u[f.Health07] = health[-8]
+        u[f.Health08] = health[-9]
+        u[f.Health09] = health[-10]
+        u[f.Health10] = health[-11]
+        u[f.Health11] = health[-12]
+        u[f.Health12] = health[-13]
+        u[f.Health13] = health[-14]
+        u[f.Health14] = health[-15]
+        u[f.Health15] = health[-16]
+        u[f.AttackDamage] = msg['attack_damage']
+        u[f.AttackSpeed] = msg['attack_speed']
+        u[f.PhysicalResistance] = msg['armor']
+        u[f.IsGlyphed] = 0
+        u[f.GlyphTime] = 0
+        u[f.MovementSpeed] = msg['current_movement_speed']
+        u[f.IsAlly] = msg['team_id'] == self.faction
+        u[f.IsNeutral] = msg['team_id'] == 1
+        u[f.AnimationCycleTime] = msg['anim_cycle']
+        u[f.EtaIncomingProjectile] = 0
+        u[f.NumberOfUnitAttackingMe] = 0
+        # u[f.ShrineCooldown        ] = 0
+        u[f.ToCurrentUnitdx] = 0
+        u[f.ToCurrentUnitdy] = 0
+        u[f.ToCurrentUnitl] = 0
+        u[f.IsCurrentHeroAttackingIt] = 0
+        u[f.IsAttackingCurrentHero] = 0
+        u[f.EtaProjectileToHero] = 0
+        u[f.UnitTypeHERO + offset] = 1
 
-            # Add Hero info into their own struct
-            # >>> Units that are constant
-            if unit['unit_type'] == msg.UnitType.HERO:
-                source = state._players
-                key = 'player_id'
+        return u
 
-            # exist for the the entire game
-            elif unit['unit_type'] == msg.UnitType.COURIER:
-                source = state._couriers
-                key = 'player_id'
+    def prepare_rune(self, rmsg):
+        r = torch.zeros((RuneState.Size,))
+        f = RuneState
 
-            # They stay up for most of the game
-            elif unit['unit_type'] in (
-            msg.UnitType.BUILDING, msg.UnitType.FORT, msg.UnitType.BARRACKS, msg.UnitType.TOWER):
-                source = state._buildings
-                key = 'handle'
-            # Roshan
+        # RUNE_STATUS_UNKNOWN = 0
+        RUNE_STATUS_AVAILABLE = 1
+        # RUNE_STATUS_MISSING = 2
 
-            # Neutrals
+        r[f.Visible] = rmsg['status'] == RUNE_STATUS_AVAILABLE
+        r[f.LocationX] = rmsg['location']['x']
+        r[f.LocationY] = rmsg['location']['y']
+        r[f.DistanceH0] = 0
+        r[f.DistanceH1] = 0
+        r[f.DistanceH2] = 0
+        r[f.DistanceH3] = 0
+        r[f.DistanceH4] = 0
+        r[f.DistanceH5] = 0
+        r[f.DistanceH6] = 0
+        r[f.DistanceH7] = 0
+        r[f.DistanceH8] = 0
+        r[f.DistanceH9] = 0
 
-            # <<<
-            # CREEP_HERO, LANE_CREEP
-            else:
-                remove_dead = True
-                source = state._units
-                key = 'handle'
+        return r
 
-            udata = source[unit[key]]
-
-            # this is a edge case that should almost never happen
-            # all items are sent
-            if unit['unit_type'] == msg.UnitType.HERO:
-                if 'items' not in unit:
-                    udata['items'] = []
-            # ----
-
-            for field, value in unit.items():
-                udata[field] = value
-
-            handle = unit['handle']
-            pos = unit['location']
-            state._proximity.manager.update_position(handle, pos['x'], pos['y'])
-
-            if remove_dead and not udata.get('is_alive', True):
-                source.pop(unit[key])
-        # ---
-
-        # Courier Event
-        for courier in delta.get('couriers', []):
-            courier_unit = state.courier[courier['handle']]
-            courier_unit['player_id'] = courier['player_id']
-            courier_unit['state'] = courier['state']
-
-        for event in delta.get('courier_killed_events', []):
-            pass
-        # --
-
+    def process_trees(self, delta):
         # Tree Event
         for tree_event in delta.get('tree_events', []):
             if tree_event.get('destroyed', False):
-                state._proximity.tree.pop_entity(event['tree_id'])
+                self.proximities.tree.pop_entity(tree_event['tree_id'])
                 continue
 
             if tree_event.get('respawned', False):
-                x, y = state._proximity.tid_pos[event['tree_id']]
-                state._proximity.tree.add_entity(event['tree_id'], x, y)
-        # --
+                x, y = self.proximities.tid_pos[tree_event['tree_id']]
+                self.proximities.tree.add_entity(tree_event['tree_id'], x, y)
 
-        # Damage Event:
-        for dmg in delta.get('damage_events', []):
-            pass
-        # --
+    def prepare_hero_unit(self, pmsg):
+        h = torch.zeros((HeroUnit.Size,))
+        f = HeroUnit
 
-        # Ability Event:
-        for ability in delta.get('ability_events', []):
-            pass
-        # --
+        umsg = pmsg['unit']
+        tpitem = umsg['pitems'].get(const.ItemSlot.Item15, dict())
 
-        # Rune info
+        h[f.IsAlive] = umsg['is_alive']
+        h[f.NumberOfDeath] = pmsg['deaths']
+        h[f.HeroInSight] = 1
+        h[f.LastSeenTime] = 0
+        h[f.IsTeleporting] = tpitem.get('is_channeling', False)
+        h[f.TeleportTargetX] = 0
+        h[f.TeleportTargetY] = 0
+        h[f.TeleportChannelTime] = tpitem.get('channel_time', 0)
+        h[f.CurrentGold] = umsg['reliable_gold'] + umsg['unreliable_gold']
+        h[f.Level] = umsg['level'] / 30
+        h[f.ManaMax] = umsg['mana_max']
+        h[f.Mana] = umsg['mana']
+        h[f.ManaRegen] = umsg['mana_regen']
+        h[f.HealthMax] = umsg['health_max']
+        h[f.Health] = umsg['health']
+        h[f.HealthRegen] = umsg['health_regen']
+        h[f.MagicResitance] = umsg['magic_resist']
+        h[f.Strength] = umsg['strength']
+        h[f.Agility] = umsg['agility']
+        h[f.Intelligence] = umsg['intelligence']
+        h[f.IsInvisibility] = umsg['is_invisible']
+        h[f.IsUsingAbility] = umsg['is_using_ability']
+        h[f.NumberOfAllied] = 0
+        h[f.NumberOfAlliedCreeps] = 0
+        h[f.NumberOfEnemy] = 0
+        h[f.NumberOfEnemyCreeps] = 0
+
+        return h
+
+    def process_hero(self, umsg):
+        pitems = dict()
+        umsg['pitems'] = pitems
+
+        for item in umsg['items']:
+            pitems[item['slot']] = item
+
+        pabi = dict()
+        umsg['pabi'] = pabi
+
+        for item in umsg['abilities']:
+            pitems[item['slot']] = item
+
+    def prepare_ally_hero(self, umsg):
+        h = torch.zeros((AllyHeroState.Size,))
+        f = AllyHeroState
+
+        has_buyback = umsg['unreliable_gold'] < umsg['buyback_cost'] and umsg['buyback_cooldown'] < 0.001
+        h[f.HasBuyBack] = has_buyback
+        h[f.BuyBackCost] = umsg['buyback_cost']
+        h[f.BuyBackCooldown] = umsg['buyback_cooldown']
+
+        # --
+        h[f.LaneAssignRoam] = 0
+        h[f.LaneAssignTop] = 0
+        h[f.LaneAssignMid] = 0
+        h[f.LaneAssignBot] = 0
+
+        h[f.NumberOfEmptyInventory] = 0
+        h[f.NumberOfEmptyBackPack] = 0
+
+        return h
+
+    def prepare_ability(self, amsg):
+        a = torch.zeros((AbilityState.Size,))
+        f = AbilityState
+
+        a[f.Cooldown] = amsg['cooldown_remaining']
+        a[f.InUse] = amsg['is_in_ability_phase'] or amsg['is_channeling']
+        a[f.Castable] = amsg['is_fully_castable']
+
+        level = amsg['level']
+
+        if level > 0:
+            a[f.Level1 + level - 1] = 1
+
+        return a
+
+    def prepare_item(self, imsg):
+        i = torch.zeros((ItemState.Size,))
+        f = ItemState
+
+        # ITEM_SLOT_TYPE_INVALID
+        # ITEM_SLOT_TYPE_MAIN
+        # ITEM_SLOT_TYPE_BACKPACK
+        # ITEM_SLOT_TYPE_STASH
+
+        i[f.Inventory] = imsg['slot']
+        i[f.BackPack] = imsg['slot']
+        i[f.Stash] = imsg['slot']
+        i[f.Charges] = imsg['charges']
+        i[f.IsCooldown] = imsg['cooldown_remaining'] > 0.001
+        i[f.CooldownTime] = imsg['cooldown_remaining']
+        i[f.IsDisabled] = not imsg['is_activated']
+        i[f.SwapCoolDown] = 0
+        i[f.ToggledState] = imsg['is_toggled']
+        i[f.Locked] = imsg['is_combined_locked']
+
+        i[f.StateStr + imsg['power_treads_stat']] = 1
+
+        return i
+
+    def prepare_hero(self, msg):
+        phero = Player(ally=msg['team_id'] == self.faction)
+        phero.unit = self.prepare_unit(msg)
+        phero.hero = self.prepare_hero_unit(msg)
+
+        if msg['team_id'] == self.faction:
+            phero.ally = self.prepare_ability(msg)
+
+        return phero
+
+    def generic_apply(self, delta):
+        self.common = self.prepare_common(delta)
+        self.proximities.reset()
+
+        players = dict()
+        self.process_trees(delta)
+
         for rune in delta.get('rune_infos', []):
-            x = rune['location']['x']
-            y = rune['location']['y']
+            rid = self.proximities.runes.get_entity(
+                rune['location']['x'],
+                rune['location']['y']
+            )
+            self.runes[rid] = self.prepare_rune(rune)
 
-            rune_id = f'{int(x)}{int(y)}'
-            rune_state = state.runes[rune_id]
+        for player in delta.get('players', []):
+            pid = player['player_id']
+            players[pid] = player
 
-            for f, value in rune.items():
-                rune_state[f] = value
+        for tp in delta.get('incoming_teleports', []):
+            pid = tp['player']
+            players[pid]['tp'] = tp
 
-        # --
+        for unit in delta.get('units', []):
+            uid = unit['handle']
+            player = players.get(uid, None)
 
-        # This is not a delta
-        # Item Drops (Neutral, Roshan)
-        state.dropitems = delta.get('dropped_items', [])
-        # --
+            if player is not None:
+                player[uid]['unit'] = unit
+                self.process_hero(unit)
 
-        state._e += 1
+                hu = self.prepare_hero(player[uid])
+                self.heroes[uid] = hu
+                continue
+
+            tu = self.prepare_unit(unit)
+            self.units[uid] = tu
+
+
+if __name__ == '__main__':
+    a = default_buffer(16)()
+
+    a.append(1)
+    a.append(2)
+
+    print(a.to_list()[-1])

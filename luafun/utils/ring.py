@@ -79,3 +79,9 @@ if __name__ == '__main__':
     print(b)
 
     print(b[-1], b.last())
+
+    print(a[-1])
+    print(a[-2])
+
+    print(a[0])
+    print(a[1])

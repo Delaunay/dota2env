@@ -85,14 +85,11 @@ class Dota2Env(Dota2Game):
 
         # Function to stich state together
         if stitcher is None:
-            stitcher = Stitcher()
+            stitcher = Stitcher
 
-        self.sticher = stitcher
-
-        # State per faction
-        self._radiant_state = self.sticher.initial_state()
-        self._dire_state = self.sticher.initial_state()
-        # ---
+        self.sticher_factory = stitcher
+        self.dire_stitcher = stitcher()
+        self.radiant_stitcher = stitcher()
 
         # Reward function
         if reward is None:
@@ -102,8 +99,8 @@ class Dota2Env(Dota2Game):
 
         # Draft tracker for the drafting AI
         self.draft_tracker = DraftTracker()
-        self._radiant_state.draft = self.draft_tracker.draft
-        self._dire_state.draft = self.draft_tracker.draft
+        self.radiant_stitcher.draft = self.draft_tracker.draft
+        self.dire_stitcher.draft = self.draft_tracker.draft
 
         self.has_next = 0
         self.step_start = None
@@ -119,17 +116,17 @@ class Dota2Env(Dota2Game):
         # self.unit_size.close()
         pass
 
-    def dire_state(self):
-        return self._dire_state
+    def dire_message(self):
+        return self.dire_stitcher.latest_message
 
-    def radiant_state(self):
-        return self._radiant_state
+    def radiant_message(self):
+        return self.radiant_stitcher.latest_message
 
     # For states we should have a queue of state to observe
     def update_dire_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for dire"""
         try:
-            self.sticher.apply_diff(self._dire_state, message)
+            self.dire_stitcher.apply_diff(message)
             self.has_next += 1
         except Exception as e:
             log.error(f'Error happened during state stitching {e}')
@@ -144,7 +141,7 @@ class Dota2Env(Dota2Game):
     def update_radiant_state(self, message: msg.CMsgBotWorldState):
         """Receive a state diff from the game for radiant"""
         try:
-            self.sticher.apply_diff(self._radiant_state, message)
+            self.radiant_stitcher.apply_diff(message)
             self.has_next += 1
         except Exception as e:
             log.error(f'Error happened during state stitching {e}')
@@ -156,17 +153,6 @@ class Dota2Env(Dota2Game):
 
     def receive_message(self, faction: int, player_id: int, message: dict):
         """We only use log to get errors back if any"""
-        pass
-
-    # Training data
-    def generate_bot_state(self):
-        """Generate the states of our bots. The state is the faction state augmented with
-        player specific information
-
-        In a standard self-play Game this would return 10 states
-        """
-        dire = acquire_state(self._dire_state)
-        radiant = acquire_state(self._radiant_state)
         pass
 
     # Gym Environment API
@@ -185,11 +171,11 @@ class Dota2Env(Dota2Game):
         """
         if self.running:
             self.__exit__(None, None, None)
-            self._radiant_state = self.sticher.initial_state()
-            self._dire_state = self.sticher.initial_state()
+            self.radiant_stitcher = self.sticher_factory()
+            self.dire_stitcher = self.sticher_factory()
 
         self.__enter__()
-        return self._radiant_state, self._dire_state
+        return self.radiant_stitcher, self.dire_stitcher
 
     def close(self):
         """Stop the game"""
@@ -241,11 +227,11 @@ class Dota2Env(Dota2Game):
     @property
     def observation_space(self):
         """Return the observation space we observe at every step"""
-        return self.sticher.observation_space
+        return self.dire_stitcher.observation_space
 
     def initial(self):
         """Return the initial state of the game"""
-        return self.radiant_state(), self.dire_state()
+        return self.radiant_stitcher, self.dire_stitcher
 
     def step(self, action):
         """Make an action and return the resulting state
@@ -287,8 +273,8 @@ class Dota2Env(Dota2Game):
 
         self.has_next = 0
 
-        rs = self.radiant_state()
-        ds = self.dire_state()
+        rs = self.radiant_stitcher
+        ds = self.dire_stitcher
 
         obs = (rs, ds)
 
@@ -342,9 +328,9 @@ class Dota2Env(Dota2Game):
             y = pos[1] * 8288
             action[actions.ARG.vLoc] = (x, y)
 
-            state = self.radiant_state()
+            state = self.radiant_stitcher
             if pid >= 5:
-                state = self.dire_state()
+                state = self.dire_stitcher
 
             unit, rune, tree = state.get_entities(x, y)
 

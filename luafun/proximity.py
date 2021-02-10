@@ -70,6 +70,9 @@ class ProximityMapper:
             if not self.runes.add_entity(rid, x, y):
                 print('duplicated rune')
 
+    def reset(self):
+        self.manager = EntityManager(7)
+
     def add_unit(self, handle, x, y):
         self.manager.add_entity(handle, x, y)
 

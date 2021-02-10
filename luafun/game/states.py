@@ -40,6 +40,7 @@ class SyncWorldListener:
         self.namespace = f'word-{self.name}'
         self.reason = None
         self.decode_errors = open('decode.txt', 'w')
+        self.error = None
         # self.msg_size = open('msg_size.txt', 'w')
 
     @property
@@ -48,8 +49,12 @@ class SyncWorldListener:
 
     def connect(self, retries=20):
         pending = None
+        s = None
 
         for i in range(retries):
+            if s is not None:
+                s.close()
+
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 # this does not do anything
@@ -135,7 +140,7 @@ class SyncWorldListener:
             # self.msg_size.write(f'{len(msg)}\n')
 
             world_state = CMsgBotWorldState()
-            world_state.ParseFromString(msg)
+            self.error = world_state.ParseFromString(msg)
 
             if not world_state.IsInitialized():
                 self.reason = f'Message is not initialized'
@@ -143,18 +148,30 @@ class SyncWorldListener:
 
             return world_state
 
+        except SystemError:
+            log.error(traceback.format_exc())
+            return self.recover(f'SystemError', msg)
+
         except RuntimeWarning:
-            import base64
-            self.reason = f'Truncated message'
-            self.decode_errors.write(base64.b64encode(msg))
-            self.decode_errors.close()
+            log.error(traceback.format_exc())
+            return self.recover(f'RuntimeWarning', msg)
 
         except DecodeError:
-            import base64
-            self.reason = f'Decode error'
-            self.decode_errors.write(base64.b64encode(msg))
-            self.decode_errors.close()
-            return None
+            return self.recover(f'Decode error', msg)
+
+    def recover(self, error, msg):
+        import base64
+        self.reason = f'{error}: {self.error}'
+        self.decode_errors.write(base64.b64encode(msg).decode('utf-8'))
+        self.decode_errors.close()
+        self.decode_errors = None
+
+        # Reconnect, the connection is tainted
+        # we do not know when a message starts and when it ends
+        # this means we will drop at least one state update
+        self.sock.close()
+        self.sock = self.connect()
+        return None
 
     def insert_message(self, msg, s):
         json_msg = MessageToDict(
@@ -182,9 +199,6 @@ class SyncWorldListener:
             else:
                 log.error(f'Could not read message because: {self.reason}')
                 self.reason = None
-                # we cannot recover from this
-                self.state['running'] = False
-                # self.sock = self.connect()
 
         for err in error:
             err.close()
@@ -205,7 +219,7 @@ class SyncWorldListener:
             except ConnectionResetError:
                 # dota2 proabaly shutdown
                 self.state['running'] = False
-                log.error('Dota2 shutdown')
+                log.error('ConnectionResetError: dota2 shutdown')
 
             except ValueError:
                 self.state['running'] = False
@@ -220,6 +234,9 @@ class SyncWorldListener:
 
         # self.msg_size.close()
         log.debug('World state listener shutting down')
+
+        if self.decode_errors:
+            self.decode_errors.close()
 
 
 def sync_world_listener(host, port, queue, state, stats, level, name):

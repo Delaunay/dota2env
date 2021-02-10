@@ -7,7 +7,91 @@ from luafun.utils.options import option
 from luafun.game.ipc_send import TEAM_RADIANT, TEAM_DIRE
 
 
-class WorldState(IntEnum):
+def enumitems(enumclass):
+    return enumclass.__members__.items()
+
+
+def print_tensor(tensor, enumclass, pfun=print):
+    """Print a tensor using an enum as index names
+
+    Examples
+    --------
+    >>> worldstate_tensor = torch.zeros((CommonState.Size,))
+    >>> print_tensor(worldstate_tensor, CommonState)
+                 GameTime: 0.0
+                TimeOfDay: 0.0
+               TimeToNext: 0.0
+           TimeSpawnCreep: 0.0
+         TimeSpawnNeutral: 0.0
+          TimeSpawnBounty: 0.0
+           TimeSpawnRunes: 0.0
+    TimeSinceEnemyCourier: 0.0
+             RoshSpawnMin: 0.0
+             RoshSpawnMax: 0.0
+                RoshAlive: 0.0
+                 RoshDead: 0.0
+               RoshCheese: 0.0
+            RoshRefresher: 0.0
+                 RoshAghs: 0.0
+           RoshHealthRand: 0.0
+            GlyphCooldown: 0.0
+       GlyphCooldownEnemy: 0.0
+                 StockGem: 0.0
+               StockSmoke: 0.0
+            StockObserver: 0.0
+              StockSentry: 0.0
+            StockRaindrop: 0.0
+
+    >>> batch_size = 3
+    >>> worldstate_batch = torch.zeros((batch_size, CommonState.Size))
+    >>> print_tensor(worldstate_batch, CommonState)
+                 GameTime: tensor([0., 0., 0.])
+                TimeOfDay: tensor([0., 0., 0.])
+               TimeToNext: tensor([0., 0., 0.])
+           TimeSpawnCreep: tensor([0., 0., 0.])
+         TimeSpawnNeutral: tensor([0., 0., 0.])
+          TimeSpawnBounty: tensor([0., 0., 0.])
+           TimeSpawnRunes: tensor([0., 0., 0.])
+    TimeSinceEnemyCourier: tensor([0., 0., 0.])
+             RoshSpawnMin: tensor([0., 0., 0.])
+             RoshSpawnMax: tensor([0., 0., 0.])
+                RoshAlive: tensor([0., 0., 0.])
+                 RoshDead: tensor([0., 0., 0.])
+               RoshCheese: tensor([0., 0., 0.])
+            RoshRefresher: tensor([0., 0., 0.])
+                 RoshAghs: tensor([0., 0., 0.])
+           RoshHealthRand: tensor([0., 0., 0.])
+            GlyphCooldown: tensor([0., 0., 0.])
+       GlyphCooldownEnemy: tensor([0., 0., 0.])
+                 StockGem: tensor([0., 0., 0.])
+               StockSmoke: tensor([0., 0., 0.])
+            StockObserver: tensor([0., 0., 0.])
+              StockSentry: tensor([0., 0., 0.])
+            StockRaindrop: tensor([0., 0., 0.])
+    """
+    if len(tensor.shape) > 1:
+        print_batch_vector(tensor, enumclass, pfun=pfun)
+    else:
+        print_vector(tensor, enumclass, pfun=pfun)
+
+
+def print_batch_vector(tensor, enumclass, pfun=print):
+    for name, value in enumitems(enumclass):
+        if name == 'Size':
+            continue
+
+        pfun(f'{name:>21}: {tensor[:, value]}')
+
+
+def print_vector(tensor, enumclass, pfun=print):
+    for name, value in enumitems(enumclass):
+        if name == 'Size':
+            continue
+
+        pfun(f'{name:>21}: {tensor[value]}')
+
+
+class CommonState(IntEnum):
     GameTime              = 0
     TimeOfDay             = auto()
     TimeToNext            = auto()
@@ -33,9 +117,13 @@ class WorldState(IntEnum):
     StockRaindrop         = auto()
     Size                  = auto()
 
+    @staticmethod
+    def print(tensor):
+        print_tensor(tensor, CommonState)
+
 
 # OpenAI == 22
-assert WorldState.Size == 23
+assert CommonState.Size == 23
 
 
 class UnitState(IntEnum):
@@ -95,6 +183,10 @@ class UnitState(IntEnum):
     UnitTypeWARD             = auto()
     Size                     = auto()
 
+    @staticmethod
+    def print(tensor):
+        print_tensor(tensor, UnitState)
+
 
 # OpenAI == 43
 assert UnitState.Size == 53
@@ -129,6 +221,10 @@ class HeroUnit(IntEnum):
     NumberOfEnemyCreeps  = auto()
     Size                 = auto()
 
+    @staticmethod
+    def print(tensor):
+        print_tensor(tensor, HeroUnit)
+
 
 # OpenAI == 25
 assert HeroUnit.Size == 26
@@ -143,6 +239,10 @@ class PreviousActionState(IntEnum):
     Item        = auto()
     Ix2         = auto()
     Size        = auto()
+
+    @staticmethod
+    def print(tensor):
+        print_tensor(tensor, PreviousActionState)
 
 
 # OpenAI == 310
@@ -164,6 +264,10 @@ class AllyHeroState(IntEnum):
     TerrainEnd             = TerrainStart + 196
     Size                   = auto()
 
+    @staticmethod
+    def print(tensor):
+        print_tensor(tensor, AllyHeroState)
+
 
 # OpenAI == 211
 assert AllyHeroState.Size == 206
@@ -176,6 +280,10 @@ class ModifierState(IntEnum):
     # ModifierEmbeddingStart = auto()
     # ModifierEmbeddingEnd   = ModifierEmbeddingStart + 128
     Size                   = auto()
+
+    @staticmethod
+    def print(tensor):
+        print_tensor(tensor, ModifierState)
 
 
 # OpenAI == 2
@@ -200,6 +308,10 @@ class ItemState(IntEnum):
     # ItemEmbeddingEnd   = ItemEmbeddingStart + 128
     Size                = auto()
 
+    @staticmethod
+    def print(tensor):
+        print_tensor(tensor, ItemState)
+
 
 # OpenAI == 13
 assert ItemState.Size == 13
@@ -216,6 +328,10 @@ class AbilityState(IntEnum):
     # ItemEmbeddingStart = auto()
     # ItemEmbeddingEnd   = ItemEmbeddingStart + 128
     Size               = auto()
+
+    @staticmethod
+    def print(tensor):
+        print_tensor(tensor, AbilityState)
 
 
 # OpenAI == 7
@@ -238,6 +354,10 @@ class RuneState(IntEnum):
     DistanceH9 = auto()
     Size       = auto()
 
+    @staticmethod
+    def print(tensor):
+        print_tensor(tensor, RuneState)
+
 
 # OpenAI == 15
 assert RuneState.Size == 13
@@ -253,6 +373,16 @@ class Minimap10x10Tile(IntEnum):
     CellX = auto()
     CellY = auto()
     Size = auto()
+
+    @staticmethod
+    def print(tensor):
+        print_tensor(tensor, Minimap10x10Tile)
+
+
+class DropItem:
+    X = 0
+    Y = auto()
+    Item = auto()
 
 
 # OpenAI == 9
@@ -272,7 +402,7 @@ class StateBuilder:
 
         # Hero state size
         self.total_size = (
-            WorldState.Size +
+            CommonState.Size +
             UnitState.Size * unit_cnt +
             HeroUnit.Size * heroes_cnt +
             AllyHeroState.Size * ally_cnt +
@@ -322,7 +452,7 @@ def generate_game_batch(state, player_ids):
 
 class FullState(IntEnum):
     WorldStateS = 0
-    WorldStateE = len(WorldState)
+    WorldStateE = len(CommonState)
     MyHeroS = auto()
     MyHeroE = MyHeroS + len(AllyHeroState)
     Ally1S = auto()

@@ -78,7 +78,12 @@ class DrawMap(BasePage):
         resource = os.path.join(dir, '..', 'resources')
         self.resource_folder = os.path.join(resource, 'minimap')
 
-        minimap = os.path.join(self.resource_folder, 'minimap_7.23.png')
+        # that version of the minimap was never updated
+        bad = 'minimap_7.23.png'
+        # this is the latest version that match
+        self.size = (1024, 1024)
+        new = 'minimap_merged.png'
+        minimap = os.path.join(self.resource_folder, new)
         minimap = os.path.realpath(minimap)
 
         self.background = self.load_image(minimap)
@@ -126,8 +131,8 @@ class DrawMap(BasePage):
             if loc is None:
                 continue
 
-            x = (loc['x'] + const.BOUNDS[1][0]) * 1024 / const.SIZE[0]
-            y = (const.BOUNDS[1][1] - loc['y']) * 1024 / const.SIZE[0]
+            x = (loc['x'] + const.BOUNDS[1][0]) * self.size[0] / const.SIZE[0]
+            y = (const.BOUNDS[1][1] - loc['y']) * self.size[1] / const.SIZE[0]
 
             c = None
             if type == 'hero':
@@ -151,15 +156,15 @@ class DrawMap(BasePage):
         bad_trees = []
 
         for k, loc in const.IGNORED_TREES.items():
-            x = (loc[0] + const.BOUNDS[1][0]) * 1024 / const.SIZE[0]
-            y = (const.BOUNDS[1][1] - loc[1]) * 1024 / const.SIZE[0]
+            x = (loc[0] + const.BOUNDS[1][0]) * self.size[0] / const.SIZE[0]
+            y = (const.BOUNDS[1][1] - loc[1]) * self.size[1] / const.SIZE[0]
             c = self.trees['ignored']
             h = f'<circle id="{k}" cx="{x}" cy="{y}" stroke="black" r="8" fill="{c}"/>'
             bad_trees.append(h)
 
         for k, loc in const.DUP_TREES.items():
-            x = (loc[0] + const.BOUNDS[1][0]) * 1024 / const.SIZE[0]
-            y = (const.BOUNDS[1][1] - loc[1]) * 1024 / const.SIZE[0]
+            x = (loc[0] + const.BOUNDS[1][0]) * self.size[0] / const.SIZE[0]
+            y = (const.BOUNDS[1][1] - loc[1]) * self.size[1] / const.SIZE[0]
             c = self.trees['duplicated']
             h = f'<circle id="{k}" cx="{x}" cy="{y}" stroke="black" r="8" fill="{c}"/>'
             bad_trees.append(h)
@@ -191,7 +196,7 @@ class DrawMap(BasePage):
         units = '\n'.join(heroes + buildings + units + trees)
 
         svg = f"""
-        <svg height="1024px" width="1024px" style="background-image: url({self.background})">
+        <svg height="{self.size[1]}px" width="{self.size[0]}px" style="background-image: url({self.background})">
             <defs>
                 <pattern id="default_icon" x="16" y="16" patternUnits="userSpaceOnUse" height="32" width="32">
                     <image x="0" y="0" xlink:href="{default_icon}"></image>
