@@ -6,6 +6,7 @@ import logging
 from luafun.game.inspect.base import BasePage
 from luafun.utils.python_fix import asdict
 import luafun.game.constants as const
+from luafun.stitcher import FactionState
 
 import rpcjs.elements as html
 
@@ -28,6 +29,7 @@ class GameInspector(BasePage):
     def main(self, faction, player=None):
         radiant = faction.lower() in ('rad', 'radiant')
         page = 'state.html'
+        state: FactionState
 
         if radiant:
             self.title = 'Radiant State'
@@ -49,6 +51,7 @@ class GameInspector(BasePage):
 
         raw = ''
         if state and not isinstance(state, (str, dict)):
+            state._proximity = None
             state = asdict(state)
 
         if state is not None:

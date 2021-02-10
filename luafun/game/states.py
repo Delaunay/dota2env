@@ -6,6 +6,7 @@ import time
 import multiprocessing as mp
 from struct import unpack
 import traceback
+import warnings
 
 from google.protobuf.json_format import MessageToDict
 from google.protobuf.message import DecodeError
@@ -16,7 +17,17 @@ log = logging.getLogger(__name__)
 
 
 class SyncWorldListener:
-    """Connect to the dota2 game and save the messages in a queue to be read"""
+    """Connect to the dota2 game and save the messages in a queue to be read
+
+    Size of the message through time. Think dota might allocate a fixed size of memory
+    for the proto message and if the message grows too much the game stop pushing proto messages.
+
+    I think with active bots we could limit the message size to something reasonable (i.e if creeps
+    die fast enough that the number of units on the map is fairly constant).
+
+    .. image:: ../_static/msgsize.png
+
+    """
 
     def __init__(self, host, port, queue, state, stats, name):
         self.host = host
@@ -28,7 +39,8 @@ class SyncWorldListener:
         self.name = name
         self.namespace = f'word-{self.name}'
         self.reason = None
-        self.decode_errors = open('decode.txt', 'bw')
+        self.decode_errors = open('decode.txt', 'w')
+        # self.msg_size = open('msg_size.txt', 'w')
 
     @property
     def running(self):
@@ -42,7 +54,7 @@ class SyncWorldListener:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 # this does not do anything
                 # s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 5)     # Number of Keep alive probes
-                # s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 1)    # Iddle time before keep alive proves are sent
+                # s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 1)    # Idle time before keep alive proves are sent
                 # s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 1)   # interval between keep alive probes
                 # s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 0)     # disables the Nagle algorithm for TCP sockets
 
@@ -67,9 +79,6 @@ class SyncWorldListener:
         return None
 
     def read_message(self, read: socket.socket):
-        chunks = []
-        bytes_recv = 0
-
         msg_size = b''
         retries = 0
         while msg_size == b'' and retries < 10:
@@ -96,7 +105,8 @@ class SyncWorldListener:
             return None
 
         msg_len = int(unpack("@I", msg_size)[0])
-
+        chunks = []
+        bytes_recv = 0
         while bytes_recv < msg_len:
             chunk = read.recv(min(msg_len - bytes_recv, 8192))
 
@@ -111,19 +121,40 @@ class SyncWorldListener:
             self.reason = f'Read more than necessary breaking communication (received: {bytes_recv}) (length: {msg_len})'
             return None
 
-        msg = b''.join(chunks)
-        world_state = CMsgBotWorldState()
-        try:
-            world_state.ParseFromString(msg)
-
-        except DecodeError:
-            self.reason = f'Decode error'
-            self.decode_errors.write(msg)
-            self.decode_errors.close()
-            self.state['running'] = False
+        if bytes_recv < msg_len:
+            self.reason = f'Read less than necessary breaking communication (received: {bytes_recv}) (length: {msg_len})'
             return None
 
-        return world_state
+        msg = b''.join(chunks)
+        try:
+            # Overflow in GetSerializedWorldState!
+            # /home/setepenre/work/LuaFun/luafun/game/states.py:117:
+            # RuntimeWarning: Unexpected end-group tag: Not all data was converted
+            #   world_state.ParseFromString(msg)
+            #
+            # self.msg_size.write(f'{len(msg)}\n')
+
+            world_state = CMsgBotWorldState()
+            world_state.ParseFromString(msg)
+
+            if not world_state.IsInitialized():
+                self.reason = f'Message is not initialized'
+                return None
+
+            return world_state
+
+        except RuntimeWarning:
+            import base64
+            self.reason = f'Truncated message'
+            self.decode_errors.write(base64.b64encode(msg))
+            self.decode_errors.close()
+
+        except DecodeError:
+            import base64
+            self.reason = f'Decode error'
+            self.decode_errors.write(base64.b64encode(msg))
+            self.decode_errors.close()
+            return None
 
     def insert_message(self, msg, s):
         json_msg = MessageToDict(
@@ -138,18 +169,22 @@ class SyncWorldListener:
         if not self.running:
             return
 
+        s = datetime.utcnow()
         # this needs to be lower than the game.deadline so in case of disconnect we can reconnect fast
         readable, _, error = select.select([self.sock], [], [self.sock], 0.05)
 
         for read in readable:
-            s = datetime.utcnow()
+
             msg = self.read_message(read)
 
             if msg is not None:
                 self.insert_message(msg, s)
             else:
-                log.debug(f'Could not read message because: {self.reason}')
+                log.error(f'Could not read message because: {self.reason}')
                 self.reason = None
+                # we cannot recover from this
+                self.state['running'] = False
+                # self.sock = self.connect()
 
         for err in error:
             err.close()
@@ -157,6 +192,7 @@ class SyncWorldListener:
             self.sock = self.connect()
 
     def run(self):
+        warnings.simplefilter('error')
         self.sock = self.connect()
 
         if self.sock is None:
@@ -175,12 +211,14 @@ class SyncWorldListener:
                 self.state['running'] = False
                 log.error(traceback.format_exc())
 
-            except Exception as err:
+            except Exception:
                 if self.running:
                     log.error(traceback.format_exc())
 
         if self.sock:
             self.sock.close()
+
+        # self.msg_size.close()
         log.debug('World state listener shutting down')
 
 

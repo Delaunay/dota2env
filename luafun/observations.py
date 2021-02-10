@@ -290,7 +290,7 @@ class StateBuilder:
         #
         # Output = 25 + 2 + 40 + 17 + 208 = 292
 
-        print('         ', self.total_size, self.total_size * 16)
+        # print('         ', self.total_size, self.total_size * 16)
         # use imagenet as a point of reference
         assert self.total_size * timesteps < 3 * 256 * 256
 

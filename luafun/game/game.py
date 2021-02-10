@@ -178,14 +178,25 @@ class Dota2Game:
         # save the arguments of the current game for visibility
         self.args = path + self.options.args(self.paths)
         print(' '.join(self.args))
-        self.process = subprocess.Popen(self.args)  # , stdin=subprocess.PIPE
+        self.process = subprocess.Popen(
+            self.args,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+            # , stdin=subprocess.PIPE
+        )
 
     def dire_state_delta(self):
         """Return a new observation delta if available"""
         if not self.dire_state_delta_queue.empty():
             n = self.dire_state_delta_queue.qsize()
+
             if (self.state.get('draft') or self.ready) and n > 2:
-                log.warning(f'Running late on state processing for dire  (q: {n})')
+
+                log_fun = log.debug
+                if n > 3:
+                    log_fun = log.warning
+
+                log_fun(f'Running late on state processing for dire  (q: {n})')
 
             delta = self.dire_state_delta_queue.get()
             return delta
@@ -196,8 +207,14 @@ class Dota2Game:
         """Return a new observation delta if available"""
         if not self.radiant_state_delta_queue.empty():
             n = self.radiant_state_delta_queue.qsize()
+
             if (self.state.get('draft') or self.ready) and n > 2:
-                log.warning(f'Running late on state processing for radiant (q: {n})')
+
+                log_fun = log.debug
+                if n > 3:
+                    log_fun = log.warning
+
+                log_fun(f'Running late on state processing for radiant (q: {n})')
 
             delta = self.radiant_state_delta_queue.get()
             return delta
@@ -449,7 +466,7 @@ class Dota2Game:
             if not self.heroes:
                 self._set_hero_info(info)
 
-            self._bots.append(player_id)
+            self._bots.append(int(player_id))
             if self.is_game_ready():
                 self.state['game'] = True
 

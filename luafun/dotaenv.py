@@ -111,9 +111,12 @@ class Dota2Env(Dota2Game):
         self.cnt = 0
         self.avg = 0
 
+        # self.unit_size = open('unit_size.txt', 'w')
+
     def cleanup(self):
         # self.radiant_message.close()
         # self.dire_message.close()
+        # self.unit_size.close()
         pass
 
     def dire_state(self):
@@ -131,6 +134,8 @@ class Dota2Env(Dota2Game):
         except Exception as e:
             log.error(f'Error happened during state stitching {e}')
             log.error(traceback.format_exc())
+
+        # self.unit_size.write(f'{len(self._dire_state._units)}\n')
 
         # self.dire_message.write(str(type(message)) + '\n')
         # self.dire_message.write(str(message))

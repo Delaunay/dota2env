@@ -29,4 +29,5 @@ botcpp_radiant.so
 bots/
 .codecov
 botscpp/rev/*
-
+decode*.txt
+luafun/plots/geckodriver.log

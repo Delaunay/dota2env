@@ -126,6 +126,13 @@ def dictionary():
 
 @dataclass
 class FactionState:
+    """Keep track of the game state
+
+    Number of units through time with passive bots
+
+    .. image:: ../_static/unitcount.png
+
+    """
     global_state: GlobalGameState = field(default_factory=GlobalGameState)
     units: List[Unit] = field(default_factory=list)
     heroes: List[Heroes] = field(default_factory=list)

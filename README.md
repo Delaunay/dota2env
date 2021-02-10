@@ -55,8 +55,14 @@ Most assets located in `luafun/game/resources` are owned by Valve.
 
 # Platforms
 
+* Windows & Linux
 * works best on linux
-* there is a bug in windows where state are being dropped randomly (unknown reason)
+
+
+NB: Windows might drop states after a few 1000th steps.
+This is a known issue, unfortunately the connection seems to drop on
+dota side and there is nothing we can do. Thankfully the issue seems to be
+mostly transient
 
 # Install
 

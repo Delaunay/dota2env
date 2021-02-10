@@ -100,7 +100,7 @@ Features
 
 
 
-.. code-block::
+.. code-block:: text
 
     @software{pierre_delaunay_2021_4514210,
       author       = {Pierre Delaunay},

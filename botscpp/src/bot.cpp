@@ -1,6 +1,8 @@
 #include <chrono>
 #include <ctime>
 #include <thread>
+#include <unistd.h>
+
 
 #include <google/protobuf/text_format.h>
 
@@ -12,7 +14,9 @@
 extern "C" void Init(int team_id, void *b, void *c) {
     logfile(team_id);
     print("Init (team:", team_id, ") " VERSION);
+
     // This line is printed dota2/game/bin/linuxsteamrt64/cpp_2.log
+    sleep(10);
 }
 
 // call    _dlopen
@@ -43,9 +47,8 @@ extern "C" void Init(int team_id, void *b, void *c) {
 
 // v21 = &a1->CMsgBot[751];
 // Observe(libraryTeamID, &a1->CMsgBot[751]);
-extern "C" void Ob(int team_id, const CMsgBotWorldState& ws) {
-    return Observe(team_id, ws);
-}
+//
+// This function is not called anymore
 extern "C" void Observe(int team_id, const CMsgBotWorldState& ws) {
     print("Observe (team:", team_id, ')');
 
@@ -54,6 +57,11 @@ extern "C" void Observe(int team_id, const CMsgBotWorldState& ws) {
         print("loc: x=", unit.location().x(), " y=", unit.location().y());
     }
 }
+
+extern "C" void Ob(int team_id, const CMsgBotWorldState& ws) {
+    return Observe(team_id, ws);
+}
+
 
 // callDynamicallyLoadedLibrary(a1, v28, (__m128)time_delta)
 // libraryTeamID = (__int64 *)*(unsigned int *)baseFuncPtr;

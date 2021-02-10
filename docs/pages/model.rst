@@ -4,7 +4,7 @@ Model
 .. image:: ../_static/ModelPipeline.png
 
 
-.. automodule:: luafun.actor_critic
+.. automodule:: luafun.model.actor_critic
     :members:
     :undoc-members:
 
