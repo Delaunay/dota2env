@@ -6,7 +6,6 @@ import logging
 from luafun.game.inspect.base import BasePage
 from luafun.utils.python_fix import asdict
 import luafun.game.constants as const
-from luafun.stitcher import FactionState
 
 import rpcjs.elements as html
 
@@ -29,7 +28,7 @@ class GameInspector(BasePage):
     def main(self, faction, player=None):
         radiant = faction.lower() in ('rad', 'radiant')
         page = 'state.html'
-        state: FactionState
+        state = None
 
         if radiant:
             self.title = 'Radiant State'
@@ -37,12 +36,6 @@ class GameInspector(BasePage):
         else:
             self.title = 'Dire State'
             state = self.getattr('dire_state')
-
-        if state is not None:
-            if state._s <= self.latest:
-                log.debug('State is not being updated anymore')
-
-            self.latest = state._s
 
         if player is not None and state is not None:
             pid = player

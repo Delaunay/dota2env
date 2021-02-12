@@ -216,14 +216,21 @@ class SyncWorldListener:
             try:
                 self._run()
 
+            except KeyboardInterrupt:
+                log.debug('user interrupt')
+                self.state['running'] = False
+                break
+
             except ConnectionResetError:
                 # dota2 proabaly shutdown
                 self.state['running'] = False
                 log.error('ConnectionResetError: dota2 shutdown')
+                break
 
             except ValueError:
                 self.state['running'] = False
                 log.error(traceback.format_exc())
+                break
 
             except Exception:
                 if self.running:

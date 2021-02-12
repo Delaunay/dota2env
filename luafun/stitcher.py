@@ -193,6 +193,39 @@ def default_buffer(size):
     return make
 
 
+FOREVER_UNITS = [
+    'T1_OFF',
+    'T1_MID',
+    'T1_SAFE',
+
+    'T2_OFF',
+    'T2_MID',
+    'T2_SAFE',
+    'OUTPOST'
+    
+    'T3_OFF',
+    'T3_MID',
+    'T3_SAFE',
+
+    'MB_OFF',
+    'MB_MID',
+    'MB_SAFE',
+
+    'RB_OFF',
+    'RB_MID',
+    'RB_SAFE',
+
+    'T4_TOP',
+    'T4_BOT',
+    'ANCIENT'
+]  # + 7 Filler
+
+# = 36 Permanent units
+assert len(FOREVER_UNITS) == 18
+
+MAX_UNIT_COUNT = 100
+
+
 class Stitcher:
     def __init__(self, faction):
         self.roshan_death_count = 0
@@ -204,7 +237,7 @@ class Stitcher:
         self.heroes = dict()
         self.units = dict()
         self.runes = dict()
-        self.health_tracker = defaultdict(default_factory=default_buffer(16))
+        self.health_tracker = defaultdict(default_buffer(16))
 
         # Proximity mapping
         self.proximities = ProximityMapper()
@@ -218,15 +251,20 @@ class Stitcher:
         return (
             Player.size(False) * 5 +
             Player.size(True) * 5 +
-            Unit.size() * (189 - 10) +
+            Unit.size() * len(FOREVER_UNITS) +
+            Unit.size() * len(FOREVER_UNITS) +
+            Unit.size() * MAX_UNIT_COUNT +
             RuneState.Size * 6 +
             CommonState.Size
         )
 
     def apply_diff(self, delta: msg.CMsgBotWorldState):
         """Take a world state delta and apply it to a previous state"""
+        import time
+
         self.latest_message = delta
         self.generic_apply(delta)
+        e = time.time()
 
     def generate_batch(self, botids):
         return None
@@ -251,16 +289,26 @@ class Stitcher:
         closest = []
         for k, unit in self.units.items():
             x, y = unit[UnitState.X], unit[UnitState.Y]
-            dist = (x - px) ** 2 + (y - py) ** 2
+            dist = sqrt((x - px) ** 2 + (y - py) ** 2)
             closest.append((k, dist))
 
         closest.sort()
 
-        for i, (k, _) in enumerate(closest):
+        for i, (k, dist) in enumerate(closest):
             if i > 189 - 10:
                 break
 
             unit = self.units[k]
+            x, y = unit[UnitState.X], unit[UnitState.Y]
+
+            unit[UnitState.ToCurrentUnitdx] = x - px
+            unit[UnitState.ToCurrentUnitdy] = y - py
+            unit[UnitState.ToCurrentUnitl] = dist
+
+            # IsCurrentHeroAttackingIt
+            # IsAttackingCurrentHero
+            # EtaProjectileToHero
+
 
             s = e
             e = s + UnitState.Size
@@ -336,14 +384,31 @@ class Stitcher:
         health.append(msg['health'])
         health = health.to_list()
 
+        # BOT_ACTION_TYPE_NONE = 0
+        # BOT_ACTION_TYPE_IDLE = 1
+        # BOT_ACTION_TYPE_MOVE_TO = 2
+        # BOT_ACTION_TYPE_MOVE_TO_DIRECTLY = 3
+        # BOT_ACTION_TYPE_ATTACK = 4
+        # BOT_ACTION_TYPE_ATTACKMOVE = 5
+        # BOT_ACTION_TYPE_USE_ABILITY
+        # BOT_ACTION_TYPE_PICK_UP_RUNE
+        # BOT_ACTION_TYPE_PICK_UP_ITEM
+        # BOT_ACTION_TYPE_DROP_ITEM
+        # BOT_ACTION_TYPE_SHRINE
+        # BOT_ACTION_TYPE_DELAY
+
         self.proximities.manager.update_position(uid, pos[0], pos[1])
         u[f.X] = pos[0]
         u[f.Y] = pos[1]
         u[f.Z] = pos[2]
         u[f.FacingCos] = cos(msg['facing'])
         u[f.FacingSin] = sin(msg['facing'])
-        u[f.IsAttacking] = 'action_type' == 'attacking' or 'attack_target_handle'
-        u[f.TimeSinceLastAttack] = msg['last_attack_time']
+
+        has_target = msg.get('ability_target_handle', None) is not None
+        is_attacking = msg.get('action_type', -1) in (4, 5)
+
+        u[f.IsAttacking] = has_target or is_attacking
+        u[f.TimeSinceLastAttack] = msg.get('last_attack_time', 0)
         u[f.MaxHealth] = msg['health_max']
         u[f.Health00] = health[-1]
         u[f.Health01] = health[-2]
@@ -364,21 +429,33 @@ class Stitcher:
         u[f.AttackDamage] = msg['attack_damage']
         u[f.AttackSpeed] = msg['attack_speed']
         u[f.PhysicalResistance] = msg['armor']
-        u[f.IsGlyphed] = 0
-        u[f.GlyphTime] = 0
+        # This should be in the modifier list
+        # u[f.IsGlyphed] = 0
+        # u[f.GlyphTime] = 0
         u[f.MovementSpeed] = msg['current_movement_speed']
         u[f.IsAlly] = msg['team_id'] == self.faction
         u[f.IsNeutral] = msg['team_id'] == 1
         u[f.AnimationCycleTime] = msg['anim_cycle']
-        u[f.EtaIncomingProjectile] = 0
-        u[f.NumberOfUnitAttackingMe] = 0
+
+        min_eta = 10
+        for track in msg.get('incoming_tracking_projectiles', []):
+            x, y = track['location']['x'], track['location']['y']
+            dist = sqrt((x - pos[0]) ** 2 + (y - pos[1]) ** 2)
+            eta = dist / track['velocity']
+            min_eta = min(eta, min_eta)
+
+        u[f.EtaIncomingProjectile] = min_eta
+
+        # Needs more computations to get those
+        # u[f.NumberOfUnitAttackingMe] = 0
         # u[f.ShrineCooldown        ] = 0
-        u[f.ToCurrentUnitdx] = 0
-        u[f.ToCurrentUnitdy] = 0
-        u[f.ToCurrentUnitl] = 0
-        u[f.IsCurrentHeroAttackingIt] = 0
-        u[f.IsAttackingCurrentHero] = 0
-        u[f.EtaProjectileToHero] = 0
+        # u[f.ToCurrentUnitdx] = 0
+        # u[f.ToCurrentUnitdy] = 0
+        # u[f.ToCurrentUnitl] = 0
+        # u[f.IsCurrentHeroAttackingIt] = 0
+        # u[f.IsAttackingCurrentHero] = 0
+        # u[f.EtaProjectileToHero] = 0
+
         u[f.UnitTypeHERO + offset] = 1
 
         return u
@@ -426,14 +503,14 @@ class Stitcher:
         tpitem = umsg['pitems'].get(const.ItemSlot.Item15, dict())
 
         h[f.IsAlive] = umsg['is_alive']
-        h[f.NumberOfDeath] = pmsg['deaths']
+        h[f.NumberOfDeath] = pmsg.get('deaths', 0)
         h[f.HeroInSight] = 1
         h[f.LastSeenTime] = 0
         h[f.IsTeleporting] = tpitem.get('is_channeling', False)
-        h[f.TeleportTargetX] = 0
-        h[f.TeleportTargetY] = 0
-        h[f.TeleportChannelTime] = tpitem.get('channel_time', 0)
-        h[f.CurrentGold] = umsg['reliable_gold'] + umsg['unreliable_gold']
+        h[f.TeleportTargetX] = tpitem.get('location', dict()).get('x', -1)
+        h[f.TeleportTargetY] = tpitem.get('location', dict()).get('x', -1)
+        h[f.TeleportChannelTime] = tpitem.get('time_remaining', 0)
+        h[f.CurrentGold] = umsg.get('reliable_gold', 0) + umsg.get('unreliable_gold', 0)
         h[f.Level] = umsg['level'] / 30
         h[f.ManaMax] = umsg['mana_max']
         h[f.Mana] = umsg['mana']
@@ -442,11 +519,11 @@ class Stitcher:
         h[f.Health] = umsg['health']
         h[f.HealthRegen] = umsg['health_regen']
         h[f.MagicResitance] = umsg['magic_resist']
-        h[f.Strength] = umsg['strength']
-        h[f.Agility] = umsg['agility']
-        h[f.Intelligence] = umsg['intelligence']
+        h[f.Strength] = umsg.get('strength', 0)
+        h[f.Agility] = umsg.get('agility', 0)
+        h[f.Intelligence] = umsg.get('intelligence', 0)
         h[f.IsInvisibility] = umsg['is_invisible']
-        h[f.IsUsingAbility] = umsg['is_using_ability']
+        h[f.IsUsingAbility] = umsg.get('is_using_ability', False)
         h[f.NumberOfAllied] = 0
         h[f.NumberOfAlliedCreeps] = 0
         h[f.NumberOfEnemy] = 0
@@ -458,13 +535,13 @@ class Stitcher:
         pitems = dict()
         umsg['pitems'] = pitems
 
-        for item in umsg['items']:
+        for item in umsg.get('items', []):
             pitems[item['slot']] = item
 
         pabi = dict()
         umsg['pabi'] = pabi
 
-        for item in umsg['abilities']:
+        for item in umsg.get('abilities', []):
             pitems[item['slot']] = item
 
     def prepare_ally_hero(self, umsg):
@@ -491,11 +568,11 @@ class Stitcher:
         a = torch.zeros((AbilityState.Size,))
         f = AbilityState
 
-        a[f.Cooldown] = amsg['cooldown_remaining']
-        a[f.InUse] = amsg['is_in_ability_phase'] or amsg['is_channeling']
-        a[f.Castable] = amsg['is_fully_castable']
+        a[f.Cooldown] = amsg.get('cooldown_remaining', 0)
+        a[f.InUse] = amsg.get('is_in_ability_phase', False) or amsg.get('is_channeling', False)
+        a[f.Castable] = amsg.get('is_fully_castable', False)
 
-        level = amsg['level']
+        level = amsg.get('level', 0)
 
         if level > 0:
             a[f.Level1 + level - 1] = 1
@@ -528,7 +605,7 @@ class Stitcher:
 
     def prepare_hero(self, msg):
         phero = Player(ally=msg['team_id'] == self.faction)
-        phero.unit = self.prepare_unit(msg)
+        phero.unit = self.prepare_unit(msg['unit'])
         phero.hero = self.prepare_hero_unit(msg)
 
         if msg['team_id'] == self.faction:
@@ -540,7 +617,7 @@ class Stitcher:
         self.common = self.prepare_common(delta)
         self.proximities.reset()
 
-        players = dict()
+        players = defaultdict(dict)
         self.process_trees(delta)
 
         for rune in delta.get('rune_infos', []):
@@ -550,23 +627,35 @@ class Stitcher:
             )
             self.runes[rid] = self.prepare_rune(rune)
 
+        # projectile (arrows, hook)
+        for linear in delta.get('linear_projectiles', []):
+            pass
+
+        # not supported yet
+        # DroppedItem
+        # EventAbility
+        # EventDamage
+        # EventCourierKilled
+
+        # insert player info into unit for easier tensor building
         for player in delta.get('players', []):
             pid = player['player_id']
             players[pid] = player
 
         for tp in delta.get('incoming_teleports', []):
-            pid = tp['player']
+            pid = tp['player_id']
             players[pid]['tp'] = tp
 
+        # Main builder
         for unit in delta.get('units', []):
             uid = unit['handle']
             player = players.get(uid, None)
 
             if player is not None:
-                player[uid]['unit'] = unit
+                player['unit'] = unit
                 self.process_hero(unit)
 
-                hu = self.prepare_hero(player[uid])
+                hu = self.prepare_hero(player)
                 self.heroes[uid] = hu
                 continue
 

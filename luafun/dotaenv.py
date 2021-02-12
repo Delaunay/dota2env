@@ -88,8 +88,8 @@ class Dota2Env(Dota2Game):
             stitcher = Stitcher
 
         self.sticher_factory = stitcher
-        self.dire_stitcher = stitcher()
-        self.radiant_stitcher = stitcher()
+        self.dire_stitcher = stitcher(faction=TEAM_DIRE)
+        self.radiant_stitcher = stitcher(faction=TEAM_RADIANT)
 
         # Reward function
         if reward is None:
@@ -267,9 +267,17 @@ class Dota2Env(Dota2Game):
         self.send_message(preprocessed)
 
         # 2. Wait for the new stitched state
+        wait_time = 0
         while self.has_next < 2 and self.running:
-            self._tick()
-            time.sleep(0.05)
+            try:
+                self._tick()
+                time.sleep(0.05)
+                wait_time += 0.05
+            except KeyboardInterrupt:
+                return None, None, None, None
+
+            if wait_time > 1:
+                log.debug('Waiting for an unusually long time')
 
         self.has_next = 0
 

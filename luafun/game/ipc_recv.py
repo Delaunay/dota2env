@@ -125,6 +125,11 @@ class IPCRecv:
                 if not self.got_messages:
                     time.sleep(0.13 / 2)
 
+            except KeyboardInterrupt:
+                log.debug(f'User interrupt')
+                self.state['running'] = False
+                break
+
             except Exception as e:
                 time.sleep(0.01)
                 log.debug(f'IPC error {e}')

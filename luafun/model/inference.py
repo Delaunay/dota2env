@@ -31,7 +31,6 @@ class InferenceEngine:
         self.state_space = game.observation_space
         self.action_space = game.action_space
 
-        input_size = self.state_space.total_size
         # self.model = HeroModel(len(self.bots), input_size, 16)
         # self.filter = ActionFilter()
         # self.sampler = ActionSampler()
@@ -39,7 +38,7 @@ class InferenceEngine:
 
     def action(self, state):
         """Build the observation batch and the action to take"""
-        batch = generate_game_batch(state, self.bots)
+        # batch = generate_game_batch(state, self.bots)
 
         action = self.action_space.sample()
         # msg = self.model(state)

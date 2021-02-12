@@ -154,8 +154,8 @@ class UnitState(IntEnum):
     AttackDamage             = auto()
     AttackSpeed              = auto()
     PhysicalResistance       = auto()
-    IsGlyphed                = auto()
-    GlyphTime                = auto()
+    # IsGlyphed                = auto()
+    # GlyphTime                = auto()
     MovementSpeed            = auto()
     IsAlly                   = auto()
     IsNeutral                = auto()
@@ -189,7 +189,7 @@ class UnitState(IntEnum):
 
 
 # OpenAI == 43
-assert UnitState.Size == 53
+assert UnitState.Size == 51
 
 
 class HeroUnit(IntEnum):
