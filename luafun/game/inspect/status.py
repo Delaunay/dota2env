@@ -23,6 +23,7 @@ class Status(BasePage):
         ipc_recv = self.state.get('ipc_recv')
         dire_state = self.state.get('word-Dire')
         rad_state = self.state.get('word-Radiant')
+        perf = self.getattr('performance_counters')
         now = datetime.utcnow()
 
         kwargs = {
@@ -40,5 +41,5 @@ class Status(BasePage):
             kwargs['rad_state'] = rad_state
 
         page = self.env.get_template('status.html')
-        return page.render(**kwargs, state=self.state)
+        return page.render(**kwargs, state=self.state, perf=perf)
 

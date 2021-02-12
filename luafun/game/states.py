@@ -12,6 +12,7 @@ from google.protobuf.json_format import MessageToDict
 from google.protobuf.message import DecodeError
 
 from luafun.game.dota2.dota_gcmessages_common_bot_script_pb2 import CMsgBotWorldState
+from luafun.game.performance import ProcessingStates
 
 log = logging.getLogger(__name__)
 
@@ -39,15 +40,18 @@ class SyncWorldListener:
         self.name = name
         self.namespace = f'word-{self.name}'
         self.reason = None
-        self.decode_errors = open('decode.txt', 'w')
+        self.decode_errors = None
+        self.err_cnt = 0
         self.error = None
+        self.proto_rcv = 0
+        self.proto_decode = 0
         # self.msg_size = open('msg_size.txt', 'w')
 
     @property
     def running(self):
         return self.state['running']
 
-    def connect(self, retries=20):
+    def connect(self, retries=20, sleep_time=0.01):
         pending = None
         s = None
 
@@ -65,7 +69,7 @@ class SyncWorldListener:
 
                 s.setblocking(True)
                 s.connect((self.host, self.port))
-                log.debug(f'Connection established after {i} retries')
+                log.debug(f'Connection established after {i} retries for {self.name}')
                 return s
 
             except ConnectionRefusedError as err:
@@ -74,7 +78,7 @@ class SyncWorldListener:
                     return None
 
                 pending = err
-                time.sleep(1)
+                time.sleep(sleep_time)
         else:
             log.debug('Could not establish connection')
 
@@ -84,6 +88,8 @@ class SyncWorldListener:
         return None
 
     def read_message(self, read: socket.socket):
+        self.proto_rcv = time.time()
+
         msg_size = b''
         retries = 0
         while msg_size == b'' and retries < 10:
@@ -148,11 +154,10 @@ class SyncWorldListener:
 
             return world_state
 
-        except SystemError:
-            log.error(traceback.format_exc())
-            return self.recover(f'SystemError', msg)
+        except RuntimeWarning as err:
+            if hasattr(err, '__cause__'):
+                err.__cause__
 
-        except RuntimeWarning:
             log.error(traceback.format_exc())
             return self.recover(f'RuntimeWarning', msg)
 
@@ -161,24 +166,35 @@ class SyncWorldListener:
 
     def recover(self, error, msg):
         import base64
-        self.reason = f'{error}: {self.error}'
-        self.decode_errors.write(base64.b64encode(msg).decode('utf-8'))
-        self.decode_errors.close()
-        self.decode_errors = None
+        self.reason = f'{error}-{self.name}: {self.error}'
+
+        if msg is not None:
+            self.decode_errors = open(f'decode_{self.err_cnt}.txt', 'w')
+            self.decode_errors.write(base64.b64encode(msg).decode('utf-8'))
+            self.decode_errors.close()
+            self.decode_errors = None
+            self.err_cnt += 1
 
         # Reconnect, the connection is tainted
         # we do not know when a message starts and when it ends
         # this means we will drop at least one state update
         self.sock.close()
-        self.sock = self.connect()
+        self.sock = self.connect(sleep_time=0.01)
         return None
 
     def insert_message(self, msg, s):
+        self.proto_decode = time.time()
         json_msg = MessageToDict(
             msg,
             preserving_proto_field_name=True,
             use_integers_for_enums=True)
 
+        perf = ProcessingStates()
+        perf.proto_rcv = self.proto_rcv
+        perf.proto_decode = self.proto_decode
+        perf.proto_send = time.time()
+
+        json_msg['perf'] = perf
         self.queue.put(json_msg)
         self.state[self.namespace] = (datetime.utcnow() - s).total_seconds()
 
@@ -207,7 +223,7 @@ class SyncWorldListener:
 
     def run(self):
         warnings.simplefilter('error')
-        self.sock = self.connect()
+        self.sock = self.connect(sleep_time=1)
 
         if self.sock is None:
             raise RuntimeError('Impossible to connect to the game')
@@ -222,10 +238,10 @@ class SyncWorldListener:
                 break
 
             except ConnectionResetError:
-                # dota2 proabaly shutdown
-                self.state['running'] = False
-                log.error('ConnectionResetError: dota2 shutdown')
-                break
+                self.recover('ConnectionResetError', None)
+
+            except ConnectionRefusedError:
+                self.recover('ConnectionRefusedError', None)
 
             except ValueError:
                 self.state['running'] = False
@@ -241,9 +257,6 @@ class SyncWorldListener:
 
         # self.msg_size.close()
         log.debug('World state listener shutting down')
-
-        if self.decode_errors:
-            self.decode_errors.close()
 
 
 def sync_world_listener(host, port, queue, state, stats, level, name):

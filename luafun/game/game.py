@@ -17,6 +17,7 @@ from luafun.game.extractor import Extractor
 import luafun.game.constants as const
 from luafun.game.states import world_listener_process
 from luafun.utils.options import option
+from luafun.game.performance import ProcessingStates
 
 
 log = logging.getLogger(__name__)
@@ -124,9 +125,18 @@ class Dota2Game:
             TEAM_DIRE: 0
         }
 
+        self.dire_perf = None
+        self.rad_perf = None
+        self.dire_perf_prev = None
+        self.rad_perf_prev = None
+        self.perf = ProcessingStates(0, 0, 0, 0, 0, 0, 0, 0)
+
         self.extractor = Extractor()
         log.debug(f'Main Process: {os.getpid()}')
         self._bots = []
+
+    def performance_counters(self):
+        return self.perf
 
     @property
     def batch_size(self):
@@ -143,7 +153,7 @@ class Dota2Game:
         """Return the inference time limit in seconds.
         i.e it is the time remaining before receiving a new observation
         """
-        return SECONDS_PER_TICK * self.options.ticks_per_observation
+        return SECONDS_PER_TICK * self.options.ticks_per_observation / self.options.host_timescale
 
     @property
     def running(self):
@@ -185,41 +195,32 @@ class Dota2Game:
             # , stdin=subprocess.PIPE
         )
 
-    def dire_state_delta(self):
-        """Return a new observation delta if available"""
-        if not self.dire_state_delta_queue.empty():
-            n = self.dire_state_delta_queue.qsize()
+    def _get_next(self, q1, q2):
+        m1, m2 = None, None
 
-            if (self.state.get('draft') or self.ready) and n > 2:
+        while True:
+            if m1 is None and not q1.empty():
+                m1 = q1.get()
 
-                log_fun = log.debug
-                if n > 3:
-                    log_fun = log.warning
+                self.rad_perf = m1['perf']
+                self.rad_perf.state_rcv = time.time()
 
-                log_fun(f'Running late on state processing for dire  (q: {n})')
+            if m2 is None and not q2.empty():
+                m2 = q2.get()
 
-            delta = self.dire_state_delta_queue.get()
-            return delta
+                self.dire_perf = m2['perf']
+                self.dire_perf.state_rcv = time.time()
 
-        return None
+            if m1 and m2:
+                break
 
-    def radiant_state_delta(self):
-        """Return a new observation delta if available"""
-        if not self.radiant_state_delta_queue.empty():
-            n = self.radiant_state_delta_queue.qsize()
+        n1 = q1.qsize()
+        n2 = q2.qsize()
 
-            if (self.state.get('draft') or self.ready) and n > 2:
+        if any((n1 > 2, n2 > 2)):
+            log.warning(f'Running late on state processing (radiant: {n1}) (dire: {n2})')
 
-                log_fun = log.debug
-                if n > 3:
-                    log_fun = log.warning
-
-                log_fun(f'Running late on state processing for radiant (q: {n})')
-
-            delta = self.radiant_state_delta_queue.get()
-            return delta
-
-        return None
+        return m1, m2
 
     def start_ipc(self):
         """Start inter-process communication processes.
@@ -294,7 +295,7 @@ class Dota2Game:
 
         # wait the game to finish before exiting
         total = 0
-        while self.process.poll() is None and total < timeout:
+        while self.process.poll() is None and total < timeout and self.process.returncode is None:
             time.sleep(0.01)
             total += 0.01
 
@@ -313,6 +314,10 @@ class Dota2Game:
             return
 
         msg = self.http_rpc_recv.get()
+        if not isinstance(msg, dict):
+            self.http_rpc_send.put(dict(error=msg))
+            return
+
         attr = msg.get('attr')
         args = msg.get('args', [])
         kwargs = msg.get('kwargs', dict())
@@ -336,24 +341,19 @@ class Dota2Game:
 
     def _handle_state(self):
         s = time.time()
-        dire_delta = self.dire_state_delta()
+        radiant, dire = self._get_next(
+            self.radiant_state_delta_queue,
+            self.dire_state_delta_queue
+        )
 
-        while dire_delta is not None:
-            self.update_dire_state(dire_delta)
-            dire_delta = self.dire_state_delta()
+        self.update_dire_state(dire)
+        self.dire_perf.state_applied = time.time()
 
-        e = time.time()
-        self.state['dire_state_time'] = e - s
-
-        s = time.time()
-        rad_delta = self.radiant_state_delta()
-
-        while rad_delta is not None:
-            self.update_radiant_state(rad_delta)
-            rad_delta = self.radiant_state_delta()
+        self.update_radiant_state(radiant)
+        self.rad_perf.state_applied = time.time()
 
         e = time.time()
-        self.state['rad_state_time'] = e - s
+        self.state['state_time'] = e - s
 
     def _tick(self):
         stop = False
@@ -363,7 +363,7 @@ class Dota2Game:
             self.stop()
             stop = True
 
-        winner = self.state.get('win')
+        winner = self.state.get('win', None)
         if winner is not None:
             log.debug(f'{winner} won')
             self.stop()
@@ -521,7 +521,18 @@ class Dota2Game:
 
     def send_message(self, data: dict):
         """Send a message to the bots"""
+        now = time.time()
+        if self.rad_perf and self.dire_perf:
+            self.rad_perf.state_replied = now
+            self.dire_perf.state_replied = now
+
+            self.perf.add(self.rad_perf, self.rad_perf_prev)
+            self.perf.add(self.dire_perf, self.dire_perf_prev)
+
         ipc_send(self.paths.ipc_send_handle, data, self.uid)
+
+        self.dire_perf_prev = now
+        self.rad_perf_prev = now
 
     def cleanup(self):
         """Cleanup needed by the environment"""

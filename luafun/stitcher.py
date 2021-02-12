@@ -17,7 +17,9 @@ from luafun.draft import DraftStatus
 from luafun.proximity import ProximityMapper
 from luafun.observations import CommonState, ItemState, AbilityState, RuneState, Minimap10x10Tile
 from luafun.observations import UnitState, HeroUnit, AllyHeroState, PreviousActionState, ModifierState
+from luafun.game.ipc_send import TEAM_DIRE, TEAM_RADIANT
 import luafun.game.constants as const
+
 
 GAME_START = 30
 NIGHT_DAY_TIME = 5 * 60
@@ -193,40 +195,131 @@ def default_buffer(size):
     return make
 
 
-FOREVER_UNITS = [
-    'T1_OFF',
-    'T1_MID',
-    'T1_SAFE',
+def buildings(faction):
+    """Returns a list of building we track
 
-    'T2_OFF',
-    'T2_MID',
-    'T2_SAFE',
-    'OUTPOST'
-    
-    'T3_OFF',
-    'T3_MID',
-    'T3_SAFE',
+    Examples
+    --------
+    Allied building comes first and enemies last
+    >>> buildings(TEAM_RADIANT)[:2]
+    ['npc_dota_goodguys_tower1_bot', 'npc_dota_goodguys_tower1_mid']
 
-    'MB_OFF',
-    'MB_MID',
-    'MB_SAFE',
+    >>> buildings(TEAM_RADIANT)[-2:]
+    ['npc_dota_badguys_tower4_2', 'npc_dota_badguys_fort']
 
-    'RB_OFF',
-    'RB_MID',
-    'RB_SAFE',
+    >>> buildings(TEAM_DIRE)[:2]
+    ['npc_dota_badguys_tower1_top', 'npc_dota_badguys_tower1_mid']
 
-    'T4_TOP',
-    'T4_BOT',
-    'ANCIENT'
-]  # + 7 Filler
+    >>> buildings(TEAM_DIRE)[-2:]
+    ['npc_dota_goodguys_tower4_2', 'npc_dota_goodguys_fort']
 
-# = 36 Permanent units
-assert len(FOREVER_UNITS) == 18
+    """
+    if faction == TEAM_RADIANT:
+        me = 'goodguys'
+        enemy = 'badguys'
+        safe = 'bot'
+        off = 'top'
+        enemy_outpost = '#DOTA_OutpostName_North'
+        outpost = '"#DOTA_OutpostName_South"'
+
+    elif faction == TEAM_DIRE:
+        me = 'badguys'
+        enemy = 'goodguys'
+        safe = 'top'
+        off = 'bot'
+        outpost = '#DOTA_OutpostName_North'
+        enemy_outpost = '"#DOTA_OutpostName_South"'
+
+    else:
+        raise RuntimeError('Bad faction')
+
+    b = [
+        f'npc_dota_{me}_tower1_{safe}',
+        f'npc_dota_{me}_tower1_mid',
+        f'npc_dota_{me}_tower1_{off}',
+        f'npc_dota_{me}_tower2_{safe}',
+        f'npc_dota_{me}_tower2_mid',
+        f'npc_dota_{me}_tower2_{off}',
+        outpost,
+        f'npc_dota_{me}_tower3_{safe}',
+        f'npc_dota_{me}_tower3_mid',
+        f'npc_dota_{me}_tower3_{off}',
+        f'npc_dota_{me}_melee_rax_{safe}',
+        f'npc_dota_{me}_melee_rax_mid',
+        f'npc_dota_{me}_melee_rax_{off}',
+        f'npc_dota_{me}_range_rax_{safe}',
+        f'npc_dota_{me}_range_rax_mid',
+        f'npc_dota_{me}_range_rax_{off}',
+        f'npc_dota_{me}_tower4_1',
+        f'npc_dota_{me}_tower4_2',
+        f'npc_dota_{me}_fort',
+
+        f'npc_dota_{enemy}_tower1_{safe}',
+        f'npc_dota_{enemy}_tower1_mid',
+        f'npc_dota_{enemy}_tower1_{off}',
+        f'npc_dota_{enemy}_tower2_{safe}',
+        f'npc_dota_{enemy}_tower2_mid',
+        f'npc_dota_{enemy}_tower2_{off}',
+        enemy_outpost,
+        f'npc_dota_{enemy}_tower3_{safe}',
+        f'npc_dota_{enemy}_tower3_mid',
+        f'npc_dota_{enemy}_tower3_{off}',
+        f'npc_dota_{enemy}_melee_rax_{safe}',
+        f'npc_dota_{enemy}_melee_rax_mid',
+        f'npc_dota_{enemy}_melee_rax_{off}',
+        f'npc_dota_{enemy}_range_rax_{safe}',
+        f'npc_dota_{enemy}_range_rax_mid',
+        f'npc_dota_{enemy}_range_rax_{off}',
+        f'npc_dota_{enemy}_tower4_1',
+        f'npc_dota_{enemy}_tower4_2',
+        f'npc_dota_{enemy}_fort',
+    ]
+    # = 36 Permanent buildings
+    assert len(set(b)) == 38
+    return b
+
 
 MAX_UNIT_COUNT = 100
 
 
+def hero_order(faction, bid):
+    """Returns the hero order for the controlling bots
+
+    Examples
+    --------
+    We are generating the observation for player 1 (radiant)
+    so it will appear first, then its teammate and last the enemies
+    >>> hero_order(TEAM_RADIANT, 1)
+    [1, 0, 2, 3, 4, 5, 6, 7, 8, 9]
+
+    We are generating the observation for player 9
+    so it will appear first, then its teammate and last the enemies
+    >>> hero_order(TEAM_DIRE, 9)
+    [9, 6, 7, 8, 5, 0, 1, 2, 3, 4]
+
+    """
+    rad =  [0, 1, 2, 3, 4]
+    dire = [5, 6, 7, 8, 9]
+
+    if faction == TEAM_RADIANT:
+        horder = rad + dire
+        offset = 0
+
+    elif faction == TEAM_DIRE:
+        horder = dire + rad
+        offset = 5
+
+    else:
+        raise RuntimeError('Bad faction')
+
+    horder[0], horder[bid - offset] = horder[bid - offset], horder[0]
+    return horder
+
+
 class Stitcher:
+    """Stitcher is a class that tracks game state and generate intermediate tensor to
+    help us build the player specific observation tensor
+    """
     def __init__(self, faction):
         self.roshan_death_count = 0
         self.faction = faction
@@ -238,6 +331,9 @@ class Stitcher:
         self.units = dict()
         self.runes = dict()
         self.health_tracker = defaultdict(default_buffer(16))
+        self.building_names = buildings(faction)
+        self.buildings = dict()
+        self.building_order = []
 
         # Proximity mapping
         self.proximities = ProximityMapper()
@@ -251,8 +347,7 @@ class Stitcher:
         return (
             Player.size(False) * 5 +
             Player.size(True) * 5 +
-            Unit.size() * len(FOREVER_UNITS) +
-            Unit.size() * len(FOREVER_UNITS) +
+            Unit.size() * len(self.building_names) +
             Unit.size() * MAX_UNIT_COUNT +
             RuneState.Size * 6 +
             CommonState.Size
@@ -266,10 +361,17 @@ class Stitcher:
         self.generic_apply(delta)
         e = time.time()
 
-    def generate_batch(self, botids):
-        return None
+    def generate_batch(self, botids) -> torch.Tensor:
+        """Generate an observation for a set of players"""
+        state = torch.zeros((len(botids), self.observation_space,))
 
-    def generate_player(self, bid):
+        for i, pid in enumerate(botids):
+            state[i, :] = self.generate_player(pid)
+
+        return state
+
+    def generate_player(self, bid) -> torch.Tensor:
+        """Generate an observation for a given player"""
         state = torch.zeros((self.observation_space,))
         s = 0
         e = 0
@@ -286,6 +388,37 @@ class Stitcher:
             e = s + RuneState.Size
             state[s:e] = self.runes.get(i)
 
+        # Set building info
+        for i, uid in self.building_order:
+            unit = self.buildings.get(i)
+
+            x, y = unit[UnitState.X], unit[UnitState.Y]
+            dist = sqrt((x - px) ** 2 + (y - py) ** 2)
+
+            unit[UnitState.ToCurrentUnitdx] = x - px
+            unit[UnitState.ToCurrentUnitdy] = y - py
+            unit[UnitState.ToCurrentUnitl] = dist
+
+            # IsCurrentHeroAttackingIt
+            # IsAttackingCurrentHero
+            # EtaProjectileToHero
+
+            s = e
+            e = s + UnitState.Size
+
+            state[s:e] = unit
+        # ---
+
+        # set hero info
+        horder = hero_order(self.faction, bid)
+        for hid in horder:
+            hero: Player = self.heroes[hid]
+
+            s = e
+            e = s + Player.size(hero.is_ally)
+            state[s:e] = hero.tensor()
+
+        # Set closest unit first
         closest = []
         for k, unit in self.units.items():
             x, y = unit[UnitState.X], unit[UnitState.Y]
@@ -309,12 +442,11 @@ class Stitcher:
             # IsAttackingCurrentHero
             # EtaProjectileToHero
 
-
             s = e
             e = s + UnitState.Size
             state[s:e] = unit
 
-        return None
+        return state
 
     def prepare_common(self, state) -> torch.Tensor:
         g = torch.zeros((CommonState.Size,))
@@ -613,6 +745,33 @@ class Stitcher:
 
         return phero
 
+    def init_buildings(self, msg):
+        if len(self.buildings) == len(self.building_names):
+            return
+
+        self.building_order = []
+        self.buildings = dict()
+
+        # we need to track idx because of T4 towers
+        # there are 2 towers with the same name
+        idx = set()
+
+        for unit in msg.get('units', []):
+            uid = unit['handle']
+            name = unit.get('name')
+
+            for i, bname in enumerate(self.building_names):
+
+                if bname.startswith(name) and i not in idx:
+                    idx.add(i)
+
+                    tu = self.prepare_unit(unit)
+                    self.buildings[uid] = tu
+                    self.building_order.append((i, uid))
+
+        # Sort by index order
+        self.building_order.sort(key=lambda x: x[0])
+
     def generic_apply(self, delta):
         self.common = self.prepare_common(delta)
         self.proximities.reset()
@@ -628,8 +787,8 @@ class Stitcher:
             self.runes[rid] = self.prepare_rune(rune)
 
         # projectile (arrows, hook)
-        for linear in delta.get('linear_projectiles', []):
-            pass
+        # for linear in delta.get('linear_projectiles', []):
+        #     pass
 
         # not supported yet
         # DroppedItem
@@ -646,10 +805,34 @@ class Stitcher:
             pid = tp['player_id']
             players[pid]['tp'] = tp
 
+        # enum
+        # UnitType
+        # {
+        # INVALID = 0;
+        # HERO = 1;
+        # CREEP_HERO = 2;
+        # LANE_CREEP = 3;
+        # JUNGLE_CREEP = 4;
+        # ROSHAN = 5;
+        # TOWER = 6;
+        # BARRACKS = 7;
+        # SHRINE = 8;
+        # FORT = 9;
+        # BUILDING = 10;
+        # COURIER = 11;
+        # WARD = 12;
+        # }
+
+        self.init_buildings(delta)
+
         # Main builder
         for unit in delta.get('units', []):
             uid = unit['handle']
-            player = players.get(uid, None)
+
+            player = None
+            if unit.get('unit_type', 0) == 1:
+                pid = unit.get('player_id', -1)
+                player = players.get(pid, None)
 
             if player is not None:
                 player['unit'] = unit
@@ -659,7 +842,13 @@ class Stitcher:
                 self.heroes[uid] = hu
                 continue
 
+            # Standard unit
             tu = self.prepare_unit(unit)
+
+            if uid in self.buildings:
+                self.buildings[uid] = tu
+                continue
+
             self.units[uid] = tu
 
 

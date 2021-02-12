@@ -32,24 +32,21 @@ class GameInspector(BasePage):
 
         if radiant:
             self.title = 'Radiant State'
-            state = self.getattr('radiant_state')
+            state = self.getattr('dire_message')
         else:
             self.title = 'Dire State'
-            state = self.getattr('dire_state')
+            state = self.getattr('radiant_message')
 
         if player is not None and state is not None:
             pid = player
             page = 'player.html'
-            state = state._players.get(int(pid), dict())
+        #     state = state._players.get(int(pid), dict())
 
         raw = ''
         if state and not isinstance(state, (str, dict)):
-            state._proximity = None
             state = asdict(state)
 
         if state is not None:
-            if '_manager' in state:
-                state['_manager'] = None
             raw = json.dumps(state, indent=2)
 
         page = self.env.get_template(page)

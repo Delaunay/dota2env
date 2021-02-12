@@ -251,6 +251,7 @@ class Dota2Env(Dota2Game):
             returns nothing
         """
         self.step_end = time.time()
+        s = time.time()
         if self.step_start:
             t = self.step_end - self.step_start
             if t > self.deadline:
@@ -271,8 +272,8 @@ class Dota2Env(Dota2Game):
         while self.has_next < 2 and self.running:
             try:
                 self._tick()
-                time.sleep(0.05)
-                wait_time += 0.05
+                time.sleep(0.001)
+                wait_time += 0.001
             except KeyboardInterrupt:
                 return None, None, None, None
 
@@ -280,6 +281,7 @@ class Dota2Env(Dota2Game):
                 log.debug('Waiting for an unusually long time')
 
         self.has_next = 0
+        self.perf.acquire_time += time.time() - s
 
         rs = self.radiant_stitcher
         ds = self.dire_stitcher

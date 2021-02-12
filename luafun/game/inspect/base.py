@@ -19,10 +19,10 @@ class BasePage(Page):
             try:
                 return self.rpc_recv.get(timeout=0.250)
             except Exception as err:
-                log.error(f'Error {err}')
+                log.debug(f'RCV timed-out')
         return None
 
     def getattr(self, attr_name):
-        """Fetch a gamr attribute using the queues"""
+        """Fetch a game attribute using the queues"""
         self.rpc_send.put(dict(attr=attr_name))
         return self.fetch()
