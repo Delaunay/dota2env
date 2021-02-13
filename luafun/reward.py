@@ -38,5 +38,5 @@ class Reward:
     def reward(self, state):
         return 0
 
-    def __call__(self, ally, enemy):
-        return self.reward(ally) - self.reward(enemy)
+    def __call__(self, rad, dire):
+        return self.reward(rad) - self.reward(dire)

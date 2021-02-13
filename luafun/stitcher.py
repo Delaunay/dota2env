@@ -376,7 +376,11 @@ class Stitcher:
         s = 0
         e = 0
 
-        player = self.heroes.get(bid).unit
+        player = self.heroes.get(bid)
+        if player is None:
+            return state
+
+        player = player.unit
         px, py = player[UnitState.X], player[UnitState.Y]
 
         s = e
@@ -495,7 +499,7 @@ class Stitcher:
     TOWER = 6 - 1
     ROSHAN = 5 - 1
 
-    def prepare_unit(self, msg) -> torch.Tensor:
+    def prepare_unit(self, msg, modifier_count) -> torch.Tensor:
         u = torch.zeros((UnitState.Size,))
         f = UnitState
 
@@ -589,6 +593,8 @@ class Stitcher:
         # u[f.EtaProjectileToHero] = 0
 
         u[f.UnitTypeHERO + offset] = 1
+
+        # modifier_count
 
         return u
 
@@ -737,7 +743,7 @@ class Stitcher:
 
     def prepare_hero(self, msg):
         phero = Player(ally=msg['team_id'] == self.faction)
-        phero.unit = self.prepare_unit(msg['unit'])
+        phero.unit = self.prepare_unit(msg['unit'], modifier_count=10)
         phero.hero = self.prepare_hero_unit(msg)
 
         if msg['team_id'] == self.faction:
@@ -843,7 +849,7 @@ class Stitcher:
                 continue
 
             # Standard unit
-            tu = self.prepare_unit(unit)
+            tu = self.prepare_unit(unit, modifier_count=2)
 
             if uid in self.buildings:
                 self.buildings[uid] = tu

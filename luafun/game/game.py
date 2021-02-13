@@ -125,6 +125,9 @@ class Dota2Game:
             TEAM_DIRE: 0
         }
 
+        self.dire_bots = []
+        self.rad_bots = []
+
         self.dire_perf = None
         self.rad_perf = None
         self.dire_perf_prev = None
@@ -436,6 +439,7 @@ class Dota2Game:
         #   {"is_bot":true,"team_id":3,"hero":"npc_dota_hero_nevermore","id":9}]
         #   }
         bot_count = 0
+
         for p in info:
             hero = {
                 'name': p['hero'],
@@ -447,6 +451,17 @@ class Dota2Game:
             bot_count += int(p['is_bot'])
 
         self.bot_count = bot_count
+
+    def _set_bot_by_faction(self):
+        self.dire_bots = []
+        self.rad_bots = []
+
+        for bid in self._bots:
+            if bid < 5:
+                self.rad_bots.append(bid)
+
+            if bid > 4:
+                self.dire_bots.append(bid)
 
     def _receive_message(self, faction: int, player_id: int, message: dict):
         # error processing
@@ -469,8 +484,8 @@ class Dota2Game:
             self._bots.append(int(player_id))
             if self.is_game_ready():
                 self.state['game'] = True
-
                 self._bots.sort()
+                self._set_bot_by_faction()
                 # 1v1 Mid is buggy and all bots are spawned
                 # as a hack we ignore them
                 if self.options.game_mode == DOTA_GameMode.DOTA_GAMEMODE_1V1MID:

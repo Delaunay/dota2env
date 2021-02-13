@@ -40,6 +40,7 @@ class InferenceEngine:
         """Build the observation batch and the action to take"""
         # batch = generate_game_batch(state, self.bots)
 
+
         action = self.action_space.sample()
         # msg = self.model(state)
         # filter = self.filter(state, unit, rune, tree)

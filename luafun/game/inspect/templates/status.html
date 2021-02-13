@@ -14,12 +14,12 @@
         <tbody>
             <tr>
                 <th>IPC</th>
-                <td>{{ "%7.4f"|format(ipc_recv) }}</td>
+                <td>{{ pc_recv }}</td>
                 <td>{{ "%7.4f"|format(state.get('ipc_time', 0)) }}</td>
             </tr>
             <tr>
                 <th>State</th>
-                <td>{{ "%7.4f"|format(dire_state) }}</td>
+                <td>{{ dire_state }}</td>
                 <td>{{ "%7.4f"|format(state.get('state_time', 0)) }}</td>
             </tr>
             <tr>

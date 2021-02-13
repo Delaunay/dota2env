@@ -7,6 +7,9 @@ import logging
 import time
 import traceback
 
+import torch
+
+
 from luafun.game.game import Dota2Game
 from luafun.game.modes import DOTA_GameMode
 import luafun.game.dota2.state_types as msg
@@ -15,8 +18,6 @@ from luafun.game.action import action_space
 import luafun.game.constants as const
 import luafun.game.action as actions
 from luafun.utils.options import option
-
-
 from luafun.stitcher import Stitcher
 from luafun.reward import Reward
 from luafun.draft import DraftTracker
@@ -283,13 +284,13 @@ class Dota2Env(Dota2Game):
         self.has_next = 0
         self.perf.acquire_time += time.time() - s
 
-        rs = self.radiant_stitcher
-        ds = self.dire_stitcher
+        radbatch = self.radiant_stitcher.generate_batch(self.rad_bots)
+        direbatch = self.dire_stitcher.generate_batch(self.dire_bots)
 
-        obs = (rs, ds)
+        obs = torch.cat((radbatch, direbatch), 0)
 
         # 3. Compute the reward
-        reward = self.reward(*obs)
+        reward = self.reward(obs[:len(self.rad_bots)], obs[len(self.rad_bots):])
         done = self.state.get('win', None) is not None
         info = dict()
 
