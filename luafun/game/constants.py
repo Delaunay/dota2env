@@ -19,6 +19,8 @@ BOUNDS = [
     (8288, 8288)
 ]
 
+ORIGIN = (8288, 8288)
+
 RANGE = (8288, 8288)
 
 # Game Unit
@@ -79,7 +81,8 @@ def position_to_key(x, y, div=27):
         TREES                          = 128
         DOTA_HULL_SIZE_FILLER 	       =  96 # Fillers / Outpost
         DOTA_HULL_SIZE_HUGE 	       =  80 # Power Cog
-        DOTA_HULL_SIZE_HERO 	       =  24 # <== Mostly Heroes
+        DOTA_HULL_SIZE_HERO 	       =
+         # <== Mostly Heroes
         DOTA_HULL_SIZE_REGULAR 	       =  16 # <== Melee Creep
         DOTA_HULL_SIZE_SMALL 	       =   8 # <== Range Creep
         DOTA_HULL_SIZE_SMALLEST        =   2 # Zombie

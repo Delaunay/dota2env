@@ -1,9 +1,4 @@
-
-from luafun.model.filter import ActionFilter
-from luafun.model.actor_critic import ActionSampler, HeroModel
-
 from luafun.dotaenv import Dota2Env
-from luafun.observations import generate_game_batch
 
 
 class InferenceEngine:

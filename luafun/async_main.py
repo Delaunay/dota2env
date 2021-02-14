@@ -4,7 +4,7 @@ import logging
 import time 
 
 from luafun.dotaenv import Dota2Env
-from luafun.observations import Entry
+from luafun.observation.observations import Entry
 from luafun.model.actor_critic import ActorCritic, BaseActorCritic
 
 log = logging.getLogger(__name__)

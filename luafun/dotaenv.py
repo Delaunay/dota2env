@@ -18,7 +18,7 @@ from luafun.game.action import action_space
 import luafun.game.constants as const
 import luafun.game.action as actions
 from luafun.utils.options import option
-from luafun.stitcher import Stitcher
+from luafun.observation.stitcher import Stitcher
 from luafun.reward import Reward
 from luafun.draft import DraftTracker
 

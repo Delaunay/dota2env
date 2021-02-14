@@ -4,19 +4,16 @@ and stitch together a consistent state to be observed by the bots
 """
 
 from collections import defaultdict
-import copy
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from math import cos, sin, sqrt
-from typing import List, Dict, Any, Optional
 
 import torch
 
 import luafun.game.dota2.state_types as msg
 from luafun.utils.ring import RingBuffer
-from luafun.draft import DraftStatus
 from luafun.proximity import ProximityMapper
-from luafun.observations import CommonState, ItemState, AbilityState, RuneState, Minimap10x10Tile
-from luafun.observations import UnitState, HeroUnit, AllyHeroState, PreviousActionState, ModifierState
+from luafun.observation.observations import CommonState, ItemState, AbilityState, RuneState
+from luafun.observation.observations import UnitState, HeroUnit, AllyHeroState, ModifierState
 from luafun.game.ipc_send import TEAM_DIRE, TEAM_RADIANT
 import luafun.game.constants as const
 
@@ -316,6 +313,10 @@ def hero_order(faction, bid):
     return horder
 
 
+def distance(x, y, px, py):
+    return sqrt((x - px) ** 2 + (y - py) ** 2)
+
+
 class Stitcher:
     """Stitcher is a class that tracks game state and generate intermediate tensor to
     help us build the player specific observation tensor
@@ -387,17 +388,30 @@ class Stitcher:
         e = s + CommonState.Size
         state[s:e] = self.common
 
+        horder = hero_order(self.faction, bid)
+
         for i in range(6):
             s = e
             e = s + RuneState.Size
-            state[s:e] = self.runes.get(i)
+            rune = self.runes.get(i)
+
+            # set hero location
+            for i, hid in enumerate(horder):
+                hpos = self.heroes[hid]['pos']
+                rune[RuneState.DistanceH0 + i] = distance(
+                    hpos[0],
+                    hpos[1],
+                    rune[RuneState.LocationX],
+                    rune[RuneState.LocationY])
+
+            state[s:e] = rune
 
         # Set building info
         for i, uid in self.building_order:
             unit = self.buildings.get(i)
 
             x, y = unit[UnitState.X], unit[UnitState.Y]
-            dist = sqrt((x - px) ** 2 + (y - py) ** 2)
+            dist = distance(x, y, px, py)
 
             unit[UnitState.ToCurrentUnitdx] = x - px
             unit[UnitState.ToCurrentUnitdy] = y - py
@@ -414,7 +428,6 @@ class Stitcher:
         # ---
 
         # set hero info
-        horder = hero_order(self.faction, bid)
         for hid in horder:
             hero: Player = self.heroes[hid]
 
@@ -432,7 +445,7 @@ class Stitcher:
         closest.sort()
 
         for i, (k, dist) in enumerate(closest):
-            if i > 189 - 10:
+            if i > MAX_UNIT_COUNT:
                 break
 
             unit = self.units[k]
@@ -606,9 +619,12 @@ class Stitcher:
         RUNE_STATUS_AVAILABLE = 1
         # RUNE_STATUS_MISSING = 2
 
+        pos = rmsg['location']['x'], rmsg['location']['y']
+
         r[f.Visible] = rmsg['status'] == RUNE_STATUS_AVAILABLE
-        r[f.LocationX] = rmsg['location']['x']
-        r[f.LocationY] = rmsg['location']['y']
+        r[f.LocationX] = pos[0]
+        r[f.LocationY] = pos[1]
+
         r[f.DistanceH0] = 0
         r[f.DistanceH1] = 0
         r[f.DistanceH2] = 0
@@ -842,6 +858,7 @@ class Stitcher:
 
             if player is not None:
                 player['unit'] = unit
+                player['pos'] = unit['location']['x'], unit['location']['y']
                 self.process_hero(unit)
 
                 hu = self.prepare_hero(player)
