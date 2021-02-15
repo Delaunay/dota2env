@@ -91,7 +91,7 @@ class DotaOptions:
             '-botworldstatetosocket_dire', '{}'.format(self.port_dire),
             # console log file
             '-con_logfile', '{}'.format(paths.console_log),
-            '-con_timestamp',
+            # '-con_timestamp',
             # Enable console in game
             '-console',
             # enable dev assertion

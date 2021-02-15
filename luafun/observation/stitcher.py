@@ -397,7 +397,7 @@ class Stitcher:
 
             # set hero location
             for i, hid in enumerate(horder):
-                hu = self.heroes[hid]
+                hu = self.heroes.unit[hid]
                 hpos = hu[UnitState.X], hu[UnitState.Y]
                 rune[RuneState.DistanceH0 + i] = distance(
                     hpos[0],

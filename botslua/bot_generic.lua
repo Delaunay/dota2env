@@ -195,13 +195,17 @@ end
 
 
 local function _get_passable()
+    -- 4144
     for i = -8288,8288 do
         for j = -8288,8288 do
-            local p = {i, j, IsLocationPassable(Vector(i, j, 0)) }
-            local h = {i, j, GetHeightLevel(Vector(i, j, 0)) }
-
-            send_message({I = p, T = 'PASSSABLE'})
-            send_message({I = h, T = 'HEIGHT'})
+            local v = Vector(i, j, 0)
+            local p = {
+                i,
+                j,
+                IsLocationPassable(v),
+                GetHeightLevel(v)
+            }
+            send_message({I = p, T = 'P'})
         end
     end
 end
@@ -269,7 +273,7 @@ local function get_info()
 
     -- This will make dota2 unresponsive for a few minutes
     -- while the data is extracted
-    -- _get_passable()
+    _get_passable()
 
     -- CreateHTTPRequest
     -- CreateRemoteHTTPRequest

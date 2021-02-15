@@ -157,6 +157,8 @@ def get_tree(x, y):
 TREES = load_source_file('resources/trees.json')
 TREE_COUNT = len(TREES)
 
+assert TREE_COUNT == 2104
+
 
 # Runes
 def rune_lookup():
@@ -179,21 +181,44 @@ def get_rune(x, y):
     return RUNES.get(key)
 
 
+ITEMS = load_source_file('resources/items.json')
+ITEM_COUNT = len(ITEMS)
+
+# 208 items, 68 recipes
+assert ITEM_COUNT == 242
+
+
+def get_item(name):
+    for n, item in enumerate(ITEMS):
+        if item['name'] == name:
+            return n
+    return None
+
+
 RUNES = load_source_file('resources/runes.json')
 RUNE_COUNT = len(RUNES)
+
+assert RUNE_COUNT == 6
 
 SHOPS = load_source_file('resources/shops.json')
 SHOP_COUNT = len(SHOPS)
 
+assert SHOP_COUNT == 4
+
 NEUTRALS = load_source_file('resources/neutrals.json')
 NEUTRAL_COUNT = len(NEUTRALS)
+
+assert NEUTRAL_COUNT == 18
 
 ABILITIES = load_source_file('resources/abilities.json')
 ABILITY_COUNT = len(ABILITIES)
 
+assert ABILITY_COUNT == 2031
+
 HEROES = load_source_file('resources/heroes.json')
 HERO_COUNT = len(HEROES)
 
+assert HERO_COUNT == 121
 
 MAX_ABILITY_COUNT_PER_HEROES = 24
 
@@ -372,16 +397,6 @@ class HeroLookup:
 
 
 HERO_LOOKUP = HeroLookup()
-
-ITEMS = load_source_file('resources/items.json')
-ITEM_COUNT = len(ITEMS)
-
-
-def get_item(name):
-    for n, item in enumerate(ITEMS):
-        if item['name'] == name:
-            return n
-    return None
 
 
 class Lanes(IntEnum):

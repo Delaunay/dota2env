@@ -277,8 +277,25 @@ def generate_item_array():
         if v.get('ItemPurchasable', "") == '0':
             continue
 
-        abilities.append(dict(name=k, id=int(v['ID'])))
+        if v.get('IsObsolete', "") == '1':
+            continue
 
+        cost = v.get('ItemCost')
+
+        # this only removes `item_recipe_hood_of_defiance`
+        if cost is None or cost == '':
+            continue
+
+        # this removes, unbuyable recipes
+        #   - item_recipe_echo_sabre
+        #   - item_recipe_oblivion_staff
+        if cost == '0' and v.get('ItemRecipe', '') == '1':
+            continue
+
+        # , cost=int(cost)
+        abilities.append(dict(name=k, id=int(v['ID']), cost=int(cost)))
+
+    abilities.sort(key=lambda x: x['cost'])
     f = os.path.join(folder, '..', 'game', 'resources', 'items.json')
     with open(f, 'w') as f:
         json.dump(abilities, f, indent=2)

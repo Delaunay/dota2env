@@ -67,7 +67,6 @@ def tree_minimap(s=259):
     .. images:: ../_static/minmap_trees.png
 
     """
-    import matplotlib.pyplot as plt
     import torch
     import luafun.game.constants as const
 
@@ -80,9 +79,27 @@ def tree_minimap(s=259):
         ix, iy = new_origin((x, y), origin, scale)
         img[1, ix, iy] = 1
 
-    plt.imshow(img.permute(1, 2, 0))
+    return img
+
+
+def to_image(tensor, filename=None):
+    from torchvision import transforms
+    im = transforms.ToPILImage()(tensor).convert("RGB")
+
+    if filename:
+        im.save(filename, "PNG")
+
+    return im
+
+
+def show_tensor(tensor):
+    """Show a tensor as image"""
+    import matplotlib.pyplot as plt
+
+    plt.imshow(tensor.permute(1, 2, 0))
     plt.show()
 
 
 if __name__ == '__main__':
-    tree_minimap()
+    img = tree_minimap()
+    to_image(img, "tree_minimap.png")
