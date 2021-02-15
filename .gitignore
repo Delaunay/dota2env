@@ -19,7 +19,7 @@ config.json
 _build/
 .coverage*
 coverage.xml
-decode.txt
+decode_error/decode.txt
 console.*.log
 bots.so
 botcpp_dire.so
@@ -31,4 +31,3 @@ bots/
 botscpp/rev/*
 decode*.txt
 luafun/plots/geckodriver.log
-decode.txt

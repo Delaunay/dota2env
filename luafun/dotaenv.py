@@ -263,10 +263,11 @@ class Dota2Env(Dota2Game):
 
         # 1. send action
         # 1.1 Preprocess the actions (remapping)
-        preprocessed = self._action_preprocessor(action)
+        if action is not None:
+            preprocessed = self._action_preprocessor(action)
 
-        # 1.2 Send the action
-        self.send_message(preprocessed)
+            # 1.2 Send the action
+            self.send_message(preprocessed)
 
         # 2. Wait for the new stitched state
         wait_time = 0

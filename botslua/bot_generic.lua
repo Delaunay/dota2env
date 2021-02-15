@@ -164,7 +164,6 @@ local function get_dropped_items(vloc)
     return nil
 end
 
-
 local function _get_world_size()
     local x_min, y_min, x_max, y_max = GetWorldBounds()
     send_message({I = {
@@ -191,6 +190,19 @@ local function _get_runes()
         local loc = GetRuneSpawnLocation(i)
         local runes = {i, loc.x, loc.y, loc.z}
         send_message({I = runes, T = 'RUNE'})
+    end
+end
+
+
+local function _get_passable()
+    for i = -8288,8288 do
+        for j = -8288,8288 do
+            local p = {i, j, IsLocationPassable(Vector(i, j, 0)) }
+            local h = {i, j, GetHeightLevel(Vector(i, j, 0)) }
+
+            send_message({I = p, T = 'PASSSABLE'})
+            send_message({I = h, T = 'HEIGHT'})
+        end
     end
 end
 
@@ -254,6 +266,10 @@ local function get_info()
     -- DebugDrawLine
     -- DebugDrawText
     -- DebugPause
+
+    -- This will make dota2 unresponsive for a few minutes
+    -- while the data is extracted
+    -- _get_passable()
 
     -- CreateHTTPRequest
     -- CreateRemoteHTTPRequest

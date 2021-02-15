@@ -197,7 +197,7 @@ class Actions(BasePage):
 
     def start(self):
         """Start a new environment running"""
-        from luafun.dotaenv import main
+        from luafun.main import main
 
         config = Config(self.app)
         self.state['running'] = True

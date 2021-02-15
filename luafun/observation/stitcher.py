@@ -397,7 +397,8 @@ class Stitcher:
 
             # set hero location
             for i, hid in enumerate(horder):
-                hpos = self.heroes[hid]['pos']
+                hu = self.heroes[hid]
+                hpos = hu[UnitState.X], hu[UnitState.Y]
                 rune[RuneState.DistanceH0 + i] = distance(
                     hpos[0],
                     hpos[1],
@@ -787,7 +788,7 @@ class Stitcher:
                 if bname.startswith(name) and i not in idx:
                     idx.add(i)
 
-                    tu = self.prepare_unit(unit)
+                    tu = self.prepare_unit(unit, modifier_count=2)
                     self.buildings[uid] = tu
                     self.building_order.append((i, uid))
 
@@ -858,7 +859,6 @@ class Stitcher:
 
             if player is not None:
                 player['unit'] = unit
-                player['pos'] = unit['location']['x'], unit['location']['y']
                 self.process_hero(unit)
 
                 hu = self.prepare_hero(player)

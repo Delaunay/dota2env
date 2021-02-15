@@ -470,3 +470,12 @@ class CourierAction(IntEnum):
     # TAKE_AND_TRANSFER_ITEMS
     # COURIER_ACTION_SIDE_SHOP
     # COURIER_ACTION_SIDE_SHOP2
+
+
+class HeightLevel(IntEnum):
+    River = 0
+    Low = 1
+    High = 2
+    Elevated = 3
+    Cliffs = 4
+    Valley = 5

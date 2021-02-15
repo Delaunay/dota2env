@@ -1,4 +1,5 @@
 from luafun.dotaenv import Dota2Env
+from luafun.game.ipc_send import new_ipc_message
 
 
 class InferenceEngine:
@@ -13,6 +14,8 @@ class InferenceEngine:
         self.sampler = None
         self.filter = None
         self.action_space = None
+        self.passive = model == 'passive'
+        self.random = model == 'random'
 
     def init_draft(self):
         pass
@@ -35,9 +38,13 @@ class InferenceEngine:
         """Build the observation batch and the action to take"""
         # batch = generate_game_batch(state, self.bots)
 
+        if self.passive:
+            return None
 
-        action = self.action_space.sample()
+        if self.random:
+            return self.action_space.sample()
+
         # msg = self.model(state)
         # filter = self.filter(state, unit, rune, tree)
         # action = self.sampler.sampled(msg, filter)
-        return action
+        return None

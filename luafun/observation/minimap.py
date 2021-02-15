@@ -41,6 +41,26 @@ def new_origin(p, origin, scale):
 def tree_minimap(s=259):
     """
 
+    Notes
+    -----
+    The main issue with minimap is extracting info from the game.
+    A few lua function are defined that could help us.
+    but the terrain information is mostly not available.
+
+    .. code-block:: bash
+        bool IsLocationPassable( vLocation )
+        bool IsLocationVisible( vLocation )
+        int GetHeightLevel( vLocation )
+
+        { hUnit, ... } GetNearbyHeroes( nRadius, bEnemies, nMode)
+        { hUnit, ... } GetNearbyCreeps( nRadius, bEnemies )
+        { hUnit, ... } GetNearbyLaneCreeps( nRadius, bEnemies )
+        { hUnit, ... } GetNearbyNeutralCreeps( nRadius )
+        { hUnit, ... } GetNearbyTowers( nRadius, bEnemies )
+        { hUnit, ... } GetNearbyBarracks( nRadius, bEnemies )
+        { hUnit, ... } GetNearbyShrines( nRadius, bEnemies )
+        { int, ...   } GetNearbyTrees ( nRadius )
+
     Examples
     --------
 
