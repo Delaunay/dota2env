@@ -1,5 +1,9 @@
 from enum import IntEnum, auto
 
+import torch
+
+import luafun.game.constants as const
+
 
 class MiniMapItem(IntEnum):
     Me = 0
@@ -35,7 +39,7 @@ def new_origin(p, origin, scale):
     x = p[0] + origin[0]
     y = origin[1] - p[1]
 
-    return int(x * scale), int(y * scale)
+    return x * scale, y * scale
 
 
 def tree_minimap(s=259):
@@ -67,17 +71,24 @@ def tree_minimap(s=259):
     .. images:: ../_static/minmap_trees.png
 
     """
-    import torch
-    import luafun.game.constants as const
 
     img = torch.zeros(3, s, s)
+    add_trees(img)
+    return img
 
+
+def add_trees(img):
+    s = img.shape[1]
     scale = s / const.SIZE[0]
+
+    tree_size = 256
+    half = tree_size / 2 * scale
+
     origin = const.ORIGIN
 
     for tid, x, y, z in const.TREES:
         ix, iy = new_origin((x, y), origin, scale)
-        img[1, ix, iy] = 1
+        img[0, int(iy - half):int(iy + half), int(ix - half):int(ix + half)] = 1
 
     return img
 
@@ -101,5 +112,5 @@ def show_tensor(tensor):
 
 
 if __name__ == '__main__':
-    img = tree_minimap()
+    img = tree_minimap(16576)
     to_image(img, "tree_minimap.png")

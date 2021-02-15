@@ -196,14 +196,19 @@ end
 
 local function _get_passable()
     -- 4144
-    for i = -8288,8288 do
+    local s = 0
+    local e = 8288
+
+    local level = GetHeightLevel(Vector(i, j, 0))
+
+    for i = s,e do
         for j = -8288,8288 do
-            local v = Vector(i, j, 0)
+            local v = Vector(i, j, 512)
             local p = {
                 i,
                 j,
-                IsLocationPassable(v),
-                GetHeightLevel(v)
+                IsLocationPassable(Vector(i, j, 128 * level)),
+                level
             }
             send_message({I = p, T = 'P'})
         end

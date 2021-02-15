@@ -2,6 +2,9 @@ import os
 import json
 from enum import IntEnum
 
+from PIL import Image
+from torchvision import transforms
+
 # Map constant
 # Extracted using Lua
 # might be automated so it never gets out of date
@@ -106,8 +109,68 @@ IGNORED_TREES = dict()
 DUP_TREES = dict()
 
 
+topo_map = None
+
+
+def load_map():
+    """This is a 3.3Go image, showing heights, trees and impassable locations.
+    The red channel is used for trees, green for passable and blue for heights
+
+    Notes
+    -----
+
+    The PNG is only 873.8 kB but gets decompressed to 1Go+.
+    Some application have decompression bomb safeguard that will stop decompression.
+
+    The resulting tensor shape is torch.Size([3, 16576, 16576])
+
+    .. image:: ../_static/topology.png
+
+    The data was extracted from Lua using for loops with the following functions
+    ``IsLocationPassable``, ``GetHeightLevel``, ``GetTreeLocation``.
+
+    Although the image has quite a high resolution we can see that is not necessarily the case for
+    the function that were called.
+
+    Collision in Dota2 is a bit weird, Tower collision has a hull size of 288 (144 radius).
+    When looking at the map we can clearly see that the radius is actually only ~259.
+
+    .. code-block:: bash
+
+        Blue depth means heights
+        Red means tree
+        Green means passable
+
+        Blue = not passable
+        Pink = Red + Blue = not passable because of trees
+        Yellow = Might be passable but there is tree
+        Bright Green = High ground
+        Light Green = River
+
+    """
+    global topo_map
+
+    if topo_map is not None:
+        return topo_map
+
+    dirname = os.path.dirname(__file__)
+    filename = os.path.join(dirname, 'resources/gigamap.png')
+
+    Image.MAX_IMAGE_PIXELS = None
+    im = Image.open(filename)
+    topo_map = transforms.ToTensor()(im)
+    return topo_map
+
+
 # Trees
 def load_trees():
+    """Load the location of all the trees
+
+    Examples
+    --------
+    .. image:: ../_static/tree_minimap.png
+
+    """
     trees = load_source_file('resources/trees.json')
     position_to_tree = dict()
 

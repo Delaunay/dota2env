@@ -45,6 +45,7 @@ class SyncWorldListener:
         self.error = None
         self.proto_rcv = 0
         self.proto_decode = 0
+        self.partial = b''
         # self.msg_size = open('msg_size.txt', 'w')
 
     @property
@@ -116,7 +117,7 @@ class SyncWorldListener:
             return None
 
         msg_len = int(unpack("@I", msg_size)[0])
-        chunks = []
+        chunks = [self.partial]
         bytes_recv = 0
         while bytes_recv < msg_len:
             chunk = read.recv(min(msg_len - bytes_recv, 8192))
@@ -142,24 +143,15 @@ class SyncWorldListener:
             # /home/setepenre/work/LuaFun/luafun/game/states.py:117:
             # RuntimeWarning: Unexpected end-group tag: Not all data was converted
             #   world_state.ParseFromString(msg)
-            #
-            # self.msg_size.write(f'{len(msg)}\n')
 
             world_state = CMsgBotWorldState()
-            self.error = world_state.ParseFromString(msg)
+            size_read = world_state.ParseFromString(msg)
 
-            if not world_state.IsInitialized():
-                self.reason = f'Message is not initialized'
-                return None
+            self.partial = b''
+            if len(msg) != size_read:
+                self.partial = msg[size_read:]
 
             return world_state
-
-        except RuntimeWarning as err:
-            if hasattr(err, '__cause__'):
-                err.__cause__
-
-            log.error(traceback.format_exc())
-            return self.recover(f'RuntimeWarning', msg)
 
         except DecodeError:
             return self.recover(f'Decode error', msg)
@@ -222,7 +214,7 @@ class SyncWorldListener:
             self.sock = self.connect()
 
     def run(self):
-        warnings.simplefilter('error')
+        # warnings.simplefilter('error')
         self.sock = self.connect(sleep_time=1)
 
         if self.sock is None:

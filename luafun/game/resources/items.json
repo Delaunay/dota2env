@@ -2,1211 +2,1453 @@
   {
     "name": "item_ward_observer",
     "id": 42,
-    "cost": 0
+    "cost": 0,
+    "quality": "consumable"
   },
   {
     "name": "item_branches",
     "id": 16,
-    "cost": 50
+    "cost": 50,
+    "quality": "consumable"
   },
   {
     "name": "item_clarity",
     "id": 38,
-    "cost": 50
+    "cost": 50,
+    "quality": "consumable"
   },
   {
     "name": "item_smoke_of_deceit",
     "id": 188,
-    "cost": 50
+    "cost": 50,
+    "quality": "consumable"
   },
   {
     "name": "item_faerie_fire",
     "id": 237,
-    "cost": 70
+    "cost": 70,
+    "quality": "consumable"
   },
   {
     "name": "item_enchanted_mango",
     "id": 216,
-    "cost": 70
+    "cost": 70,
+    "quality": "consumable"
   },
   {
     "name": "item_ward_sentry",
     "id": 43,
-    "cost": 75
+    "cost": 75,
+    "quality": "consumable"
   },
   {
     "name": "item_tome_of_knowledge",
     "id": 257,
-    "cost": 75
+    "cost": 75,
+    "quality": "consumable"
   },
   {
     "name": "item_dust",
     "id": 40,
-    "cost": 80
+    "cost": 80,
+    "quality": "consumable"
   },
   {
     "name": "item_tango",
     "id": 44,
-    "cost": 90
+    "cost": 90,
+    "quality": "consumable"
   },
   {
     "name": "item_tpscroll",
     "id": 46,
-    "cost": 90
+    "cost": 90,
+    "quality": "consumable"
   },
   {
     "name": "item_recipe_orb_of_corrosion",
     "id": 640,
-    "cost": 100
+    "cost": 100,
+    "quality": ""
   },
   {
     "name": "item_flask",
     "id": 39,
-    "cost": 110
+    "cost": 110,
+    "quality": "consumable"
   },
   {
     "name": "item_quelling_blade",
     "id": 11,
-    "cost": 130
+    "cost": 130,
+    "quality": "component"
   },
   {
     "name": "item_gauntlets",
     "id": 13,
-    "cost": 145
+    "cost": 145,
+    "quality": "component"
   },
   {
     "name": "item_slippers",
     "id": 14,
-    "cost": 145
+    "cost": 145,
+    "quality": "component"
   },
   {
     "name": "item_mantle",
     "id": 15,
-    "cost": 145
+    "cost": 145,
+    "quality": "component"
   },
   {
     "name": "item_recipe_magic_wand",
     "id": 35,
-    "cost": 150
+    "cost": 150,
+    "quality": ""
   },
   {
     "name": "item_circlet",
     "id": 20,
-    "cost": 155
+    "cost": 155,
+    "quality": "component"
   },
   {
     "name": "item_ring_of_protection",
     "id": 12,
-    "cost": 175
+    "cost": 175,
+    "quality": "component"
   },
   {
     "name": "item_ring_of_regen",
     "id": 27,
-    "cost": 175
+    "cost": 175,
+    "quality": "component"
   },
   {
     "name": "item_sobi_mask",
     "id": 28,
-    "cost": 175
+    "cost": 175,
+    "quality": "component"
   },
   {
     "name": "item_magic_stick",
     "id": 34,
-    "cost": 200
+    "cost": 200,
+    "quality": "component"
   },
   {
     "name": "item_recipe_buckler",
     "id": 85,
-    "cost": 200
+    "cost": 200,
+    "quality": ""
   },
   {
     "name": "item_recipe_heavens_halberd",
     "id": 209,
-    "cost": 200
+    "cost": 200,
+    "quality": ""
   },
   {
     "name": "item_recipe_bracer",
     "id": 72,
-    "cost": 210
+    "cost": 210,
+    "quality": ""
   },
   {
     "name": "item_recipe_wraith_band",
     "id": 74,
-    "cost": 210
+    "cost": 210,
+    "quality": ""
   },
   {
     "name": "item_recipe_null_talisman",
     "id": 76,
-    "cost": 210
+    "cost": 210,
+    "quality": ""
   },
   {
     "name": "item_infused_raindrop",
     "id": 265,
-    "cost": 225
+    "cost": 225,
+    "quality": "component"
   },
   {
     "name": "item_recipe_falcon_blade",
     "id": 599,
-    "cost": 225
+    "cost": 225,
+    "quality": ""
   },
   {
     "name": "item_wind_lace",
     "id": 244,
-    "cost": 250
+    "cost": 250,
+    "quality": "component"
   },
   {
     "name": "item_fluffy_hat",
     "id": 593,
-    "cost": 250
+    "cost": 250,
+    "quality": "secret_shop"
   },
   {
     "name": "item_recipe_ring_of_basilius",
     "id": 87,
-    "cost": 250
+    "cost": 250,
+    "quality": ""
   },
   {
     "name": "item_recipe_headdress",
     "id": 93,
-    "cost": 250
+    "cost": 250,
+    "quality": ""
   },
   {
     "name": "item_recipe_meteor_hammer",
     "id": 222,
-    "cost": 250
+    "cost": 250,
+    "quality": ""
   },
   {
     "name": "item_recipe_soul_ring",
     "id": 177,
-    "cost": 275
+    "cost": 275,
+    "quality": ""
   },
   {
     "name": "item_orb_of_venom",
     "id": 181,
-    "cost": 275
+    "cost": 275,
+    "quality": "component"
   },
   {
     "name": "item_blight_stone",
     "id": 240,
-    "cost": 300
+    "cost": 300,
+    "quality": "component"
   },
   {
     "name": "item_recipe_urn_of_shadows",
     "id": 91,
-    "cost": 335
+    "cost": 335,
+    "quality": ""
   },
   {
     "name": "item_buckler",
     "id": 86,
-    "cost": 375
+    "cost": 375,
+    "quality": "rare"
   },
   {
     "name": "item_ring_of_basilius",
     "id": 88,
-    "cost": 425
+    "cost": 425,
+    "quality": "rare"
   },
   {
     "name": "item_headdress",
     "id": 94,
-    "cost": 425
+    "cost": 425,
+    "quality": "rare"
   },
   {
     "name": "item_blades_of_attack",
     "id": 2,
-    "cost": 450
+    "cost": 450,
+    "quality": "component"
   },
   {
     "name": "item_belt_of_strength",
     "id": 17,
-    "cost": 450
+    "cost": 450,
+    "quality": "component"
   },
   {
     "name": "item_boots_of_elves",
     "id": 18,
-    "cost": 450
+    "cost": 450,
+    "quality": "component"
   },
   {
     "name": "item_robe",
     "id": 19,
-    "cost": 450
+    "cost": 450,
+    "quality": "component"
   },
   {
     "name": "item_crown",
     "id": 261,
-    "cost": 450
+    "cost": 450,
+    "quality": "component"
   },
   {
     "name": "item_gloves",
     "id": 25,
-    "cost": 450
+    "cost": 450,
+    "quality": "component"
   },
   {
     "name": "item_magic_wand",
     "id": 36,
-    "cost": 450
+    "cost": 450,
+    "quality": "common"
   },
   {
     "name": "item_recipe_hurricane_pike",
     "id": 262,
-    "cost": 450
+    "cost": 450,
+    "quality": ""
   },
   {
     "name": "item_recipe_solar_crest",
     "id": 227,
-    "cost": 450
+    "cost": 450,
+    "quality": ""
   },
   {
     "name": "item_recipe_glimmer_cape",
     "id": 253,
-    "cost": 450
+    "cost": 450,
+    "quality": ""
   },
   {
     "name": "item_recipe_holy_locket",
     "id": 268,
-    "cost": 475
+    "cost": 475,
+    "quality": ""
   },
   {
     "name": "item_recipe_orchid",
     "id": 97,
-    "cost": 475
+    "cost": 475,
+    "quality": ""
   },
   {
     "name": "item_boots",
     "id": 29,
-    "cost": 500
+    "cost": 500,
+    "quality": "component"
   },
   {
     "name": "item_cloak",
     "id": 31,
-    "cost": 500
+    "cost": 500,
+    "quality": "component"
   },
   {
     "name": "item_recipe_manta",
     "id": 146,
-    "cost": 500
+    "cost": 500,
+    "quality": ""
   },
   {
     "name": "item_recipe_lesser_crit",
     "id": 148,
-    "cost": 500
+    "cost": 500,
+    "quality": ""
   },
   {
     "name": "item_bracer",
     "id": 73,
-    "cost": 510
+    "cost": 510,
+    "quality": "common"
   },
   {
     "name": "item_wraith_band",
     "id": 75,
-    "cost": 510
+    "cost": 510,
+    "quality": "common"
   },
   {
     "name": "item_null_talisman",
     "id": 77,
-    "cost": 510
+    "cost": 510,
+    "quality": "common"
   },
   {
     "name": "item_chainmail",
     "id": 4,
-    "cost": 550
+    "cost": 550,
+    "quality": "component"
   },
   {
     "name": "item_recipe_aether_lens",
     "id": 233,
-    "cost": 550
+    "cost": 550,
+    "quality": ""
   },
   {
     "name": "item_recipe_ancient_janggo",
     "id": 184,
-    "cost": 550
+    "cost": 550,
+    "quality": ""
   },
   {
     "name": "item_recipe_witch_blade",
     "id": 533,
-    "cost": 600
+    "cost": 600,
+    "quality": ""
   },
   {
     "name": "item_recipe_vladmir",
     "id": 80,
-    "cost": 600
+    "cost": 600,
+    "quality": ""
   },
   {
     "name": "item_recipe_kaya",
     "id": 258,
-    "cost": 600
+    "cost": 600,
+    "quality": ""
   },
   {
     "name": "item_recipe_sange",
     "id": 161,
-    "cost": 600
+    "cost": 600,
+    "quality": ""
   },
   {
     "name": "item_recipe_yasha",
     "id": 169,
-    "cost": 600
+    "cost": 600,
+    "quality": ""
   },
   {
     "name": "item_recipe_mage_slayer",
     "id": 597,
-    "cost": 600
+    "cost": 600,
+    "quality": ""
   },
   {
     "name": "item_bottle",
     "id": 41,
-    "cost": 625
+    "cost": 625,
+    "quality": "common"
   },
   {
     "name": "item_recipe_cyclone",
     "id": 99,
-    "cost": 650
+    "cost": 650,
+    "quality": ""
   },
   {
     "name": "item_recipe_shivas_guard",
     "id": 118,
-    "cost": 650
+    "cost": 650,
+    "quality": ""
   },
   {
     "name": "item_recipe_armlet",
     "id": 150,
-    "cost": 650
+    "cost": 650,
+    "quality": ""
   },
   {
     "name": "item_recipe_veil_of_discord",
     "id": 189,
-    "cost": 650
+    "cost": 650,
+    "quality": ""
   },
   {
     "name": "item_recipe_blade_mail",
     "id": 126,
-    "cost": 675
+    "cost": 675,
+    "quality": ""
   },
   {
     "name": "item_recipe_monkey_king_bar",
     "id": 134,
-    "cost": 675
+    "cost": 675,
+    "quality": ""
   },
   {
     "name": "item_voodoo_mask",
     "id": 473,
-    "cost": 700
+    "cost": 700,
+    "quality": "component"
   },
   {
     "name": "item_recipe_gungir",
     "id": 1565,
-    "cost": 700
+    "cost": 700,
+    "quality": ""
   },
   {
     "name": "item_recipe_diffusal_blade",
     "id": 173,
-    "cost": 700
+    "cost": 700,
+    "quality": ""
   },
   {
     "name": "item_soul_ring",
     "id": 178,
-    "cost": 740
+    "cost": 740,
+    "quality": "common"
   },
   {
     "name": "item_ring_of_health",
     "id": 56,
-    "cost": 825
+    "cost": 825,
+    "quality": "component"
   },
   {
     "name": "item_void_stone",
     "id": 57,
-    "cost": 825
+    "cost": 825,
+    "quality": "component"
   },
   {
     "name": "item_urn_of_shadows",
     "id": 92,
-    "cost": 840
+    "cost": 840,
+    "quality": "rare"
   },
   {
     "name": "item_recipe_rod_of_atos",
     "id": 205,
-    "cost": 850
+    "cost": 850,
+    "quality": ""
   },
   {
     "name": "item_quarterstaff",
     "id": 10,
-    "cost": 875
+    "cost": 875,
+    "quality": "component"
   },
   {
     "name": "item_lifesteal",
     "id": 26,
-    "cost": 900
+    "cost": 900,
+    "quality": "component"
   },
   {
     "name": "item_gem",
     "id": 30,
-    "cost": 900
+    "cost": 900,
+    "quality": "component"
   },
   {
     "name": "item_energy_booster",
     "id": 59,
-    "cost": 900
+    "cost": 900,
+    "quality": "secret_shop"
   },
   {
     "name": "item_recipe_mekansm",
     "id": 78,
-    "cost": 900
+    "cost": 900,
+    "quality": ""
   },
   {
     "name": "item_recipe_heart",
     "id": 113,
-    "cost": 900
+    "cost": 900,
+    "quality": ""
   },
   {
     "name": "item_recipe_sphere",
     "id": 122,
-    "cost": 900
+    "cost": 900,
+    "quality": ""
   },
   {
     "name": "item_recipe_basher",
     "id": 142,
-    "cost": 900
+    "cost": 900,
+    "quality": ""
   },
   {
     "name": "item_recipe_mjollnir",
     "id": 157,
-    "cost": 900
+    "cost": 900,
+    "quality": ""
   },
   {
     "name": "item_helm_of_iron_will",
     "id": 6,
-    "cost": 925
+    "cost": 925,
+    "quality": "component"
   },
   {
     "name": "item_orb_of_corrosion",
     "id": 569,
-    "cost": 925
+    "cost": 925,
+    "quality": "rare"
   },
   {
     "name": "item_tranquil_boots",
     "id": 214,
-    "cost": 925
+    "cost": 925,
+    "quality": "rare"
   },
   {
     "name": "item_recipe_crimson_guard",
     "id": 243,
-    "cost": 950
+    "cost": 950,
+    "quality": ""
   },
   {
     "name": "item_recipe_helm_of_the_dominator",
     "id": 163,
-    "cost": 975
+    "cost": 975,
+    "quality": ""
   },
   {
     "name": "item_broadsword",
     "id": 3,
-    "cost": 1000
+    "cost": 1000,
+    "quality": "component"
   },
   {
     "name": "item_ogre_axe",
     "id": 21,
-    "cost": 1000
+    "cost": 1000,
+    "quality": "component"
   },
   {
     "name": "item_blade_of_alacrity",
     "id": 22,
-    "cost": 1000
+    "cost": 1000,
+    "quality": "component"
   },
   {
     "name": "item_staff_of_wizardry",
     "id": 23,
-    "cost": 1000
+    "cost": 1000,
+    "quality": "component"
   },
   {
     "name": "item_blitz_knuckles",
     "id": 485,
-    "cost": 1000
+    "cost": 1000,
+    "quality": "component"
   },
   {
     "name": "item_recipe_bloodthorn",
     "id": 245,
-    "cost": 1000
+    "cost": 1000,
+    "quality": ""
   },
   {
     "name": "item_recipe_force_staff",
     "id": 101,
-    "cost": 1000
+    "cost": 1000,
+    "quality": ""
   },
   {
     "name": "item_recipe_spirit_vessel",
     "id": 266,
-    "cost": 1000
+    "cost": 1000,
+    "quality": ""
   },
   {
     "name": "item_recipe_greater_crit",
     "id": 140,
-    "cost": 1000
+    "cost": 1000,
+    "quality": ""
   },
   {
     "name": "item_shadow_amulet",
     "id": 215,
-    "cost": 1000
+    "cost": 1000,
+    "quality": ""
   },
   {
     "name": "item_medallion_of_courage",
     "id": 187,
-    "cost": 1025
+    "cost": 1025,
+    "quality": "rare"
   },
   {
     "name": "item_javelin",
     "id": 7,
-    "cost": 1100
+    "cost": 1100,
+    "quality": "component"
   },
   {
     "name": "item_vitality_booster",
     "id": 61,
-    "cost": 1100
+    "cost": 1100,
+    "quality": "secret_shop"
   },
   {
     "name": "item_recipe_aeon_disk",
     "id": 255,
-    "cost": 1100
+    "cost": 1100,
+    "quality": ""
   },
   {
     "name": "item_recipe_eternal_shroud",
     "id": 691,
-    "cost": 1100
+    "cost": 1100,
+    "quality": ""
   },
   {
     "name": "item_recipe_silver_edge",
     "id": 248,
-    "cost": 1100
+    "cost": 1100,
+    "quality": ""
   },
   {
     "name": "item_falcon_blade",
     "id": 596,
-    "cost": 1100
+    "cost": 1100,
+    "quality": "rare"
   },
   {
     "name": "item_point_booster",
     "id": 60,
-    "cost": 1200
+    "cost": 1200,
+    "quality": "secret_shop"
   },
   {
     "name": "item_recipe_necronomicon",
     "id": 105,
-    "cost": 1250
+    "cost": 1250,
+    "quality": ""
   },
   {
     "name": "item_recipe_dagon",
     "id": 103,
-    "cost": 1300
+    "cost": 1300,
+    "quality": ""
   },
   {
     "name": "item_recipe_assault",
     "id": 111,
-    "cost": 1300
+    "cost": 1300,
+    "quality": ""
   },
   {
     "name": "item_claymore",
     "id": 5,
-    "cost": 1350
+    "cost": 1350,
+    "quality": "component"
   },
   {
     "name": "item_recipe_radiance",
     "id": 136,
-    "cost": 1350
+    "cost": 1350,
+    "quality": ""
   },
   {
     "name": "item_platemail",
     "id": 9,
-    "cost": 1400
+    "cost": 1400,
+    "quality": "secret_shop"
   },
   {
     "name": "item_talisman_of_evasion",
     "id": 32,
-    "cost": 1400
+    "cost": 1400,
+    "quality": "secret_shop"
   },
   {
     "name": "item_power_treads",
     "id": 63,
-    "cost": 1400
+    "cost": 1400,
+    "quality": "common"
   },
   {
     "name": "item_aghanims_shard",
     "id": 609,
-    "cost": 1400
+    "cost": 1400,
+    "quality": "rare"
   },
   {
     "name": "item_arcane_boots",
     "id": 180,
-    "cost": 1400
+    "cost": 1400,
+    "quality": "rare"
   },
   {
     "name": "item_recipe_black_king_bar",
     "id": 115,
-    "cost": 1450
+    "cost": 1450,
+    "quality": ""
   },
   {
     "name": "item_ghost",
     "id": 37,
-    "cost": 1500
+    "cost": 1500,
+    "quality": "component"
   },
   {
     "name": "item_phase_boots",
     "id": 50,
-    "cost": 1500
+    "cost": 1500,
+    "quality": "common"
   },
   {
     "name": "item_oblivion_staff",
     "id": 67,
-    "cost": 1500
+    "cost": 1500,
+    "quality": "common"
   },
   {
     "name": "item_hood_of_defiance",
     "id": 131,
-    "cost": 1500
+    "cost": 1500,
+    "quality": "epic"
   },
   {
     "name": "item_veil_of_discord",
     "id": 190,
-    "cost": 1525
+    "cost": 1525,
+    "quality": "rare"
   },
   {
     "name": "item_recipe_pipe",
     "id": 89,
-    "cost": 1550
+    "cost": 1550,
+    "quality": ""
   },
   {
     "name": "item_mithril_hammer",
     "id": 8,
-    "cost": 1600
+    "cost": 1600,
+    "quality": "component"
   },
   {
     "name": "item_recipe_wind_waker",
     "id": 612,
-    "cost": 1600
+    "cost": 1600,
+    "quality": ""
   },
   {
     "name": "item_recipe_ultimate_scepter_2",
     "id": 270,
-    "cost": 1600
+    "cost": 1600,
+    "quality": ""
   },
   {
     "name": "item_recipe_helm_of_the_dominator_2",
     "id": 633,
-    "cost": 1600
+    "cost": 1600,
+    "quality": ""
   },
   {
     "name": "item_recipe_guardian_greaves",
     "id": 230,
-    "cost": 1600
+    "cost": 1600,
+    "quality": ""
   },
   {
     "name": "item_pers",
     "id": 69,
-    "cost": 1650
+    "cost": 1650,
+    "quality": "common"
   },
   {
     "name": "item_recipe_refresher",
     "id": 109,
-    "cost": 1700
+    "cost": 1700,
+    "quality": ""
   },
   {
     "name": "item_ancient_janggo",
     "id": 185,
-    "cost": 1700
+    "cost": 1700,
+    "quality": "rare"
   },
   {
     "name": "item_recipe_arcane_blink",
     "id": 606,
-    "cost": 1750
+    "cost": 1750,
+    "quality": ""
   },
   {
     "name": "item_recipe_swift_blink",
     "id": 607,
-    "cost": 1750
+    "cost": 1750,
+    "quality": ""
   },
   {
     "name": "item_recipe_overwhelming_blink",
     "id": 608,
-    "cost": 1750
+    "cost": 1750,
+    "quality": ""
   },
   {
     "name": "item_recipe_hand_of_midas",
     "id": 64,
-    "cost": 1750
+    "cost": 1750,
+    "quality": ""
   },
   {
     "name": "item_recipe_abyssal_blade",
     "id": 207,
-    "cost": 1750
+    "cost": 1750,
+    "quality": ""
   },
   {
     "name": "item_mask_of_madness",
     "id": 172,
-    "cost": 1775
+    "cost": 1775,
+    "quality": "artifact"
   },
   {
     "name": "item_mekansm",
     "id": 79,
-    "cost": 1875
+    "cost": 1875,
+    "quality": "rare"
   },
   {
     "name": "item_dragon_lance",
     "id": 236,
-    "cost": 1900
+    "cost": 1900,
+    "quality": "artifact"
   },
   {
     "name": "item_vanguard",
     "id": 125,
-    "cost": 1925
+    "cost": 1925,
+    "quality": "epic"
   },
   {
     "name": "item_lesser_crit",
     "id": 149,
-    "cost": 1950
+    "cost": 1950,
+    "quality": "epic"
   },
   {
     "name": "item_glimmer_cape",
     "id": 254,
-    "cost": 1950
+    "cost": 1950,
+    "quality": "rare"
   },
   {
     "name": "item_recipe_travel_boots",
     "id": 47,
-    "cost": 2000
+    "cost": 2000,
+    "quality": ""
   },
   {
     "name": "item_hyperstone",
     "id": 55,
-    "cost": 2000
+    "cost": 2000,
+    "quality": "secret_shop"
   },
   {
     "name": "item_ultimate_orb",
     "id": 24,
-    "cost": 2050
+    "cost": 2050,
+    "quality": "secret_shop"
   },
   {
     "name": "item_necronomicon",
     "id": 106,
-    "cost": 2050
+    "cost": 2050,
+    "quality": "rare"
   },
   {
     "name": "item_kaya",
     "id": 259,
-    "cost": 2050
+    "cost": 2050,
+    "quality": "epic"
   },
   {
     "name": "item_sange",
     "id": 162,
-    "cost": 2050
+    "cost": 2050,
+    "quality": "artifact"
   },
   {
     "name": "item_yasha",
     "id": 170,
-    "cost": 2050
+    "cost": 2050,
+    "quality": "artifact"
   },
   {
     "name": "item_force_staff",
     "id": 102,
-    "cost": 2175
+    "cost": 2175,
+    "quality": "rare"
   },
   {
     "name": "item_demon_edge",
     "id": 51,
-    "cost": 2200
+    "cost": 2200,
+    "quality": "secret_shop"
   },
   {
     "name": "item_hand_of_midas",
     "id": 65,
-    "cost": 2200
+    "cost": 2200,
+    "quality": "common"
   },
   {
     "name": "item_blade_mail",
     "id": 127,
-    "cost": 2225
+    "cost": 2225,
+    "quality": "epic"
   },
   {
     "name": "item_blink",
     "id": 1,
-    "cost": 2250
+    "cost": 2250,
+    "quality": "component"
   },
   {
     "name": "item_aether_lens",
     "id": 232,
-    "cost": 2275
+    "cost": 2275,
+    "quality": "rare"
   },
   {
     "name": "item_meteor_hammer",
     "id": 223,
-    "cost": 2350
+    "cost": 2350,
+    "quality": "epic"
   },
   {
     "name": "item_helm_of_the_dominator",
     "id": 164,
-    "cost": 2350
+    "cost": 2350,
+    "quality": "artifact"
   },
   {
     "name": "item_armlet",
     "id": 151,
-    "cost": 2475
+    "cost": 2475,
+    "quality": "epic"
   },
   {
     "name": "item_travel_boots",
     "id": 48,
-    "cost": 2500
+    "cost": 2500,
+    "quality": "common"
   },
   {
     "name": "item_holy_locket",
     "id": 269,
-    "cost": 2500
+    "cost": 2500,
+    "quality": "rare"
   },
   {
     "name": "item_echo_sabre",
     "id": 252,
-    "cost": 2500
+    "cost": 2500,
+    "quality": "artifact"
   },
   {
     "name": "item_witch_blade",
     "id": 534,
-    "cost": 2600
+    "cost": 2600,
+    "quality": "common"
   },
   {
     "name": "item_maelstrom",
     "id": 166,
-    "cost": 2700
+    "cost": 2700,
+    "quality": "artifact"
   },
   {
     "name": "item_cyclone",
     "id": 100,
-    "cost": 2725
+    "cost": 2725,
+    "quality": "rare"
   },
   {
     "name": "item_vladmir",
     "id": 81,
-    "cost": 2750
+    "cost": 2750,
+    "quality": "rare"
   },
   {
     "name": "item_dagon",
     "id": 104,
-    "cost": 2750
+    "cost": 2750,
+    "quality": "rare"
   },
   {
     "name": "item_rod_of_atos",
     "id": 206,
-    "cost": 2750
+    "cost": 2750,
+    "quality": "rare"
   },
   {
     "name": "item_eagle",
     "id": 52,
-    "cost": 2800
+    "cost": 2800,
+    "quality": "secret_shop"
   },
   {
     "name": "item_reaver",
     "id": 53,
-    "cost": 2800
+    "cost": 2800,
+    "quality": "secret_shop"
   },
   {
     "name": "item_mystic_staff",
     "id": 58,
-    "cost": 2800
+    "cost": 2800,
+    "quality": "secret_shop"
   },
   {
     "name": "item_spirit_vessel",
     "id": 267,
-    "cost": 2940
+    "cost": 2940,
+    "quality": "rare"
   },
   {
     "name": "item_basher",
     "id": 143,
-    "cost": 2950
+    "cost": 2950,
+    "quality": "epic"
   },
   {
     "name": "item_invis_sword",
     "id": 152,
-    "cost": 3000
+    "cost": 3000,
+    "quality": "epic"
   },
   {
     "name": "item_aeon_disk",
     "id": 256,
-    "cost": 3100
+    "cost": 3100,
+    "quality": "epic"
   },
   {
     "name": "item_diffusal_blade",
     "id": 174,
-    "cost": 3150
+    "cost": 3150,
+    "quality": "artifact"
   },
   {
     "name": "item_soul_booster",
     "id": 129,
-    "cost": 3200
+    "cost": 3200,
+    "quality": "epic"
   },
   {
     "name": "item_necronomicon_2",
     "id": 193,
-    "cost": 3300
+    "cost": 3300,
+    "quality": "rare"
   },
   {
     "name": "item_eternal_shroud",
     "id": 692,
-    "cost": 3300
+    "cost": 3300,
+    "quality": "epic"
   },
   {
     "name": "item_mage_slayer",
     "id": 598,
-    "cost": 3450
+    "cost": 3450,
+    "quality": "rare"
   },
   {
     "name": "item_pipe",
     "id": 90,
-    "cost": 3475
+    "cost": 3475,
+    "quality": "rare"
   },
   {
     "name": "item_orchid",
     "id": 98,
-    "cost": 3475
+    "cost": 3475,
+    "quality": "rare"
   },
   {
     "name": "item_desolator",
     "id": 168,
-    "cost": 3500
+    "cost": 3500,
+    "quality": "artifact"
   },
   {
     "name": "item_heavens_halberd",
     "id": 210,
-    "cost": 3650
+    "cost": 3650,
+    "quality": "artifact"
   },
   {
     "name": "item_solar_crest",
     "id": 229,
-    "cost": 3775
+    "cost": 3775,
+    "quality": "rare"
   },
   {
     "name": "item_relic",
     "id": 54,
-    "cost": 3800
+    "cost": 3800,
+    "quality": "secret_shop"
   },
   {
     "name": "item_crimson_guard",
     "id": 242,
-    "cost": 3800
+    "cost": 3800,
+    "quality": "epic"
   },
   {
     "name": "item_lotus_orb",
     "id": 226,
-    "cost": 3950
+    "cost": 3950,
+    "quality": "epic"
   },
   {
     "name": "item_moon_shard",
     "id": 247,
-    "cost": 4000
+    "cost": 4000,
+    "quality": "consumable"
   },
   {
     "name": "item_dagon_2",
     "id": 201,
-    "cost": 4050
+    "cost": 4050,
+    "quality": "rare"
   },
   {
     "name": "item_black_king_bar",
     "id": 116,
-    "cost": 4050
+    "cost": 4050,
+    "quality": "epic"
   },
   {
     "name": "item_sange_and_yasha",
     "id": 154,
-    "cost": 4100
+    "cost": 4100,
+    "quality": "artifact"
   },
   {
     "name": "item_kaya_and_sange",
     "id": 273,
-    "cost": 4100
+    "cost": 4100,
+    "quality": "artifact"
   },
   {
     "name": "item_yasha_and_kaya",
     "id": 277,
-    "cost": 4100
+    "cost": 4100,
+    "quality": "artifact"
   },
   {
     "name": "item_bfury",
     "id": 145,
-    "cost": 4130
+    "cost": 4130,
+    "quality": "epic"
   },
   {
     "name": "item_ultimate_scepter",
     "id": 108,
-    "cost": 4200
+    "cost": 4200,
+    "quality": "rare"
   },
   {
     "name": "item_ethereal_blade",
     "id": 176,
-    "cost": 4300
+    "cost": 4300,
+    "quality": "epic"
   },
   {
     "name": "item_travel_boots_2",
     "id": 220,
-    "cost": 4500
+    "cost": 4500,
+    "quality": "common"
   },
   {
     "name": "item_hurricane_pike",
     "id": 263,
-    "cost": 4525
+    "cost": 4525,
+    "quality": "epic"
   },
   {
     "name": "item_necronomicon_3",
     "id": 194,
-    "cost": 4550
+    "cost": 4550,
+    "quality": "rare"
   },
   {
     "name": "item_sphere",
     "id": 123,
-    "cost": 4600
+    "cost": 4600,
+    "quality": "epic"
   },
   {
     "name": "item_manta",
     "id": 147,
-    "cost": 4600
+    "cost": 4600,
+    "quality": "epic"
   },
   {
     "name": "item_nullifier",
     "id": 225,
-    "cost": 4725
+    "cost": 4725,
+    "quality": "epic"
   },
   {
     "name": "item_heart",
     "id": 114,
-    "cost": 4800
+    "cost": 4800,
+    "quality": "epic"
   },
   {
     "name": "item_shivas_guard",
     "id": 119,
-    "cost": 4850
+    "cost": 4850,
+    "quality": "epic"
   },
   {
     "name": "item_monkey_king_bar",
     "id": 135,
-    "cost": 4975
+    "cost": 4975,
+    "quality": "epic"
   },
   {
     "name": "item_refresher",
     "id": 110,
-    "cost": 5000
+    "cost": 5000,
+    "quality": "rare"
   },
   {
     "name": "item_satanic",
     "id": 156,
-    "cost": 5050
+    "cost": 5050,
+    "quality": "artifact"
   },
   {
     "name": "item_assault",
     "id": 112,
-    "cost": 5075
+    "cost": 5075,
+    "quality": "epic"
   },
   {
     "name": "item_butterfly",
     "id": 139,
-    "cost": 5075
+    "cost": 5075,
+    "quality": "epic"
   },
   {
     "name": "item_radiance",
     "id": 137,
-    "cost": 5150
+    "cost": 5150,
+    "quality": "epic"
   },
   {
     "name": "item_greater_crit",
     "id": 141,
-    "cost": 5150
+    "cost": 5150,
+    "quality": "epic"
   },
   {
     "name": "item_guardian_greaves",
     "id": 231,
-    "cost": 5250
+    "cost": 5250,
+    "quality": "rare"
   },
   {
     "name": "item_skadi",
     "id": 160,
-    "cost": 5300
+    "cost": 5300,
+    "quality": "artifact"
   },
   {
     "name": "item_dagon_3",
     "id": 202,
-    "cost": 5350
+    "cost": 5350,
+    "quality": "rare"
   },
   {
     "name": "item_octarine_core",
     "id": 235,
-    "cost": 5475
+    "cost": 5475,
+    "quality": "rare"
   },
   {
     "name": "item_silver_edge",
     "id": 249,
-    "cost": 5600
+    "cost": 5600,
+    "quality": "epic"
   },
   {
     "name": "item_mjollnir",
     "id": 158,
-    "cost": 5600
+    "cost": 5600,
+    "quality": "artifact"
   },
   {
     "name": "item_sheepstick",
     "id": 96,
-    "cost": 5675
+    "cost": 5675,
+    "quality": "rare"
   },
   {
     "name": "item_ultimate_scepter_2",
     "id": 271,
-    "cost": 5800
+    "cost": 5800,
+    "quality": "rare"
   },
   {
     "name": "item_bloodstone",
     "id": 121,
-    "cost": 5950
+    "cost": 5950,
+    "quality": "epic"
   },
   {
     "name": "item_rapier",
     "id": 133,
-    "cost": 6000
+    "cost": 6000,
+    "quality": "epic"
   },
   {
     "name": "item_helm_of_the_dominator_2",
     "id": 635,
-    "cost": 6000
+    "cost": 6000,
+    "quality": "artifact"
   },
   {
     "name": "item_gungir",
     "id": 1466,
-    "cost": 6150
+    "cost": 6150,
+    "quality": "artifact"
   },
   {
     "name": "item_bloodthorn",
     "id": 250,
-    "cost": 6475
+    "cost": 6475,
+    "quality": "epic"
   },
   {
     "name": "item_abyssal_blade",
     "id": 208,
-    "cost": 6625
+    "cost": 6625,
+    "quality": "epic"
   },
   {
     "name": "item_dagon_4",
     "id": 203,
-    "cost": 6650
+    "cost": 6650,
+    "quality": "rare"
   },
   {
     "name": "item_overwhelming_blink",
     "id": 600,
-    "cost": 6800
+    "cost": 6800,
+    "quality": "component"
   },
   {
     "name": "item_swift_blink",
     "id": 603,
-    "cost": 6800
+    "cost": 6800,
+    "quality": "component"
   },
   {
     "name": "item_arcane_blink",
     "id": 604,
-    "cost": 6800
+    "cost": 6800,
+    "quality": "component"
   },
   {
     "name": "item_wind_waker",
     "id": 610,
-    "cost": 7125
+    "cost": 7125,
+    "quality": "rare"
   },
   {
     "name": "item_dagon_5",
     "id": 204,
-    "cost": 7950
+    "cost": 7950,
+    "quality": "rare"
   }
 ]

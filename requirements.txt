@@ -3,3 +3,6 @@ Jinja2
 Pygtail
 git+git://github.com/Delaunay/rpcjs.git
 gym
+Pillow
+torchvision
+

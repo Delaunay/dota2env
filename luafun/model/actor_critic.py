@@ -128,8 +128,10 @@ class EntitySelector(nn.Module):
 
 
 class ItemPurchaser(SelectionCategorical):
-    """Select the item we want to buy"""
-    def __init__(self, hidden_state_size, item_count):
+    """Select the item we want to buy
+
+    """
+    def __init__(self, hidden_state_size, item_count=const.ITEM_COUNT):
         super(ItemPurchaser, self).__init__()
 
 
@@ -245,6 +247,13 @@ class HeroModel(nn.Module):
 
     The returned vector act as an attention mechanism as it is with this vector that
     entities will be selected
+
+
+    Dota has 208 items but this does not count the recipes and item level.
+    In reality we need to choose among 242 options.
+
+    Heroes have only 6 abilities but we need to learn 8 talents as well.
+    6 abilities + 8 talents + 6 items + 2 items = 22 actions
 
     Examples
     --------

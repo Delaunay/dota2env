@@ -1,7 +1,7 @@
 Observation
 ===========
 
-.. automodule:: luafun.stitcher
+.. automodule:: luafun.observation.stitcher
     :members:
     :undoc-members:
     :show-inheritance:

@@ -292,8 +292,10 @@ def generate_item_array():
         if cost == '0' and v.get('ItemRecipe', '') == '1':
             continue
 
+        quality = v.get('ItemQuality', '')
+
         # , cost=int(cost)
-        abilities.append(dict(name=k, id=int(v['ID']), cost=int(cost)))
+        abilities.append(dict(name=k, id=int(v['ID']), cost=int(cost), quality=quality))
 
     abilities.sort(key=lambda x: x['cost'])
     f = os.path.join(folder, '..', 'game', 'resources', 'items.json')
