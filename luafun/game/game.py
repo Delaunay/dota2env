@@ -13,7 +13,7 @@ from luafun.game.inspect import http_inspect
 from luafun.game.ipc_recv import ipc_recv
 from luafun.game.ipc_send import ipc_send, TEAM_RADIANT, TEAM_DIRE, new_ipc_message
 import luafun.game.dota2.state_types as msg
-from luafun.game.extractor import Extractor
+from luafun.game.extractor import Extractor, SaveReplay
 import luafun.game.constants as const
 from luafun.game.states import world_listener_process
 from luafun.utils.options import option
@@ -135,6 +135,7 @@ class Dota2Game:
         self.perf = ProcessingStates(0, 0, 0, 0, 0, 0, 0, 0)
 
         self.extractor = Extractor()
+        self.replay = SaveReplay('replay.txt')
         log.debug(f'Main Process: {os.getpid()}')
         self._bots = []
 
@@ -311,6 +312,9 @@ class Dota2Game:
         if self.extractor:
             self.extractor.close()
 
+        if self.replay:
+            self.replay.close()
+
     def _handle_http_rpc(self):
         # handle debug HTTP request
         if self.http_rpc_recv.empty():
@@ -355,6 +359,7 @@ class Dota2Game:
         self.update_radiant_state(radiant)
         self.rad_perf.state_applied = time.time()
 
+        self.replay.save(radiant, dire)
         e = time.time()
         self.state['state_time'] = e - s
 

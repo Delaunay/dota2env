@@ -31,3 +31,4 @@ bots/
 botscpp/rev/*
 decode*.txt
 luafun/plots/geckodriver.log
+tests/resources/replay.txt
