@@ -43,6 +43,9 @@ def acquire_state(state):
     return asyncio.run(_acquire_faction(state))
 
 
+# TODO: add while env.drafting()
+# TODO: add while env.playing()
+# => add waiting for game phase see DOTA_GameState
 class Dota2Env(Dota2Game):
     """Dota2 Game Environment
 
@@ -62,7 +65,7 @@ class Dota2Env(Dota2Game):
     Parameters
     ----------
     path: str
-        Path to the game folder ``.../dota 2 beta``
+        Path to the game folder ``.../dota2``
 
     dedicated: bool
         runs server only

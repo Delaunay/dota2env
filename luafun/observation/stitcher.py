@@ -338,21 +338,27 @@ class Stitcher:
 
         # Proximity mapping
         self.proximities = ProximityMapper()
+        self._size = Stitcher.observation_size(faction)
 
     def get_entities(self, x, y):
         return self.proximities.entities(x, y)
 
+    @staticmethod
+    def observation_size(faction):
+        """Returns the observation space that we are stitching"""
+        return (
+                Player.size(False) * 5 +
+                Player.size(True) * 5 +
+                Unit.size() * len(buildings(faction)) +
+                Unit.size() * MAX_UNIT_COUNT +
+                RuneState.Size * 6 +
+                CommonState.Size
+        )
+
     @property
     def observation_space(self):
         """Returns the observation space that we are stitching"""
-        return (
-            Player.size(False) * 5 +
-            Player.size(True) * 5 +
-            Unit.size() * len(self.building_names) +
-            Unit.size() * MAX_UNIT_COUNT +
-            RuneState.Size * 6 +
-            CommonState.Size
-        )
+        return self._size
 
     def apply_diff(self, delta: msg.CMsgBotWorldState):
         """Take a world state delta and apply it to a previous state"""
@@ -873,6 +879,80 @@ class Stitcher:
                 continue
 
             self.units[uid] = tu
+
+
+def print_state(tensor):
+    return TensorInterpret().print(tensor)
+
+
+class TensorInterpret:
+    SIZE = Stitcher.observation_size(TEAM_DIRE)
+
+    def print_hero(self, s, e, tensor, ally, i=None):
+        for k in range(HERO_ITEMS):
+            s = e
+            e = s + ItemState.Size
+            ItemState.print(tensor[s:e], i=k)
+
+        for k in range(HERO_ABILITIES):
+            s = e
+            e = s + AbilityState.Size
+            AbilityState.print(tensor[s:e], i=k)
+
+        for k in range(HERO_MODIFIER):
+            s = e
+            e = s + ModifierState.Size
+            ModifierState.print(tensor[s:e], i=k)
+
+        if ally:
+            s = e
+            e = s + AllyHeroState.Size
+            AllyHeroState.print(tensor[s:e], i=i)
+
+        return s, e
+
+    def print(self, tensor, j=None):
+        s = 0
+        e = s + CommonState.Size
+        CommonState.print(tensor[s:e], i=j)
+
+        for i in range(6):
+            s = e
+            e = s + RuneState.Size
+            RuneState.print(tensor[s:e], i=i)
+
+        # buildings
+        for i in range(len(buildings(TEAM_RADIANT))):
+            s = e
+            e = s + UnitState.Size
+            UnitState.print(tensor[s:e], i=i)
+
+            for i in range(UNIT_MODIFIER):
+                s = e
+                e = s + ModifierState.Size
+                ModifierState.print(tensor[s:e], i=i)
+
+        # Current Hero
+        s, e = self.print_hero(s, e, tensor, True, i=-1)
+
+        # Allies
+        for i in range(4):
+            s, e = self.print_hero(s, e, tensor, True, i=i)
+
+        # Enemies
+        for i in range(5):
+            s, e = self.print_hero(s, e, tensor, False, i=i)
+
+        # Units
+        for i in range(MAX_UNIT_COUNT):
+            s = e
+            e = s + UnitState.Size
+            UnitState.print(tensor[s:e], i=i)
+
+            for k in range(UNIT_MODIFIER):
+                s = e
+                e = s + ModifierState.Size
+                ModifierState.print(tensor[s:e], i=k)
 
 
 if __name__ == '__main__':

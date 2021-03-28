@@ -220,8 +220,14 @@ class SyncWorldListener:
         if self.sock is None:
             raise RuntimeError('Impossible to connect to the game')
 
+        recover = None
+
         while self.running:
             try:
+                if recover is not None:
+                    self.recover(recover, None)
+                    recover = None
+
                 self._run()
 
             except KeyboardInterrupt:
@@ -230,10 +236,12 @@ class SyncWorldListener:
                 break
 
             except ConnectionResetError:
-                self.recover('ConnectionResetError', None)
+                recover = 'ConnectionResetError'
 
             except ConnectionRefusedError:
-                self.recover('ConnectionRefusedError', None)
+                # Dota2 is not running anymore
+                self.state['running'] = False
+                break
 
             except ValueError:
                 self.state['running'] = False

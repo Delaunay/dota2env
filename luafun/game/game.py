@@ -353,13 +353,14 @@ class Dota2Game:
             self.dire_state_delta_queue
         )
 
+        self.replay.save(radiant, dire)
+
         self.update_dire_state(dire)
         self.dire_perf.state_applied = time.time()
 
         self.update_radiant_state(radiant)
         self.rad_perf.state_applied = time.time()
 
-        self.replay.save(radiant, dire)
         e = time.time()
         self.state['state_time'] = e - s
 

@@ -42,12 +42,31 @@ Dota2 is the ultimate RL environment
 * Partially Observed State
 * High dimensional action and observation spaces
 * Multiple strategies to solve the game
+* Multiple agents
 * Agents needs to cooperate to win
 
 Like in real life you will need to
 1. Choose the relevant data to solve the problem and discard unnecessary data
 2. Choose the correct rewards balance early rewards and late rewards
 3. Encode a variety of actions for efficient processing
+
+
+# Area of research
+
+* Will an untrained agent trained faster if paired with trained agents ?
+    * i.e is the untrained agent able to learn from allies & enemies
+
+Hypothesis: Might be able to learn better from enemies has they punish bad plays strongly
+while allies cannot punish nor reward an action directly
+Might lead to untrained agent learning to do safer plays instead and lack the risk taking needed to
+get back into the game
+
+* Unit Agents
+    * One agent controlling all 10
+
+* Split Agents
+    * n in \[2-10\] agent controlling 10
+
 
 # Assets
 

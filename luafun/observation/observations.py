@@ -11,7 +11,7 @@ def enumitems(enumclass):
     return enumclass.__members__.items()
 
 
-def print_tensor(tensor, enumclass, pfun=print):
+def print_tensor(tensor, enumclass, pfun=print, i=None):
     """Print a tensor using an enum as index names
 
     Examples
@@ -70,12 +70,12 @@ def print_tensor(tensor, enumclass, pfun=print):
             StockRaindrop: tensor([0., 0., 0.])
     """
     if len(tensor.shape) > 1:
-        print_batch_vector(tensor, enumclass, pfun=pfun)
+        print_batch_vector(tensor, enumclass, pfun=pfun, i=i)
     else:
-        print_vector(tensor, enumclass, pfun=pfun)
+        print_vector(tensor, enumclass, pfun=pfun, i=i)
 
 
-def print_batch_vector(tensor, enumclass, pfun=print):
+def print_batch_vector(tensor, enumclass, pfun=print, i=None):
     for name, value in enumitems(enumclass):
         if name == 'Size':
             continue
@@ -83,12 +83,18 @@ def print_batch_vector(tensor, enumclass, pfun=print):
         pfun(f'{name:>21}: {tensor[:, value]}')
 
 
-def print_vector(tensor, enumclass, pfun=print):
+def print_vector(tensor, enumclass, pfun=print, i=None):
     for name, value in enumitems(enumclass):
         if name == 'Size':
             continue
 
-        pfun(f'{name:>21}: {tensor[value]}')
+        msg = f'{enumclass.__name__:>15} {name:>25}: {tensor[value]}'
+        if i is not None:
+            msg = f'{i:>3d}{msg}'
+        else:
+            msg = f'   {msg}'
+
+        pfun(msg)
 
 
 class CommonState(IntEnum):
@@ -118,8 +124,8 @@ class CommonState(IntEnum):
     Size                  = auto()
 
     @staticmethod
-    def print(tensor):
-        print_tensor(tensor, CommonState)
+    def print(tensor, i=None):
+        print_tensor(tensor, CommonState, i=i)
 
 
 # OpenAI == 22
@@ -184,8 +190,8 @@ class UnitState(IntEnum):
     Size                     = auto()
 
     @staticmethod
-    def print(tensor):
-        print_tensor(tensor, UnitState)
+    def print(tensor, i=None):
+        print_tensor(tensor, UnitState, i=i)
 
 
 # OpenAI == 43
@@ -222,8 +228,8 @@ class HeroUnit(IntEnum):
     Size                 = auto()
 
     @staticmethod
-    def print(tensor):
-        print_tensor(tensor, HeroUnit)
+    def print(tensor, i=None):
+        print_tensor(tensor, HeroUnit, i=i)
 
 
 # OpenAI == 25
@@ -241,8 +247,8 @@ class PreviousActionState(IntEnum):
     Size        = auto()
 
     @staticmethod
-    def print(tensor):
-        print_tensor(tensor, PreviousActionState)
+    def print(tensor, i=None):
+        print_tensor(tensor, PreviousActionState, i=i)
 
 
 # OpenAI == 310
@@ -265,8 +271,8 @@ class AllyHeroState(IntEnum):
     Size                   = auto()
 
     @staticmethod
-    def print(tensor):
-        print_tensor(tensor, AllyHeroState)
+    def print(tensor, i=None):
+        print_tensor(tensor, AllyHeroState, i=i)
 
 
 # OpenAI == 211
@@ -282,8 +288,8 @@ class ModifierState(IntEnum):
     Size                   = auto()
 
     @staticmethod
-    def print(tensor):
-        print_tensor(tensor, ModifierState)
+    def print(tensor, i=None):
+        print_tensor(tensor, ModifierState, i=i)
 
 
 # OpenAI == 2
@@ -309,8 +315,8 @@ class ItemState(IntEnum):
     Size                = auto()
 
     @staticmethod
-    def print(tensor):
-        print_tensor(tensor, ItemState)
+    def print(tensor, i=None):
+        print_tensor(tensor, ItemState, i=i)
 
 
 # OpenAI == 13
@@ -330,8 +336,8 @@ class AbilityState(IntEnum):
     Size               = auto()
 
     @staticmethod
-    def print(tensor):
-        print_tensor(tensor, AbilityState)
+    def print(tensor, i=None):
+        print_tensor(tensor, AbilityState, i=i)
 
 
 # OpenAI == 7
@@ -355,8 +361,8 @@ class RuneState(IntEnum):
     Size       = auto()
 
     @staticmethod
-    def print(tensor):
-        print_tensor(tensor, RuneState)
+    def print(tensor, i=None):
+        print_tensor(tensor, RuneState, i=i)
 
 
 # OpenAI == 15
@@ -375,8 +381,8 @@ class Minimap10x10Tile(IntEnum):
     Size = auto()
 
     @staticmethod
-    def print(tensor):
-        print_tensor(tensor, Minimap10x10Tile)
+    def print(tensor, i=None):
+        print_tensor(tensor, Minimap10x10Tile, i=i)
 
 
 class DropItem:
