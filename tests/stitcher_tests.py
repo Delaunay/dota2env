@@ -23,8 +23,7 @@ def load_test_data(name, faction):
 
             msg = json.loads(msg)
 
-            if msg.get('game_state', 0) != DOTA_GameState. DOTA_GAMERULES_STATE_GAME_IN_PROGRESS:
-                continue
+
 
             if faction_map[fac] == faction:
                 yield msg
@@ -35,14 +34,17 @@ def test_stitcher(faction=2):
 
     for msg in load_test_data('resources/replay.txt', faction):
         stitcher.apply_diff(msg)
-        print(msg)
 
-        state = stitcher.generate_player(0)
+        if msg.get('game_state', 0) == DOTA_GameState.DOTA_GAMERULES_STATE_GAME_IN_PROGRESS:
+            print(json.dumps(msg, indent=2))
 
-        print(state.shape)
-        print_state(state)
+            state = stitcher.generate_player(0)
 
-        break
+            print(stitcher.heroes)
+
+            # print(state.shape)
+            # print_state(state)
+            break
 
 
 if __name__ == '__main__':

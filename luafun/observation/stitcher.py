@@ -328,7 +328,19 @@ class Stitcher:
         self.common = None
         self.draft = None
         self.latest_message = None
-        self.heroes = dict()
+        self.heroes = {
+            0: Player(ally=TEAM_RADIANT == self.faction),
+            1: Player(ally=TEAM_RADIANT == self.faction),
+            2: Player(ally=TEAM_RADIANT == self.faction),
+            3: Player(ally=TEAM_RADIANT == self.faction),
+            4: Player(ally=TEAM_RADIANT == self.faction),
+            5: Player(ally=TEAM_DIRE == self.faction),
+            6: Player(ally=TEAM_DIRE == self.faction),
+            7: Player(ally=TEAM_DIRE == self.faction),
+            8: Player(ally=TEAM_DIRE == self.faction),
+            9: Player(ally=TEAM_DIRE == self.faction),
+        }
+
         self.units = dict()
         self.runes = dict()
         self.health_tracker = defaultdict(default_buffer(16))
@@ -404,6 +416,7 @@ class Stitcher:
             # set hero location
             for i, hid in enumerate(horder):
                 hu = self.heroes[hid].unit
+
                 hpos = hu[UnitState.X], hu[UnitState.Y]
                 rune[RuneState.DistanceH0 + i] = distance(
                     hpos[0],
@@ -416,6 +429,9 @@ class Stitcher:
         # Set building info
         for i, uid in self.building_order:
             unit = self.buildings.get(i)
+
+            if unit is None:
+                continue
 
             x, y = unit[UnitState.X], unit[UnitState.Y]
             dist = distance(x, y, px, py)
@@ -865,10 +881,12 @@ class Stitcher:
 
             if player is not None:
                 player['unit'] = unit
-                self.process_hero(unit)
+                pid = unit['player_id']
 
+                self.process_hero(unit)
                 hu = self.prepare_hero(player)
                 self.heroes[uid] = hu
+                self.heroes[pid] = hu
                 continue
 
             # Standard unit
