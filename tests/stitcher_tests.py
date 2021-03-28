@@ -37,15 +37,15 @@ def test_stitcher(faction=2):
             stitcher.apply_diff(msg)
 
             if msg.get('game_state', 0) == DOTA_GameState.DOTA_GAMERULES_STATE_GAME_IN_PROGRESS:
-                print(json.dumps(msg, indent=2))
+                # print(json.dumps(msg, indent=2))
 
                 state = stitcher.generate_player(0)
 
                 # print(stitcher.heroes)
 
                 # print(state.shape)
-                print_state(state)
-                break
+                # print_state(state)
+                pass
         except:
             # print(json.dumps(msg, indent=2))
             raise

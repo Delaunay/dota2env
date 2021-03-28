@@ -462,6 +462,9 @@ class Stitcher:
         # Set closest unit first
         closest = []
         for k, unit in self.units.items():
+            if unit is None:
+                continue
+
             x, y = unit[UnitState.X], unit[UnitState.Y]
             dist = sqrt((x - px) ** 2 + (y - py) ** 2)
             closest.append((k, dist))
@@ -571,9 +574,9 @@ class Stitcher:
         # BOT_ACTION_TYPE_DELAY
 
         self.proximities.manager.update_position(uid, pos[0], pos[1])
-        u[f.X] = pos[0]
-        u[f.Y] = pos[1]
-        u[f.Z] = pos[2]
+        u[f.X] = pos[0] / const.ORIGIN[0]
+        u[f.Y] = pos[1] / const.ORIGIN[1]
+        u[f.Z] = pos[2] / 256
         u[f.FacingCos] = cos(msg['facing'])
         u[f.FacingSin] = sin(msg['facing'])
 
@@ -620,6 +623,7 @@ class Stitcher:
         u[f.EtaIncomingProjectile] = min_eta
 
         # Needs more computations to get those
+        # TODO: implement those
         # u[f.NumberOfUnitAttackingMe] = 0
         # u[f.ShrineCooldown        ] = 0
         # u[f.ToCurrentUnitdx] = 0
@@ -631,7 +635,17 @@ class Stitcher:
 
         u[f.UnitTypeHERO + offset] = 1
 
-        # modifier_count
+        # Which modifier should be first ?
+        modifiers = msg.get('modifiers', [])
+        # sorted(modifiers, key=lambda mod: mod.get('remaining_duration', 0))
+
+        e = f.Size
+        for _, modifier in zip(range(modifier_count), modifiers):
+            s = e
+            e = s + ModifierState.Size
+
+            u[s + ModifierState.RemainingDuration] = modifier.get('remaining_duration', 0)
+            u[s + ModifierState.StackCount] = modifier.get('stack_count', 1)
 
         return u
 
@@ -646,9 +660,11 @@ class Stitcher:
         pos = rmsg['location']['x'], rmsg['location']['y']
 
         r[f.Visible] = rmsg['status'] == RUNE_STATUS_AVAILABLE
-        r[f.LocationX] = pos[0]
-        r[f.LocationY] = pos[1]
 
+        r[f.LocationX] = pos[0] / const.ORIGIN[0]
+        r[f.LocationY] = pos[1] / const.ORIGIN[1]
+
+        # will be computed when we know which player we are generating the obs for
         r[f.DistanceH0] = 0
         r[f.DistanceH1] = 0
         r[f.DistanceH2] = 0
@@ -773,6 +789,7 @@ class Stitcher:
         i[f.IsCooldown] = imsg['cooldown_remaining'] > 0.001
         i[f.CooldownTime] = imsg['cooldown_remaining']
         i[f.IsDisabled] = not imsg['is_activated']
+        # TODO: SwapCoolDown
         i[f.SwapCoolDown] = 0
         i[f.ToggledState] = imsg['is_toggled']
         i[f.Locked] = imsg['is_combined_locked']
