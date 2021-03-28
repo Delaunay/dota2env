@@ -125,12 +125,12 @@ class Player:
         self.is_ally = ally
         self.ally = None
 
-        if self.ally:
+        if self.is_ally:
             self.ally = torch.zeros((AllyHeroState.Size,))
 
-        self.unit = torch.zeros((UnitState.Size,))
+        self.unit = torch.zeros((UnitState.Size + ModifierState.Size * HERO_MODIFIER,))
         self.hero = torch.zeros((HeroUnit.Size,))
-        self.modifiers = [torch.zeros((ModifierState.Size,)) for _ in range(HERO_MODIFIER)]
+        # self.modifiers = [torch.zeros((ModifierState.Size,)) for _ in range(HERO_MODIFIER)]
         self.items = [torch.zeros((ItemState.Size,)) for _ in range(HERO_ITEMS)]
         self.abilities = [torch.zeros((AbilityState.Size,)) for _ in range(HERO_ABILITIES)]
 
@@ -154,7 +154,11 @@ class Player:
 
         s = 0
         e = UnitState.Size
-        p[s:e] = self.unit
+        p[s:e] = self.unit[:e]
+
+        s = e
+        e = s + ModifierState.Size * HERO_MODIFIER
+        p[s:e] = self.unit[s:]
 
         s = e
         e = s + HeroUnit.Size
@@ -170,10 +174,10 @@ class Player:
             e = s + AbilityState.Size
             p[s:e] = self.abilities[i]
 
-        for i in range(len(self.modifiers)):
-            s = e
-            e = s + ModifierState.Size
-            p[s:e] = self.modifiers[i]
+        # for i in range(len(self.modifiers)):
+        #     s = e
+        #     e = s + ModifierState.Size
+        #     p[s:e] = self.modifiers[i]
 
         if self.is_ally:
             s = e
@@ -405,10 +409,9 @@ class Stitcher:
         s = e
         e = s + CommonState.Size
         state[s:e] = self.common
-
         horder = hero_order(self.faction, bid)
 
-        for i in range(6):
+        for i in range(const.RUNE_COUNT):
             s = e
             e = s + RuneState.Size
             rune = self.runes.get(i)
@@ -430,24 +433,22 @@ class Stitcher:
         for i, uid in self.building_order:
             unit = self.buildings.get(i)
 
-            if unit is None:
-                continue
+            if unit is not None:
+                x, y = unit[UnitState.X], unit[UnitState.Y]
+                dist = distance(x, y, px, py)
 
-            x, y = unit[UnitState.X], unit[UnitState.Y]
-            dist = distance(x, y, px, py)
+                unit[UnitState.ToCurrentUnitdx] = x - px
+                unit[UnitState.ToCurrentUnitdy] = y - py
+                unit[UnitState.ToCurrentUnitl] = dist
 
-            unit[UnitState.ToCurrentUnitdx] = x - px
-            unit[UnitState.ToCurrentUnitdy] = y - py
-            unit[UnitState.ToCurrentUnitl] = dist
+                # IsCurrentHeroAttackingIt
+                # IsAttackingCurrentHero
+                # EtaProjectileToHero
+                s = e
+                e = s + UnitState.Size + UNIT_MODIFIER * ModifierState.Size
 
-            # IsCurrentHeroAttackingIt
-            # IsAttackingCurrentHero
-            # EtaProjectileToHero
-
-            s = e
-            e = s + UnitState.Size
-
-            state[s:e] = unit
+                # Modifiers included
+                state[s:e] = unit
         # ---
 
         # set hero info
@@ -483,7 +484,7 @@ class Stitcher:
             # EtaProjectileToHero
 
             s = e
-            e = s + UnitState.Size
+            e = s + UnitState.Size + UNIT_MODIFIER * ModifierState.Size
             state[s:e] = unit
 
         return state
@@ -536,7 +537,7 @@ class Stitcher:
     ROSHAN = 5 - 1
 
     def prepare_unit(self, msg, modifier_count) -> torch.Tensor:
-        u = torch.zeros((UnitState.Size,))
+        u = torch.zeros((UnitState.Size + modifier_count * ModifierState.Size,))
         f = UnitState
 
         uid = msg['handle']
@@ -781,12 +782,14 @@ class Stitcher:
         return i
 
     def prepare_hero(self, msg):
-        phero = Player(ally=msg['team_id'] == self.faction)
-        phero.unit = self.prepare_unit(msg['unit'], modifier_count=10)
+        is_ally = msg['team_id'] == self.faction
+
+        phero = Player(ally=is_ally)
+        phero.unit = self.prepare_unit(msg['unit'], modifier_count=HERO_MODIFIER)
         phero.hero = self.prepare_hero_unit(msg)
 
-        if msg['team_id'] == self.faction:
-            phero.ally = self.prepare_ability(msg)
+        if is_ally:
+            phero.ally = self.prepare_ally_hero(msg['unit'])
 
         return phero
 
@@ -810,7 +813,7 @@ class Stitcher:
                 if bname.startswith(name) and i not in idx:
                     idx.add(i)
 
-                    tu = self.prepare_unit(unit, modifier_count=2)
+                    tu = self.prepare_unit(unit, modifier_count=UNIT_MODIFIER)
                     self.buildings[uid] = tu
                     self.building_order.append((i, uid))
 
@@ -890,7 +893,7 @@ class Stitcher:
                 continue
 
             # Standard unit
-            tu = self.prepare_unit(unit, modifier_count=2)
+            tu = self.prepare_unit(unit, modifier_count=UNIT_MODIFIER)
 
             if uid in self.buildings:
                 self.buildings[uid] = tu
@@ -907,6 +910,15 @@ class TensorInterpret:
     SIZE = Stitcher.observation_size(TEAM_DIRE)
 
     def print_hero(self, s, e, tensor, ally, i=None):
+        s = s
+        e = s + UnitState.Size
+        UnitState.print(tensor[s:e], i=i)
+
+        for k in range(HERO_MODIFIER):
+            s = e
+            e = s + ModifierState.Size
+            ModifierState.print(tensor[s:e], i=k)
+
         for k in range(HERO_ITEMS):
             s = e
             e = s + ItemState.Size
@@ -916,11 +928,6 @@ class TensorInterpret:
             s = e
             e = s + AbilityState.Size
             AbilityState.print(tensor[s:e], i=k)
-
-        for k in range(HERO_MODIFIER):
-            s = e
-            e = s + ModifierState.Size
-            ModifierState.print(tensor[s:e], i=k)
 
         if ally:
             s = e
@@ -934,7 +941,7 @@ class TensorInterpret:
         e = s + CommonState.Size
         CommonState.print(tensor[s:e], i=j)
 
-        for i in range(6):
+        for i in range(const.RUNE_COUNT):
             s = e
             e = s + RuneState.Size
             RuneState.print(tensor[s:e], i=i)
@@ -945,10 +952,10 @@ class TensorInterpret:
             e = s + UnitState.Size
             UnitState.print(tensor[s:e], i=i)
 
-            for i in range(UNIT_MODIFIER):
+            for j in range(UNIT_MODIFIER):
                 s = e
                 e = s + ModifierState.Size
-                ModifierState.print(tensor[s:e], i=i)
+                ModifierState.print(tensor[s:e], i=j)
 
         # Current Hero
         s, e = self.print_hero(s, e, tensor, True, i=-1)

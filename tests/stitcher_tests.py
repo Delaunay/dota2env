@@ -33,20 +33,26 @@ def test_stitcher(faction=2):
     stitcher = Stitcher(faction)
 
     for msg in load_test_data('resources/replay.txt', faction):
-        stitcher.apply_diff(msg)
+        try:
+            stitcher.apply_diff(msg)
 
-        if msg.get('game_state', 0) == DOTA_GameState.DOTA_GAMERULES_STATE_GAME_IN_PROGRESS:
-            print(json.dumps(msg, indent=2))
+            if msg.get('game_state', 0) == DOTA_GameState.DOTA_GAMERULES_STATE_GAME_IN_PROGRESS:
+                print(json.dumps(msg, indent=2))
 
-            state = stitcher.generate_player(0)
+                state = stitcher.generate_player(0)
 
-            print(stitcher.heroes)
+                # print(stitcher.heroes)
 
-            # print(state.shape)
-            # print_state(state)
-            break
+                # print(state.shape)
+                print_state(state)
+                break
+        except:
+            # print(json.dumps(msg, indent=2))
+            raise
 
 
 if __name__ == '__main__':
+    import sys
+    sys.stderr = sys.stdout
     test_stitcher()
     pass
