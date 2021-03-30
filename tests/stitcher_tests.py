@@ -41,6 +41,9 @@ def test_stitcher(faction=2):
 
                 state = stitcher.generate_player(0)
 
+                print(stitcher.reward_builder.partial_dire_reward(),
+                      stitcher.reward_builder.partial_radiant_reward())
+
                 # print(stitcher.heroes)
 
                 # print(state.shape)

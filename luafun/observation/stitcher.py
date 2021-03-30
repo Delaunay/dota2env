@@ -16,6 +16,7 @@ from luafun.observation.observations import CommonState, ItemState, AbilityState
 from luafun.observation.observations import UnitState, HeroUnit, AllyHeroState, ModifierState
 from luafun.game.ipc_send import TEAM_DIRE, TEAM_RADIANT
 import luafun.game.constants as const
+from luafun.reward import Reward
 
 
 GAME_START = 30
@@ -134,6 +135,8 @@ class Player:
         self.items = [torch.zeros((ItemState.Size,)) for _ in range(HERO_ITEMS)]
         self.abilities = [torch.zeros((AbilityState.Size,)) for _ in range(HERO_ABILITIES)]
 
+        self.reward = 0
+
     @staticmethod
     def size(is_ally):
         base = (
@@ -222,7 +225,6 @@ def buildings(faction):
         off = 'top'
         enemy_outpost = '#DOTA_OutpostName_North'
         outpost = '"#DOTA_OutpostName_South"'
-
     elif faction == TEAM_DIRE:
         me = 'badguys'
         enemy = 'goodguys'
@@ -275,7 +277,7 @@ def buildings(faction):
         f'npc_dota_{enemy}_tower4_2',
         f'npc_dota_{enemy}_fort',
     ]
-    # = 36 Permanent buildings
+    # = 36 Permanent buildings + 2 outpost
     assert len(set(b)) == 38
     return b
 
@@ -324,8 +326,10 @@ def distance(x, y, px, py):
 class Stitcher:
     """Stitcher is a class that tracks game state and generate intermediate tensor to
     help us build the player specific observation tensor
+
+    Also compute rewards
     """
-    def __init__(self, faction):
+    def __init__(self, faction, reward=Reward()):
         self.roshan_death_count = 0
         self.faction = faction
         self.minimap = None
@@ -351,6 +355,7 @@ class Stitcher:
         self.building_names = buildings(faction)
         self.buildings = dict()
         self.building_order = []
+        self.reward_builder = reward
 
         # Proximity mapping
         self.proximities = ProximityMapper()
@@ -615,8 +620,8 @@ class Stitcher:
 
         min_eta = 10
         for track in msg.get('incoming_tracking_projectiles', []):
-            x, y = track['location']['x'], track['location']['y']
-            dist = sqrt((x - pos[0]) ** 2 + (y - pos[1]) ** 2)
+            x, y = track['location']['x'] / const.ORIGIN[0], track['location']['y'] / const.ORIGIN[1]
+            dist = sqrt((x / const.ORIGIN[0] - pos[0]) ** 2 + (y / const.ORIGIN[1] - pos[1]) ** 2)
             eta = dist / track['velocity']
             min_eta = min(eta, min_eta)
 
@@ -796,6 +801,8 @@ class Stitcher:
 
         i[f.StateStr + imsg['power_treads_stat']] = 1
 
+        # if imsg[]
+
         return i
 
     def prepare_hero(self, msg):
@@ -837,7 +844,15 @@ class Stitcher:
         # Sort by index order
         self.building_order.sort(key=lambda x: x[0])
 
+    def reward(self):
+        if self.faction == TEAM_RADIANT:
+            return self.reward_builder.radiant_reward()
+
+        return self.reward_builder.dire_reward()
+
     def generic_apply(self, delta):
+        self.reward_builder.clear()
+
         self.common = self.prepare_common(delta)
         self.proximities.reset()
 
@@ -907,6 +922,8 @@ class Stitcher:
                 hu = self.prepare_hero(player)
                 self.heroes[uid] = hu
                 self.heroes[pid] = hu
+
+                self.reward_builder.player_message(player, player['unit'], None)
                 continue
 
             # Standard unit
@@ -914,8 +931,10 @@ class Stitcher:
 
             if uid in self.buildings:
                 self.buildings[uid] = tu
+                self.reward_builder.building_messages(unit)
                 continue
 
+            # FIXME: courier ?
             self.units[uid] = tu
 
 
