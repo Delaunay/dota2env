@@ -147,8 +147,8 @@ class Reward:
         reward = (
             RewardConst.KilledHero    * kills +
             RewardConst.HeroDeath     * deaths +
-            RewardConst.Deny          * umsg['denies'] +
-            RewardConst.LastHit       * umsg['last_hits'] +
+            RewardConst.Deny          * umsg.get('denies', 0) +
+            RewardConst.LastHit       * umsg.get('last_hits', 0) +
             RewardConst.GoldSpent     * spent_gold +
             RewardConst.GoldGained    * current_gold +
             RewardConst.XPGained      * xp_gained +

@@ -7,7 +7,7 @@ class InferenceEngine:
     The newest model is pulled from time to time to make sure it keeps improving
     """
 
-    def __init__(self, model):
+    def __init__(self, model, train):
         self.bots = None
         self.model = None
         self.state_space = None
@@ -16,6 +16,7 @@ class InferenceEngine:
         self.action_space = None
         self.passive = model == 'passive'
         self.random = model == 'random'
+        self.trainer = train
 
     def init_draft(self):
         pass
@@ -34,6 +35,9 @@ class InferenceEngine:
         # self.sampler = ActionSampler()
         # self.filter = lambda *args: lambda x: x
 
+    def load_model(self):
+        pass
+
     def action(self, state):
         """Build the observation batch and the action to take"""
         # batch = generate_game_batch(state, self.bots)
@@ -44,7 +48,23 @@ class InferenceEngine:
         if self.random:
             return self.action_space.sample()
 
+        # reload model
+        if self.trainer.new_inference_model:
+            self.load_model()
+
         # msg = self.model(state)
         # filter = self.filter(state, unit, rune, tree)
         # action = self.sampler.sampled(msg, filter)
         return None
+
+
+class TrainEngine:
+    def __init__(self, train):
+        pass
+
+    @property
+    def new_inference_model(self):
+        return False
+
+    def push(self, *args):
+        pass

@@ -937,6 +937,12 @@ class Stitcher:
             # FIXME: courier ?
             self.units[uid] = tu
 
+    def partial_reward(self):
+        if self.faction == TEAM_RADIANT:
+            return self.reward_builder.partial_radiant_reward()
+
+        return self.reward_builder.partial_dire_reward()
+
 
 def print_state(tensor):
     return TensorInterpret().print(tensor)

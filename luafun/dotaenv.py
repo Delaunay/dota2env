@@ -293,8 +293,19 @@ class Dota2Env(Dota2Game):
 
         obs = torch.cat((radbatch, direbatch), 0)
 
+        rr = self.radiant_stitcher.partial_reward()
+        rd = self.dire_stitcher.partial_reward()
+
+        rr = rr - rd
+        rd = - rr
+
+        rr = torch.ones(radbatch.shape[0]) * rr
+        dd = torch.ones(direbatch.shape[0]) * rd
+
+        reward = torch.cat([rr, dd], 0)
+
         # 3. Compute the reward
-        reward = self.reward(obs[:len(self.rad_bots)], obs[len(self.rad_bots):])
+        # reward = self.reward(obs[:len(self.rad_bots)], obs[len(self.rad_bots):])
         done = self.state.get('win', None) is not None
         info = dict()
 

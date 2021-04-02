@@ -3,7 +3,7 @@ import logging
 
 from luafun.dotaenv import dota2_environment
 from luafun.utils.options import option
-from luafun.model.inference import InferenceEngine
+from luafun.model.inference import InferenceEngine, TrainEngine
 
 
 def main(config=None):
@@ -30,8 +30,11 @@ def main(config=None):
     parser.add_argument('--interactive', action='store_true', default=False,
                         help='Make a human create the lobby')
 
-    parser.add_argument('--model', type=str, default=None,
+    parser.add_argument('--model', type=str, default='random',
                         help='Model name factory, defaults to a random action sampler')
+
+    parser.add_argument('--trainer', type=str, default='random',
+                        help='')
 
     args = parser.parse_args()
     game = dota2_environment(args.mode, args.path, config=config)
@@ -47,7 +50,8 @@ def main(config=None):
     game.options.host_timescale = args.speed
     game.options.draft = int(args.draft)
 
-    model = InferenceEngine(args.model)
+    train = TrainEngine(args.trainer)
+    model = InferenceEngine(args.model, train)
 
     with game:
         state = game.initial()
@@ -69,16 +73,26 @@ def main(config=None):
         model.close_draft()
         model.init_play(game)
 
+        uid = game.options.game_id
+
         # Play the game
         while game.running:
-            # Start issuing orders here
-            action = model.action(state)
+            # start issuing orders here
+            action = model.action(uid)
 
             # take a random action
             state, reward, done, info = game.step(action)
 
+            # push the new observation
+            train.push(uid, state, reward, done, info, action)
+
+            if state is None:
+                break
+
             if game.cnt > 0 and game.cnt % 100 == 0:
                 print(f'Step time {game.avg / game.cnt:.4f}')
+
+            print(reward[0])
 
         print('Game Finished')
 
