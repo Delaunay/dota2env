@@ -23,8 +23,6 @@ def load_test_data(name, faction):
 
             msg = json.loads(msg)
 
-
-
             if faction_map[fac] == faction:
                 yield msg
 

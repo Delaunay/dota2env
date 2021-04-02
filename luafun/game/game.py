@@ -18,6 +18,7 @@ import luafun.game.constants as const
 from luafun.game.states import world_listener_process
 from luafun.utils.options import option
 from luafun.game.performance import ProcessingStates
+from luafun.observation.stitcher import Stitcher
 
 
 log = logging.getLogger(__name__)
@@ -134,10 +135,21 @@ class Dota2Game:
         self.rad_perf_prev = None
         self.perf = ProcessingStates(0, 0, 0, 0, 0, 0, 0, 0)
 
+        self.dire_state_query_request = None
+        self.dire_state_query_reply = None
+        self.rad_state_query_request = None
+        self.rad_state_query_reply = None
+
         self.extractor = Extractor()
         self.replay = SaveReplay('replay.txt')
         log.debug(f'Main Process: {os.getpid()}')
         self._bots = []
+
+        self.radiant_batch = None
+        self.radiant_reward = None
+
+        self.dire_batch = None
+        self.dire_reward = None
 
     def performance_counters(self):
         return self.perf
@@ -199,32 +211,40 @@ class Dota2Game:
             # , stdin=subprocess.PIPE
         )
 
-    def _get_next(self, q1, q2):
+    def _get_next(self, q1, q2, step=0.01):
         m1, m2 = None, None
+        r1, r2 = None, None
 
+        total = 0
         while True:
             if m1 is None and not q1.empty():
-                m1 = q1.get()
+                m1, r1, perf = q1.get()
 
-                self.rad_perf = m1['perf']
+                self.rad_perf = perf
                 self.rad_perf.state_rcv = time.time()
 
             if m2 is None and not q2.empty():
-                m2 = q2.get()
+                m2, r2, perf = q2.get()
 
-                self.dire_perf = m2['perf']
+                self.dire_perf = perf
                 self.dire_perf.state_rcv = time.time()
 
-            if m1 and m2:
+            if m1 is not None and m2 is not None:
                 break
+
+            # total += 0.01
+            # if total > 1:
+            #     print(f'{m1}, {m2}')
+            #     total = 0
 
         n1 = q1.qsize()
         n2 = q2.qsize()
+        self.has_next = 2
 
         if any((n1 > 2, n2 > 2)):
             log.warning(f'Running late on state processing (radiant: {n1}) (dire: {n2})')
 
-        return m1, m2
+        return (m1, r1), (m2, r2)
 
     def start_ipc(self):
         """Start inter-process communication processes.
@@ -242,6 +262,8 @@ class Dota2Game:
 
         # Dire State
         self.dire_state_delta_queue = self.manager.Queue()
+        self.dire_state_query_request = self.manager.Queue()
+        self.dire_state_query_reply = self.manager.Queue()
         self.dire_state_process = world_listener_process(
             '127.0.0.1',
             self.options.port_dire,
@@ -249,11 +271,15 @@ class Dota2Game:
             self.state,
             None,
             'Dire',
-            level
+            level,
+            Stitcher,
+            (self.dire_state_query_request, self.dire_state_query_reply)
         )
 
         # Radiant State
         self.radiant_state_delta_queue = self.manager.Queue()
+        self.rad_state_query_request = self.manager.Queue()
+        self.rad_state_query_reply = self.manager.Queue()
         self.radiant_state_process = world_listener_process(
             '127.0.0.1',
             self.options.port_radiant,
@@ -261,7 +287,9 @@ class Dota2Game:
             self.state,
             None,
             'Radiant',
-            level
+            level,
+            Stitcher,
+            (self.rad_state_query_request, self.rad_state_query_reply)
         )
 
         # IPC receive
@@ -287,6 +315,17 @@ class Dota2Game:
             # Setup the server as a monitor
             self.http_rpc_recv = self.config.rpc_recv
             self.http_rpc_send = self.config.rpc_send
+
+    def get_entities(self, pid, x, y):
+        request = self.rad_state_query_request
+        reply = self.rad_state_query_reply
+
+        if pid > 5:
+            request = self.dire_state_query_request
+            reply = self.dire_state_query_reply
+
+        request.put(('pos', (x, y)))
+        return reply.get()
 
     def stop(self, timeout=2):
         """Stop the game in progress
@@ -353,13 +392,11 @@ class Dota2Game:
             self.dire_state_delta_queue
         )
 
-        self.replay.save(radiant, dire)
+        self.radiant_batch = radiant[0]
+        self.radiant_reward = radiant[1]
 
-        self.update_dire_state(dire)
-        self.dire_perf.state_applied = time.time()
-
-        self.update_radiant_state(radiant)
-        self.rad_perf.state_applied = time.time()
+        self.dire_batch = dire[0]
+        self.dire_reward = dire[1]
 
         e = time.time()
         self.state['state_time'] = e - s
@@ -399,17 +436,29 @@ class Dota2Game:
 
         return stop
 
-    def wait_end_setup(self):
+    def wait_end_setup(self, sleep_time=0.01):
         """Wait until draft starts"""
+
+        total = 0
         while self.state and self.state.get('draft') is None and self.running:
-            time.sleep(0.01)
+            time.sleep(sleep_time)
+            total += sleep_time
             self._tick()
 
-    def wait_end_draft(self):
+            # if total > 1:
+            #     print(self.state, self.running)
+
+    def wait_end_draft(self, sleep_time=0.01):
         """Wait until draft ends and playing can start"""
+
+        total = 0
         while self.state and not self.state.get('game', False) and not self.ready and self.running:
-            time.sleep(0.01)
+            time.sleep(sleep_time)
+            total += sleep_time
             self._tick()
+
+            # if total > 1:
+            #     print(self.state, self.running)
 
     def wait(self):
         """Wait for the game to finish, this is used for debugging exclusively"""
@@ -469,6 +518,9 @@ class Dota2Game:
             if bid > 4:
                 self.dire_bots.append(bid)
 
+        self.state['rad_bots'] = self.rad_bots
+        self.state['dire_bots'] = self.dire_bots
+
     def _receive_message(self, faction: int, player_id: int, message: dict):
         # error processing
         error = message.get('E')
@@ -492,6 +544,7 @@ class Dota2Game:
                 self.state['game'] = True
                 self._bots.sort()
                 self._set_bot_by_faction()
+
                 # 1v1 Mid is buggy and all bots are spawned
                 # as a hack we ignore them
                 if self.options.game_mode == DOTA_GameMode.DOTA_GAMEMODE_1V1MID:

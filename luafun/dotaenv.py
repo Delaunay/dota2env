@@ -2,6 +2,7 @@
 that is suitable for machine learning
 """
 import asyncio
+from dataclasses import dataclass
 from itertools import chain
 import logging
 import time
@@ -12,15 +13,13 @@ import torch
 
 from luafun.game.game import Dota2Game
 from luafun.game.modes import DOTA_GameMode
-import luafun.game.dota2.state_types as msg
 from luafun.game.ipc_send import TEAM_RADIANT, TEAM_DIRE
 from luafun.game.action import action_space
 import luafun.game.constants as const
 import luafun.game.action as actions
 from luafun.utils.options import option
-from luafun.observation.stitcher import Stitcher
-from luafun.reward import Reward
 from luafun.draft import DraftTracker
+from luafun.observation.stitcher import Stitcher
 
 
 log = logging.getLogger(__name__)
@@ -41,6 +40,16 @@ async def _acquire_faction(state):
 
 def acquire_state(state):
     return asyncio.run(_acquire_faction(state))
+
+
+@dataclass
+class Dota2EnvOptions:
+    # God Reward use hidden information to compute the reward
+    # if enabled returns Radiant - Dire reward using the state update from both
+    # if disabled the dire reward is guessed from the available information
+    #
+    # Have to use the GodReward, else the reward is a bit spotty
+    GodReward: bool = True
 
 
 # TODO: add while env.drafting()
@@ -70,42 +79,21 @@ class Dota2Env(Dota2Game):
     dedicated: bool
         runs server only
 
-    stitcher: Stitcher
-        Stitch game state together
-
-    reward: Reward
-        Used to compute reward after every step
-
     _config:
         Internal argument used when the HTTP server controls the environment
     """
-    def __init__(self, path=option('dota.path', None), dedicated=True, draft=0, stitcher=None, reward=None, _config=None):
+    def __init__(self, path=option('dota.path', None), dedicated=True, draft=0, _config=None):
         super(Dota2Env, self).__init__(path, dedicated, draft, config=_config)
         # For debugging only
         # self.radiant_message = open(self.paths.bot_file('out_radiant.txt'), 'w')
         # self.dire_message = open(self.paths.bot_file('out_dire.txt'), 'w')
 
         self._action_space = action_space()
-
-        # Function to stich state together
-        if stitcher is None:
-            stitcher = Stitcher
-
-        self.sticher_factory = stitcher
-        self.dire_stitcher = stitcher(faction=TEAM_DIRE)
-        self.radiant_stitcher = stitcher(faction=TEAM_RADIANT)
-
-        # Reward function
-        if reward is None:
-            reward = Reward()
-
-        self.reward = reward
+        self.env_options = Dota2EnvOptions()
 
         # Draft tracker for the drafting AI
         self.draft_tracker = DraftTracker()
-        self.radiant_stitcher.draft = self.draft_tracker.draft
-        self.dire_stitcher.draft = self.draft_tracker.draft
-
+        self.stitcher_cls = Stitcher
         self.has_next = 0
         self.step_start = None
         self.step_end = 0
@@ -119,41 +107,6 @@ class Dota2Env(Dota2Game):
         # self.dire_message.close()
         # self.unit_size.close()
         pass
-
-    def dire_message(self):
-        return self.dire_stitcher.latest_message
-
-    def radiant_message(self):
-        return self.radiant_stitcher.latest_message
-
-    # For states we should have a queue of state to observe
-    def update_dire_state(self, message: msg.CMsgBotWorldState):
-        """Receive a state diff from the game for dire"""
-        try:
-            self.dire_stitcher.apply_diff(message)
-            self.has_next += 1
-        except Exception as e:
-            log.error(f'Error happened during state stitching {e}')
-            log.error(traceback.format_exc())
-
-        # self.unit_size.write(f'{len(self._dire_state._units)}\n')
-
-        # self.dire_message.write(str(type(message)) + '\n')
-        # self.dire_message.write(str(message))
-        # self.dire_message.write('-------\n')
-
-    def update_radiant_state(self, message: msg.CMsgBotWorldState):
-        """Receive a state diff from the game for radiant"""
-        try:
-            self.radiant_stitcher.apply_diff(message)
-            self.has_next += 1
-        except Exception as e:
-            log.error(f'Error happened during state stitching {e}')
-            log.error(traceback.format_exc())
-
-        # self.radiant_message.write(str(type(message)) + '\n')
-        # self.radiant_message.write(str(message))
-        # self.radiant_message.write('-------\n')
 
     def receive_message(self, faction: int, player_id: int, message: dict):
         """We only use log to get errors back if any"""
@@ -175,11 +128,9 @@ class Dota2Env(Dota2Game):
         """
         if self.running:
             self.__exit__(None, None, None)
-            self.radiant_stitcher = self.sticher_factory()
-            self.dire_stitcher = self.sticher_factory()
 
         self.__enter__()
-        return self.radiant_stitcher, self.dire_stitcher
+        return None, None
 
     def close(self):
         """Stop the game"""
@@ -231,11 +182,11 @@ class Dota2Env(Dota2Game):
     @property
     def observation_space(self):
         """Return the observation space we observe at every step"""
-        return self.dire_stitcher.observation_space
+        return self.stitcher_cls.observation_space
 
     def initial(self):
         """Return the initial state of the game"""
-        return self.radiant_stitcher, self.dire_stitcher
+        return None, None
 
     def step(self, action):
         """Make an action and return the resulting state
@@ -288,13 +239,15 @@ class Dota2Env(Dota2Game):
         self.has_next = 0
         self.perf.acquire_time += time.time() - s
 
-        radbatch = self.radiant_stitcher.generate_batch(self.rad_bots)
-        direbatch = self.dire_stitcher.generate_batch(self.dire_bots)
+        r = self.radiant_reward - self.dire_reward
+        d = - r
 
-        obs = torch.cat((radbatch, direbatch), 0)
+        r = torch.ones(self.radiant_batch.shape[0]) * r
+        d = torch.ones(self.dire_batch.shape[0]) * d
 
-        # 3. Compute the reward
-        reward = self.reward(obs[:len(self.rad_bots)], obs[len(self.rad_bots):])
+        reward = torch.cat([r, d], 0)
+        obs = torch.cat([self.radiant_batch, self.dire_batch], 0)
+
         done = self.state.get('win', None) is not None
         info = dict()
 
@@ -343,11 +296,7 @@ class Dota2Env(Dota2Game):
             y = pos[1] * 8288
             action[actions.ARG.vLoc] = (x, y)
 
-            state = self.radiant_stitcher
-            if pid >= 5:
-                state = self.dire_stitcher
-
-            unit, rune, tree = state.get_entities(x, y)
+            unit, rune, tree = self.get_entities(pid, x, y)
 
             action[actions.ARG.iTree] = tree
             action[actions.ARG.nRune] = rune
