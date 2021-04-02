@@ -239,7 +239,13 @@ class Dota2Env(Dota2Game):
         self.has_next = 0
         self.perf.acquire_time += time.time() - s
 
-        reward = torch.cat([self.radiant_reward, self.dire_reward], 0)
+        r = self.radiant_reward - self.dire_reward
+        d = - r
+
+        r = torch.ones(self.radiant_batch.shape[0]) * r
+        d = torch.ones(self.dire_batch.shape[0]) * d
+
+        reward = torch.cat([r, d], 0)
         obs = torch.cat([self.radiant_batch, self.dire_batch], 0)
 
         done = self.state.get('win', None) is not None

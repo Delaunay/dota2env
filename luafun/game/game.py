@@ -239,6 +239,7 @@ class Dota2Game:
 
         n1 = q1.qsize()
         n2 = q2.qsize()
+        self.has_next = 2
 
         if any((n1 > 2, n2 > 2)):
             log.warning(f'Running late on state processing (radiant: {n1}) (dire: {n2})')
