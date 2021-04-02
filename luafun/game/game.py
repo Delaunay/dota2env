@@ -135,6 +135,11 @@ class Dota2Game:
         self.rad_perf_prev = None
         self.perf = ProcessingStates(0, 0, 0, 0, 0, 0, 0, 0)
 
+        self.dire_state_query_request = None
+        self.dire_state_query_reply = None
+        self.rad_state_query_request = None
+        self.rad_state_query_reply = None
+
         self.extractor = Extractor()
         self.replay = SaveReplay('replay.txt')
         log.debug(f'Main Process: {os.getpid()}')
@@ -206,10 +211,11 @@ class Dota2Game:
             # , stdin=subprocess.PIPE
         )
 
-    def _get_next(self, q1, q2):
+    def _get_next(self, q1, q2, step=0.01):
         m1, m2 = None, None
         r1, r2 = None, None
 
+        total = 0
         while True:
             if m1 is None and not q1.empty():
                 m1, r1, perf = q1.get()
@@ -223,8 +229,13 @@ class Dota2Game:
                 self.dire_perf = perf
                 self.dire_perf.state_rcv = time.time()
 
-            if m1 and m2:
+            if m1 is not None and m2 is not None:
                 break
+
+            # total += 0.01
+            # if total > 1:
+            #     print(f'{m1}, {m2}')
+            #     total = 0
 
         n1 = q1.qsize()
         n2 = q2.qsize()
@@ -250,6 +261,8 @@ class Dota2Game:
 
         # Dire State
         self.dire_state_delta_queue = self.manager.Queue()
+        self.dire_state_query_request = self.manager.Queue()
+        self.dire_state_query_reply = self.manager.Queue()
         self.dire_state_process = world_listener_process(
             '127.0.0.1',
             self.options.port_dire,
@@ -259,10 +272,13 @@ class Dota2Game:
             'Dire',
             level,
             Stitcher,
+            (self.dire_state_query_request, self.dire_state_query_reply)
         )
 
         # Radiant State
         self.radiant_state_delta_queue = self.manager.Queue()
+        self.rad_state_query_request = self.manager.Queue()
+        self.rad_state_query_reply = self.manager.Queue()
         self.radiant_state_process = world_listener_process(
             '127.0.0.1',
             self.options.port_radiant,
@@ -271,7 +287,8 @@ class Dota2Game:
             None,
             'Radiant',
             level,
-            Stitcher
+            Stitcher,
+            (self.rad_state_query_request, self.rad_state_query_reply)
         )
 
         # IPC receive
@@ -297,6 +314,17 @@ class Dota2Game:
             # Setup the server as a monitor
             self.http_rpc_recv = self.config.rpc_recv
             self.http_rpc_send = self.config.rpc_send
+
+    def get_entities(self, pid, x, y):
+        request = self.rad_state_query_request
+        reply = self.rad_state_query_reply
+
+        if pid > 5:
+            request = self.dire_state_query_request
+            reply = self.dire_state_query_reply
+
+        request.put(('pos', (x, y)))
+        return reply.get()
 
     def stop(self, timeout=2):
         """Stop the game in progress
@@ -407,17 +435,29 @@ class Dota2Game:
 
         return stop
 
-    def wait_end_setup(self):
+    def wait_end_setup(self, sleep_time=0.01):
         """Wait until draft starts"""
+
+        total = 0
         while self.state and self.state.get('draft') is None and self.running:
-            time.sleep(0.01)
+            time.sleep(sleep_time)
+            total += sleep_time
             self._tick()
 
-    def wait_end_draft(self):
+            # if total > 1:
+            #     print(self.state, self.running)
+
+    def wait_end_draft(self, sleep_time=0.01):
         """Wait until draft ends and playing can start"""
+
+        total = 0
         while self.state and not self.state.get('game', False) and not self.ready and self.running:
-            time.sleep(0.01)
+            time.sleep(sleep_time)
+            total += sleep_time
             self._tick()
+
+            # if total > 1:
+            #     print(self.state, self.running)
 
     def wait(self):
         """Wait for the game to finish, this is used for debugging exclusively"""

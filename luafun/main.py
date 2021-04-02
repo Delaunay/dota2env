@@ -61,6 +61,7 @@ def main(config=None):
             model.init_draft()
         # ---
 
+        print('Drafting')
         # Draft here if enabled
         while game.running:
 
@@ -72,6 +73,8 @@ def main(config=None):
         game.wait_end_draft()
         model.close_draft()
         model.init_play(game)
+
+        print('Playing in progress')
 
         # Play the game
         while game.running:

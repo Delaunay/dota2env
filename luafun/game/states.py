@@ -35,10 +35,12 @@ class SyncWorldListener:
 
     """
 
-    def __init__(self, host, port, queue, state, stats, name, stitcher):
+    def __init__(self, host, port, queue, state, stats, name, stitcher, query):
         self.host = host
         self.port = port
         self.queue = queue
+        self.query_request = query[0]
+        self.query_reply = query[1]
         self.sock = None
         self.state = state
         self.stats = stats
@@ -186,8 +188,8 @@ class SyncWorldListener:
     @property
     def botids(self):
         if self.name == 'Dire':
-            return self.state['dire_bots']
-        return self.state['rad_bots']
+            return self.state.get('dire_bots', [])
+        return self.state.get('rad_bots', [])
 
     def insert_message(self, msg, s):
         self.proto_decode = time.time()
@@ -202,10 +204,15 @@ class SyncWorldListener:
         perf.proto_send = time.time()
 
         self.stitcher.apply_diff(json_msg)
-
         perf.state_applied = time.time()
-        batch = self.stitcher.generate_batch(self.botids)
-        reward = self.stitcher.partial_reward()
+
+        botids = self.botids
+        batch = []
+        reward = []
+        if botids:
+            batch = self.stitcher.generate_batch(self.botids)
+            reward = self.stitcher.partial_reward()
+
         perf.batch_generated = time.time()
 
         self.queue.put((batch, reward, perf))
@@ -219,8 +226,14 @@ class SyncWorldListener:
         # this needs to be lower than the game.deadline so in case of disconnect we can reconnect fast
         readable, _, error = select.select([self.sock], [], [self.sock], 0.05)
 
-        for read in readable:
+        # ---
+        if not self.query_request.empty():
+            fun, args = self.query_request.get()
+            if fun == 'pos':
+                self.query_reply.put(self.stitcher.get_entities(*args))
+        # ---
 
+        for read in readable:
             msg = self.read_message(read)
 
             if msg is not None:
@@ -280,7 +293,7 @@ class SyncWorldListener:
         log.debug('World state listener shutting down')
 
 
-def sync_world_listener(host, port, queue, state, stats, level, name, stitcher):
+def sync_world_listener(host, port, queue, state, stats, level, name, stitcher, query):
     try:
         import coverage
         coverage.process_startup()
@@ -288,15 +301,15 @@ def sync_world_listener(host, port, queue, state, stats, level, name, stitcher):
         pass
 
     logging.basicConfig(level=level)
-    wl = SyncWorldListener(host, port, queue, state, stats, name, stitcher)
+    wl = SyncWorldListener(host, port, queue, state, stats, name, stitcher, query)
     wl.run()
 
 
-def world_listener_process(host, port, queue, state, stats, name, level, stitcher):
+def world_listener_process(host, port, queue, state, stats, name, level, stitcher, query):
     p = mp.Process(
         name=f'WorldListener-{name}',
         target=sync_world_listener,
-        args=(host, port, queue, state, stats, level, name, stitcher)
+        args=(host, port, queue, state, stats, level, name, stitcher, query)
     )
     p.start()
     log.debug(f'WorldListener-{name}: {p.pid}')

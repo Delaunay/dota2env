@@ -239,6 +239,8 @@ class Dota2Env(Dota2Game):
         self.has_next = 0
         self.perf.acquire_time += time.time() - s
 
+        reward = torch.cat([self.radiant_reward, self.dire_reward], 0)
+        obs = torch.cat([self.radiant_batch, self.dire_batch], 0)
 
         done = self.state.get('win', None) is not None
         info = dict()
@@ -288,11 +290,7 @@ class Dota2Env(Dota2Game):
             y = pos[1] * 8288
             action[actions.ARG.vLoc] = (x, y)
 
-            state = self.radiant_stitcher
-            if pid >= 5:
-                state = self.dire_stitcher
-
-            unit, rune, tree = state.get_entities(x, y)
+            unit, rune, tree = self.get_entities(pid, x, y)
 
             action[actions.ARG.iTree] = tree
             action[actions.ARG.nRune] = rune
