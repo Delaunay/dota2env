@@ -18,6 +18,7 @@ import luafun.game.constants as const
 from luafun.game.states import world_listener_process
 from luafun.utils.options import option
 from luafun.game.performance import ProcessingStates
+from luafun.observation.stitcher import Stitcher
 
 
 log = logging.getLogger(__name__)
@@ -139,6 +140,12 @@ class Dota2Game:
         log.debug(f'Main Process: {os.getpid()}')
         self._bots = []
 
+        self.radiant_batch = None
+        self.radiant_reward = None
+
+        self.dire_batch = None
+        self.dire_reward = None
+
     def performance_counters(self):
         return self.perf
 
@@ -201,18 +208,19 @@ class Dota2Game:
 
     def _get_next(self, q1, q2):
         m1, m2 = None, None
+        r1, r2 = None, None
 
         while True:
             if m1 is None and not q1.empty():
-                m1 = q1.get()
+                m1, r1, perf = q1.get()
 
-                self.rad_perf = m1['perf']
+                self.rad_perf = perf
                 self.rad_perf.state_rcv = time.time()
 
             if m2 is None and not q2.empty():
-                m2 = q2.get()
+                m2, r2, perf = q2.get()
 
-                self.dire_perf = m2['perf']
+                self.dire_perf = perf
                 self.dire_perf.state_rcv = time.time()
 
             if m1 and m2:
@@ -224,7 +232,7 @@ class Dota2Game:
         if any((n1 > 2, n2 > 2)):
             log.warning(f'Running late on state processing (radiant: {n1}) (dire: {n2})')
 
-        return m1, m2
+        return (m1, r1), (m2, r2)
 
     def start_ipc(self):
         """Start inter-process communication processes.
@@ -249,7 +257,8 @@ class Dota2Game:
             self.state,
             None,
             'Dire',
-            level
+            level,
+            Stitcher,
         )
 
         # Radiant State
@@ -261,7 +270,8 @@ class Dota2Game:
             self.state,
             None,
             'Radiant',
-            level
+            level,
+            Stitcher
         )
 
         # IPC receive
@@ -353,13 +363,11 @@ class Dota2Game:
             self.dire_state_delta_queue
         )
 
-        self.replay.save(radiant, dire)
+        self.radiant_batch = radiant[0]
+        self.radiant_reward = radiant[1]
 
-        self.update_dire_state(dire)
-        self.dire_perf.state_applied = time.time()
-
-        self.update_radiant_state(radiant)
-        self.rad_perf.state_applied = time.time()
+        self.dire_batch = dire[0]
+        self.dire_reward = dire[1]
 
         e = time.time()
         self.state['state_time'] = e - s
@@ -469,6 +477,9 @@ class Dota2Game:
             if bid > 4:
                 self.dire_bots.append(bid)
 
+        self.state['rad_bots'] = self.rad_bots
+        self.state['dire_bots'] = self.dire_bots
+
     def _receive_message(self, faction: int, player_id: int, message: dict):
         # error processing
         error = message.get('E')
@@ -492,6 +503,7 @@ class Dota2Game:
                 self.state['game'] = True
                 self._bots.sort()
                 self._set_bot_by_faction()
+
                 # 1v1 Mid is buggy and all bots are spawned
                 # as a hack we ignore them
                 if self.options.game_mode == DOTA_GameMode.DOTA_GAMEMODE_1V1MID:

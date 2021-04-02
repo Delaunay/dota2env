@@ -11,8 +11,13 @@ import warnings
 from google.protobuf.json_format import MessageToDict
 from google.protobuf.message import DecodeError
 
+
 from luafun.game.dota2.dota_gcmessages_common_bot_script_pb2 import CMsgBotWorldState
 from luafun.game.performance import ProcessingStates
+
+from luafun.game.ipc_send import TEAM_RADIANT, TEAM_DIRE
+from luafun.observation.stitcher import Stitcher
+from luafun.reward import Reward
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +35,7 @@ class SyncWorldListener:
 
     """
 
-    def __init__(self, host, port, queue, state, stats, name):
+    def __init__(self, host, port, queue, state, stats, name, stitcher):
         self.host = host
         self.port = port
         self.queue = queue
@@ -46,7 +51,11 @@ class SyncWorldListener:
         self.proto_rcv = 0
         self.proto_decode = 0
         self.partial = b''
-        # self.msg_size = open('msg_size.txt', 'w')
+
+        if name == 'Dire':
+            self.stitcher = Stitcher(faction=TEAM_DIRE, reward=Reward())
+        else:
+            self.stitcher = Stitcher(faction=TEAM_RADIANT, reward=Reward())
 
     @property
     def running(self):
@@ -174,6 +183,12 @@ class SyncWorldListener:
         self.sock = self.connect(sleep_time=0.01)
         return None
 
+    @property
+    def botids(self):
+        if self.name == 'Dire':
+            return self.state['dire_bots']
+        return self.state['rad_bots']
+
     def insert_message(self, msg, s):
         self.proto_decode = time.time()
         json_msg = MessageToDict(
@@ -186,8 +201,14 @@ class SyncWorldListener:
         perf.proto_decode = self.proto_decode
         perf.proto_send = time.time()
 
-        json_msg['perf'] = perf
-        self.queue.put(json_msg)
+        self.stitcher.apply_diff(json_msg)
+
+        perf.state_applied = time.time()
+        batch = self.stitcher.generate_batch(self.botids)
+        reward = self.stitcher.partial_reward()
+        perf.batch_generated = time.time()
+
+        self.queue.put((batch, reward, perf))
         self.state[self.namespace] = (datetime.utcnow() - s).total_seconds()
 
     def _run(self):
@@ -259,7 +280,7 @@ class SyncWorldListener:
         log.debug('World state listener shutting down')
 
 
-def sync_world_listener(host, port, queue, state, stats, level, name):
+def sync_world_listener(host, port, queue, state, stats, level, name, stitcher):
     try:
         import coverage
         coverage.process_startup()
@@ -267,15 +288,15 @@ def sync_world_listener(host, port, queue, state, stats, level, name):
         pass
 
     logging.basicConfig(level=level)
-    wl = SyncWorldListener(host, port, queue, state, stats, name)
+    wl = SyncWorldListener(host, port, queue, state, stats, name, stitcher)
     wl.run()
 
 
-def world_listener_process(host, port, queue, state, stats, name, level):
+def world_listener_process(host, port, queue, state, stats, name, level, stitcher):
     p = mp.Process(
         name=f'WorldListener-{name}',
         target=sync_world_listener,
-        args=(host, port, queue, state, stats, level, name)
+        args=(host, port, queue, state, stats, level, name, stitcher)
     )
     p.start()
     log.debug(f'WorldListener-{name}: {p.pid}')

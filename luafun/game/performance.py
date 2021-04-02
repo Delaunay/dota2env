@@ -9,6 +9,7 @@ class ProcessingStates:
     state_rcv: float = -1
     state_applied: float = -1
     state_replied: float = -1
+    batch_generate: float = -1
     count: float = 1
     delay: float = 0
     acquire_time: float = 0
@@ -19,6 +20,7 @@ class ProcessingStates:
             self.proto_decode > 0,
             self.proto_send > 0,
             self.state_rcv > 0,
+            self.batch_generate > 0,
             self.state_applied > 0,
             self.state_replied > 0,
         ))
@@ -37,6 +39,7 @@ class ProcessingStates:
             self.proto_send +
             self.state_rcv +
             self.state_applied +
+            self.batch_generate +
             self.state_replied)
 
     def add(self, other, state_replied):

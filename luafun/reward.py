@@ -100,6 +100,7 @@ class Reward:
     """Base reward function, takes a state and return its resulting reward level"""
     def __init__(self):
         self.rewards = defaultdict(float)
+        self.breakdown_rewards = defaultdict(float)
         self.courier_state = [
             1 for _ in range(0, 10)
         ]
@@ -144,23 +145,24 @@ class Reward:
                 self.courier_state[pid] = courier_alive
         # ===
 
-        reward = (
-            RewardConst.KilledHero    * kills +
-            RewardConst.HeroDeath     * deaths +
-            RewardConst.Deny          * umsg['denies'] +
-            RewardConst.LastHit       * umsg['last_hits'] +
-            RewardConst.GoldSpent     * spent_gold +
-            RewardConst.GoldGained    * current_gold +
-            RewardConst.XPGained      * xp_gained +
-            RewardConst.ManaChanged   * mana_pct +
-            RewardConst.HealthChanged * health_reward +
-            RewardConst.CourierDeath  * self.courier_death_tracker[pid] +
+        reward = [
+            RewardConst.KilledHero    * kills,
+            RewardConst.HeroDeath     * deaths,
+            RewardConst.Deny          * umsg.get('denies', 0),
+            RewardConst.LastHit       * umsg.get('last_hits', 0),
+            RewardConst.GoldSpent     * spent_gold,
+            RewardConst.GoldGained    * current_gold,
+            RewardConst.XPGained      * xp_gained,
+            RewardConst.ManaChanged   * mana_pct,
+            RewardConst.HealthChanged * health_reward,
+            RewardConst.CourierDeath  * self.courier_death_tracker[pid],
             # FIXME: This requires us to define the area of the lanes
             # few rectangles
             RewardConst.LaneAssign * 0
-        )
+        ]
 
-        self.rewards[pid] = reward
+        self.breakdown_rewards[pid] = reward
+        self.rewards[pid] = sum(reward)
 
     def building_messages(self, umsg: Unit):
         reward = 0

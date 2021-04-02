@@ -30,7 +30,7 @@ def main(config=None):
     parser.add_argument('--interactive', action='store_true', default=False,
                         help='Make a human create the lobby')
 
-    parser.add_argument('--model', type=str, default=None,
+    parser.add_argument('--model', type=str, default='random',
                         help='Model name factory, defaults to a random action sampler')
 
     args = parser.parse_args()
@@ -42,10 +42,14 @@ def main(config=None):
     # logging.basicConfig(level=logging.INFO)
     logging.basicConfig(level=logging.DEBUG)
 
+    # Game options
     game.options.dedicated = not args.render
     game.options.interactive = args.interactive
     game.options.host_timescale = args.speed
     game.options.draft = int(args.draft)
+
+    # Training environment Options
+    # game.env_options.GodReward = False
 
     model = InferenceEngine(args.model)
 
@@ -77,8 +81,13 @@ def main(config=None):
             # take a random action
             state, reward, done, info = game.step(action)
 
+            if state is None:
+                break
+
             if game.cnt > 0 and game.cnt % 100 == 0:
                 print(f'Step time {game.avg / game.cnt:.4f}')
+
+            print(reward[0], reward[-1])
 
         print('Game Finished')
 

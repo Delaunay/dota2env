@@ -278,7 +278,7 @@ local function get_info()
 
     -- This will make dota2 unresponsive for a few minutes
     -- while the data is extracted
-    _get_passable()
+    -- _get_passable()
 
     -- CreateHTTPRequest
     -- CreateRemoteHTTPRequest

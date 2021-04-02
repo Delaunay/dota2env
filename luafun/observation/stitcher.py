@@ -334,7 +334,6 @@ class Stitcher:
         self.faction = faction
         self.minimap = None
         self.common = None
-        self.draft = None
         self.latest_message = None
         self.heroes = {
             0: Player(ally=TEAM_RADIANT == self.faction),
@@ -849,6 +848,12 @@ class Stitcher:
             return self.reward_builder.radiant_reward()
 
         return self.reward_builder.dire_reward()
+
+    def partial_reward(self):
+        if self.faction == TEAM_RADIANT:
+            return self.reward_builder.partial_radiant_reward()
+
+        return self.reward_builder.partial_dire_reward()
 
     def generic_apply(self, delta):
         self.reward_builder.clear()
