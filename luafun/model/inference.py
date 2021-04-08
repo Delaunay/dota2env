@@ -1,4 +1,5 @@
 from luafun.dotaenv import Dota2Env
+from luafun.utils.ring import RingBuffer
 from luafun.game.ipc_send import new_ipc_message
 
 
@@ -35,10 +36,10 @@ class InferenceEngine:
         # self.sampler = ActionSampler()
         # self.filter = lambda *args: lambda x: x
 
-    def load_model(self):
+    def load_model(self, weights):
         pass
 
-    def action(self, state):
+    def action(self, uid, state):
         """Build the observation batch and the action to take"""
         # batch = generate_game_batch(state, self.bots)
 
@@ -49,8 +50,9 @@ class InferenceEngine:
             return self.action_space.sample()
 
         # reload model
-        if self.trainer.new_inference_model:
-            self.load_model()
+        new_weights = self.trainer.weights
+        if new_weights is not None:
+            self.load_model(new_weights)
 
         # msg = self.model(state)
         # filter = self.filter(state, unit, rune, tree)
@@ -58,13 +60,23 @@ class InferenceEngine:
         return None
 
 
-class TrainEngine:
-    def __init__(self, train):
+class LocalInference(InferenceEngine):
+    def __init__(self):
+        self.time_steps = 16
+        self.states = RingBuffer(self.time_steps, None)
+
+    def load_model(self, weights):
         pass
 
-    @property
-    def new_inference_model(self):
-        return False
+    def init_play(self, game: Dota2Env):
+        pass
 
-    def push(self, *args):
+    def init_draft(self):
+        pass
+
+    def close_draft(self):
+        pass
+
+    def action(self, uid, state):
+        self.states.append(state)
         pass

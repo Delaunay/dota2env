@@ -3,11 +3,12 @@ import logging
 
 from luafun.dotaenv import dota2_environment
 from luafun.utils.options import option
-from luafun.model.inference import InferenceEngine, TrainEngine
+from luafun.model.inference import InferenceEngine
+from luafun.model.training import TrainEngine
 
 
 def main(config=None):
-    """This simply runs the environment forever, default to RandomActor (actions are random)
+    """This simply runs the environment until the game finishes, default to RandomActor (actions are random)
     It means bots will not do anything game winning, if drafting is enabled nothing will be drafted
     """
 
@@ -22,7 +23,7 @@ def main(config=None):
                         help='Custom Dota2 game location')
 
     parser.add_argument('--render', action='store_true', default=False,
-                        help='Custom Dota2 game location')
+                        help='Render the game on screen')
 
     parser.add_argument('--speed', type=float, default=4,
                         help='Speed multiplier')
@@ -30,9 +31,11 @@ def main(config=None):
     parser.add_argument('--interactive', action='store_true', default=False,
                         help='Make a human create the lobby')
 
+    # --model socket://192.163.0.102:8080
     parser.add_argument('--model', type=str, default='random',
                         help='Model name factory, defaults to a random action sampler')
 
+    # --trainer socket://192.163.0.103:8081
     parser.add_argument('--trainer', type=str, default='random',
                         help='')
 
@@ -50,7 +53,7 @@ def main(config=None):
     game.options.host_timescale = args.speed
     game.options.draft = int(args.draft)
 
-    train = TrainEngine(args.trainer)
+    train = TrainEngine(args.trainer, args.model)
     model = InferenceEngine(args.model, train)
 
     with game:
@@ -78,7 +81,7 @@ def main(config=None):
         # Play the game
         while game.running:
             # start issuing orders here
-            action = model.action(uid)
+            action = model.action(uid, state)
 
             # take a random action
             state, reward, done, info = game.step(action)

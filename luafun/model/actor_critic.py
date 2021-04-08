@@ -401,11 +401,11 @@ class HeroModel(nn.Module):
 
 
 class ActionSampler:
-    """Select and preprocess action retuned by our model"""
+    """Select and preprocess action returned by our model"""
     CATEGORICAL_FIELDS = [ARG.action, ARG.sItem, ARG.nSlot, ARG.ix2]
 
     def argmax(self, msg, filter):
-        """Inference only no exploration"""
+        """Inference only, no exploration"""
         fields = ActionSampler.CATEGORICAL_FIELDS
         logprobs = None
         entropy = None
@@ -454,66 +454,25 @@ class ActionSampler:
 
 
 class ActorCritic(nn.Module):
-    """Generic Implementation of the ActorCritic you should subclass to implement your model"""
-    def __init__(self, actor, critic):
+    def __init__(self, batch_size, seq, input_size):
         super(ActorCritic, self).__init__()
-        self.actor: nn.Module = actor
-        self.critic: nn.Module = critic
 
-    def actor_weights(self):
-        """Returns the actor weights"""
-        return self.actor.state_dict()
-
-    def load_actor(self, w):
-        """Update the actors weights"""
-        self.actor.load_state_dict(w)
-
-    def act(self, state):
-        """Infer the action to take, we only need actor when doing inference"""
-        with torch.no_grad():
-            action_probs = self.actor(state)
-
-            dist = distributions.Categorical(action_probs)
-            action = dist.sample()
-            action_logprobs = dist.log_prob(action)
-
-            return action
-
-    def eval(self, state, action):
-        """Compute the value of the action for training"""
-        with torch.enable_grad():
-            # Do the forward pass so we have gradients for the optimization
-            action_probs = self.actor(state)
-            dist = distributions.Categorical(action_probs)
-            action_logprobs = dist.log_prob(action)
-            dist_entropy = dist.entropy()
-
-            # Value the current state
-            value = self.critic(state)
-            return value, action_logprobs, dist_entropy
-
-    def forward(self):
-        raise NotImplementedError
-
-
-class BaseActorCritic(ActorCritic):
-    """Default actor critic implementation for debugging"""
-
-    def __init__(self, state_dim, action_dim, n_latent_var):
-        super(BaseActorCritic, self).__init__()
-        self.actor = nn.Sequential(
-            nn.Linear(state_dim, n_latent_var),
-            nn.Tanh(),
-            nn.Linear(n_latent_var, n_latent_var),
-            nn.Tanh(),
-            nn.Linear(n_latent_var, action_dim),
-            nn.Softmax(dim=-1)
-        )
-
+        self.actor = HeroModel(batch_size, seq, input_size)
         self.critic = nn.Sequential(
-            nn.Linear(state_dim, n_latent_var),
-            nn.Tanh(),
-            nn.Linear(n_latent_var, n_latent_var),
-            nn.Tanh(),
-            nn.Linear(n_latent_var, 1)
+            nn.Linear(input_size, input_size // 2),
+            nn.ReLU(),
+            nn.Linear(input_size // 2, input_size // 4),
+            nn.ReLU(),
+            nn.Linear(input_size // 4, 1)
         )
+
+    def evaluate(self, state, action):
+        """Evaluate the action taken """
+        action_probs = self.action_layer(state)
+        dist = distributions.Categorical(action_probs)
+        action_logprobs = dist.log_prob(action)
+
+        dist_entropy = dist.entropy()
+        state_value = self.critic(state)
+        return action_logprobs, torch.squeeze(state_value), dist_entropy
+
