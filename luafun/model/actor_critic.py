@@ -371,6 +371,8 @@ class HeroModel(nn.Module):
 
     def forward(self, x):
         """Inference with space exploration"""
+        print(x)
+        
         if self.h0 is None:
             hidden, (hn, cn) = self.internal_model(x, (self.h0_init, self.c0_init))
         else:

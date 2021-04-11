@@ -18,7 +18,7 @@ class TrainEngine:
         return None
 
     def push(self, uid, state, reward, done, info, action, logprob, filter):
-        self.engine.push(uid, state, reward, done, info, action, logprob, dilter)
+        self.engine.push(uid, state, reward, done, info, action, logprob, filter)
 
 
 @dataclass
@@ -118,8 +118,8 @@ class LocalTrainEngine:
     def weights(self):
         return None
 
-    def push(self, uid, state, reward, done, info, action, logprob):
-        self.dataset.push(uid, state, reward, done, info, action, logprob)
+    def push(self, uid, state, reward, done, info, action, logprob, filter):
+        self.dataset.push(uid, state, reward, done, info, action, logprob, filter)
 
     def train(self):
         batch = self.sampler.new_sample()

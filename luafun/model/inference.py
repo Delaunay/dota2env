@@ -51,7 +51,7 @@ class InferenceEngine:
         if self.passive:
             return None, None, None
 
-        if self.random:
+        if self.random or state is None:
             return self.action_space.sample(), None, None
 
         # reload model

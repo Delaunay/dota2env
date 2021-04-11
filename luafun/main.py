@@ -58,12 +58,12 @@ def main(config=None):
     model = InferenceEngine(args.model, train)
 
     with game:
-        state = game.initial()
-
         # Initialize Drafter & Encoders
         if game.options.draft:
             model.init_draft()
         # ---
+
+        state, reward, done, info = game.initial()
 
         # Draft here if enabled
         while game.running:

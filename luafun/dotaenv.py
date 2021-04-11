@@ -235,7 +235,7 @@ class Dota2Env(Dota2Game):
 
     def initial(self):
         """Return the initial state of the game"""
-        return self.radiant_stitcher, self.dire_stitcher
+        return None, None, None, None
 
     def step(self, action):
         """Make an action and return the resulting state
