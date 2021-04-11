@@ -1,6 +1,11 @@
 from luafun.dotaenv import Dota2Env
 from luafun.utils.ring import RingBuffer
+from luafun.model.training import TrainEngine
 from luafun.game.ipc_send import new_ipc_message
+
+
+import torch
+import torch.distributions as distributions
 
 
 class InferenceEngine:
@@ -8,7 +13,7 @@ class InferenceEngine:
     The newest model is pulled from time to time to make sure it keeps improving
     """
 
-    def __init__(self, model, train):
+    def __init__(self, model, train: TrainEngine):
         self.bots = None
         self.model = None
         self.state_space = None
@@ -39,20 +44,31 @@ class InferenceEngine:
     def load_model(self, weights):
         pass
 
-    def action(self, uid, state):
+    def action(self, uid, state) -> (torch.Tensor, torch.Tensor):
         """Build the observation batch and the action to take"""
         # batch = generate_game_batch(state, self.bots)
 
         if self.passive:
-            return None
+            return None, None, None
 
         if self.random:
-            return self.action_space.sample()
+            return self.action_space.sample(), None, None
 
         # reload model
         new_weights = self.trainer.weights
         if new_weights is not None:
             self.load_model(new_weights)
+
+        # Local model
+        if self.trainer:
+            probs = self.trainer.engine.actor_critic.infer(state)
+            # Filter actions here
+            filter = None
+            #
+            dist = distributions.Categorical(probs)
+            action = dist.sample()
+
+            return action, dist.log_prob(action), filter
 
         # msg = self.model(state)
         # filter = self.filter(state, unit, rune, tree)

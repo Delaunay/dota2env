@@ -53,7 +53,8 @@ def main(config=None):
     game.options.host_timescale = args.speed
     game.options.draft = int(args.draft)
 
-    train = TrainEngine(args.trainer, args.model)
+    obs_size = game.observation_space
+    train = TrainEngine(args.trainer, args.model, (obs_size, 16, 16))
     model = InferenceEngine(args.model, train)
 
     with game:
@@ -81,13 +82,13 @@ def main(config=None):
         # Play the game
         while game.running:
             # start issuing orders here
-            action = model.action(uid, state)
+            action, logprob, filter = model.action(uid, state)
 
             # take a random action
             state, reward, done, info = game.step(action)
 
             # push the new observation
-            train.push(uid, state, reward, done, info, action)
+            train.push(uid, state, reward, done, info, action, logprob, filter)
 
             if state is None:
                 break

@@ -33,3 +33,5 @@ decode*.txt
 luafun/plots/geckodriver.log
 tests/resources/replay.txt
 replay*.txt
+
+.ipynb_checkpoints/

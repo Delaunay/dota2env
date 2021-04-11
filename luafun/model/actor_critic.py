@@ -466,6 +466,11 @@ class ActorCritic(nn.Module):
             nn.Linear(input_size // 4, 1)
         )
 
+    def infer(self, state):
+        """Infer next move"""
+        with torch.no_grad():
+            return self.actor(state)
+
     def evaluate(self, state, action):
         """Evaluate the action taken """
         action_probs = self.action_layer(state)
