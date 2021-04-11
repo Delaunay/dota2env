@@ -1,7 +1,11 @@
 from luafun.dotaenv import Dota2Env
 from luafun.utils.ring import RingBuffer
 from luafun.model.training import TrainEngine
+from luafun.model.filter import ActionFilter
+from luafun.model.actor_critic import ActionSampler
 from luafun.game.ipc_send import new_ipc_message
+
+from luafun.game.action import ARG
 
 
 import torch
@@ -20,9 +24,12 @@ class InferenceEngine:
         self.sampler = None
         self.filter = None
         self.action_space = None
+        self.action_sampler = ActionSampler()
         self.passive = model == 'passive'
         self.random = model == 'random'
         self.trainer = train
+        self.obs = []
+        # self.filter = ActionFilter()
 
     def init_draft(self):
         pass
@@ -39,10 +46,36 @@ class InferenceEngine:
         # self.model = HeroModel(len(self.bots), input_size, 16)
         # self.filter = ActionFilter()
         # self.sampler = ActionSampler()
-        # self.filter = lambda *args: lambda x: x
+        #  lambda *args: lambda x: x
 
     def load_model(self, weights):
         pass
+
+    def make_batch(self, state):
+        self.obs.append(state)
+
+        if len(self.obs) == 16:
+            self.obs = self.obs[-16:]
+
+        return torch.stack(self.obs, dim=1)
+
+    def make_ipc_message(self, action):
+        msg = new_ipc_message()
+
+        for i, pid in enumerate(self.bots):
+            f = 2
+            if pid > 4:
+                f = 3
+
+            msg[f][pid] = {
+                ARG.action: action[ARG.action][i].item(),
+                ARG.vLoc: action[ARG.vLoc][i].tolist(),
+                ARG.sItem: action[ARG.sItem][i].item(),
+                ARG.nSlot: action[ARG.nSlot][i].item(),
+                ARG.ix2: action[ARG.ix2][i].item(),
+            }
+
+        return msg
 
     def action(self, uid, state) -> (torch.Tensor, torch.Tensor):
         """Build the observation batch and the action to take"""
@@ -61,14 +94,16 @@ class InferenceEngine:
 
         # Local model
         if self.trainer:
-            probs = self.trainer.engine.actor_critic.infer(state)
-            # Filter actions here
-            filter = None
-            #
-            dist = distributions.Categorical(probs)
-            action = dist.sample()
+            states = self.make_batch(state)
 
-            return action, dist.log_prob(action), filter
+            action_probs = self.trainer.engine.actor_critic.infer(states)
+
+            # filter, action, log_probs = self.filter(action_probs)
+            filter = lambda x: x
+
+            action, log_probs, entropy = self.action_sampler.sampled(action_probs, filter)
+
+            return self.make_ipc_message(action), log_probs, filter
 
         # msg = self.model(state)
         # filter = self.filter(state, unit, rune, tree)

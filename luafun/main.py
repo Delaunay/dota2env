@@ -54,7 +54,7 @@ def main(config=None):
     game.options.draft = int(args.draft)
 
     obs_size = game.observation_space
-    train = TrainEngine(args.trainer, args.model, (obs_size, 16, 16))
+    train = TrainEngine(args.trainer, args.model, (obs_size, 10, 16))
     model = InferenceEngine(args.model, train)
 
     with game:
@@ -84,7 +84,7 @@ def main(config=None):
             # start issuing orders here
             action, logprob, filter = model.action(uid, state)
 
-            # take a random action
+            # select an action to perform
             state, reward, done, info = game.step(action)
 
             # push the new observation

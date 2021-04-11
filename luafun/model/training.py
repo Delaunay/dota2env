@@ -104,7 +104,7 @@ class RolloutSampler:
 
 
 class LocalTrainEngine:
-    def __init__(self, obssize, batch=16, timestep=16):
+    def __init__(self, obssize, batch=10, timestep=16):
         self.dataset = RolloutDataset(timestep)
         self.sampler = RolloutSampler(self.dataset, batch)
         self.actor_critic = ActorCritic(batch, timestep, obssize)

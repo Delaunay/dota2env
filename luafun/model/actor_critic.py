@@ -306,6 +306,21 @@ class HeroModel(nn.Module):
     >>> act[ARG.sItem][player].shape
     torch.Size([288])
 
+
+    Make a batch from multiple observations
+    >>> a = torch.randn(batch_size, input_size)
+    >>> b = torch.randn(batch_size, input_size)
+    >>> batch = torch.stack([a, b], 1)
+
+    >>> batch.shape
+    torch.Size([10, 2, 1024])
+
+    >>> with torch.no_grad():
+    ...     act = model(batch)
+
+    >>> act[ARG.action].shape
+    torch.Size([10, 32])
+
     """
 
     def __init__(self, batch_size, seq, input_size):
@@ -371,8 +386,6 @@ class HeroModel(nn.Module):
 
     def forward(self, x):
         """Inference with space exploration"""
-        print(x)
-        
         if self.h0 is None:
             hidden, (hn, cn) = self.internal_model(x, (self.h0_init, self.c0_init))
         else:

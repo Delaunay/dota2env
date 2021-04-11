@@ -360,6 +360,7 @@ class Stitcher:
         # Proximity mapping
         self.proximities = ProximityMapper()
         self._size = Stitcher.observation_size(faction)
+        self.empty = True
 
     def get_entities(self, x, y):
         return self.proximities.entities(x, y)
@@ -385,6 +386,10 @@ class Stitcher:
         """Take a world state delta and apply it to a previous state"""
         import time
 
+        if delta is None:
+            return
+
+        self.empty = False
         self.latest_message = delta
         self.generic_apply(delta)
         e = time.time()
@@ -404,6 +409,9 @@ class Stitcher:
         s = 0
         e = 0
 
+        if self.empty:
+            return state
+
         player = self.heroes.get(bid)
         if player is None:
             return state
@@ -420,6 +428,9 @@ class Stitcher:
             s = e
             e = s + RuneState.Size
             rune = self.runes.get(i)
+
+            if rune is None:
+                continue
 
             # set hero location
             for i, hid in enumerate(horder):

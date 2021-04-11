@@ -52,3 +52,7 @@ class ActionFilter:
 
     def get_filter(self, state, unit, rune, tree):
         pass
+
+
+    def sample(self, action):
+        pass
