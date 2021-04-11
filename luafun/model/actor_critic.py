@@ -6,6 +6,8 @@ from luafun.draft import DraftFields
 from luafun.game.action import Action, AbilitySlot, ARG
 import luafun.game.constants as const
 
+from luafun.game.ipc_send import new_ipc_message
+
 
 class CategoryEncoder(nn.Module):
     """Takes a hot encoded vector and returns a compact representation of the category
@@ -385,7 +387,6 @@ class HeroModel(nn.Module):
         self.hero_embedder = HeroEncoder()
 
     def forward(self, x):
-        """Inference with space exploration"""
         if self.h0 is None:
             hidden, (hn, cn) = self.internal_model(x, (self.h0_init, self.c0_init))
         else:
@@ -416,7 +417,53 @@ class HeroModel(nn.Module):
 
 
 class ActionSampler:
-    """Select and preprocess action returned by our model"""
+    """Select and preprocess action returned by our model
+
+    Examples
+    --------
+
+    >>> _ = torch.manual_seed(0)
+    >>> input_size = 1024
+    >>> seq = 16
+    >>> batch_size = 10
+
+    >>> model = HeroModel(batch_size, seq, input_size)
+
+    >>> batch = torch.randn(batch_size, seq, input_size)
+
+    >>> with torch.no_grad():
+    ...     act = model(batch)
+
+    >>> sampler = ActionSampler()
+    >>> msg, logprobs, entropy = sampler.sampled(act, lambda x: x)
+    >>> for k, v in msg.items():
+    ...     print(k, v.shape)
+    ActionArgument.action torch.Size([10])
+    ActionArgument.vLoc torch.Size([10, 2])
+    ActionArgument.sItem torch.Size([10])
+    ActionArgument.nSlot torch.Size([10])
+    ActionArgument.ix2 torch.Size([10])
+
+
+    >>> ipc_msg = sampler.make_ipc_message(msg, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    >>> for faction, team in ipc_msg.items():
+    ...     if faction == 'uid':
+    ...         continue
+    ...
+    ...     for pid, action in team.items():
+    ...         print(faction, pid, action)
+    2 0 {<ActionArgument.action: 0>: 30, <ActionArgument.vLoc: 1>: [0.004528522491455078, -0.004528522491455078], <ActionArgument.sItem: 6>: 56, <ActionArgument.nSlot: 3>: 16, <ActionArgument.ix2: 7>: 14}
+    2 1 {<ActionArgument.action: 0>: 11, <ActionArgument.vLoc: 1>: [0.004356980323791504, -0.004356861114501953], <ActionArgument.sItem: 6>: 120, <ActionArgument.nSlot: 3>: 5, <ActionArgument.ix2: 7>: 12}
+    2 2 {<ActionArgument.action: 0>: 11, <ActionArgument.vLoc: 1>: [0.006175041198730469, -0.0061751604080200195], <ActionArgument.sItem: 6>: 26, <ActionArgument.nSlot: 3>: 16, <ActionArgument.ix2: 7>: 2}
+    2 3 {<ActionArgument.action: 0>: 9, <ActionArgument.vLoc: 1>: [0.008698344230651855, -0.00869840383529663], <ActionArgument.sItem: 6>: 94, <ActionArgument.nSlot: 3>: 13, <ActionArgument.ix2: 7>: 11}
+    2 4 {<ActionArgument.action: 0>: 10, <ActionArgument.vLoc: 1>: [0.004852294921875, -0.004852116107940674], <ActionArgument.sItem: 6>: 114, <ActionArgument.nSlot: 3>: 33, <ActionArgument.ix2: 7>: 0}
+    3 5 {<ActionArgument.action: 0>: 10, <ActionArgument.vLoc: 1>: [0.005095481872558594, -0.005095541477203369], <ActionArgument.sItem: 6>: 136, <ActionArgument.nSlot: 3>: 1, <ActionArgument.ix2: 7>: 13}
+    3 6 {<ActionArgument.action: 0>: 17, <ActionArgument.vLoc: 1>: [0.004954814910888672, -0.0049547553062438965], <ActionArgument.sItem: 6>: 151, <ActionArgument.nSlot: 3>: 16, <ActionArgument.ix2: 7>: 3}
+    3 7 {<ActionArgument.action: 0>: 1, <ActionArgument.vLoc: 1>: [0.0030739307403564453, -0.00307387113571167], <ActionArgument.sItem: 6>: 13, <ActionArgument.nSlot: 3>: 33, <ActionArgument.ix2: 7>: 8}
+    3 8 {<ActionArgument.action: 0>: 24, <ActionArgument.vLoc: 1>: [0.0035561323165893555, -0.0035560131072998047], <ActionArgument.sItem: 6>: 40, <ActionArgument.nSlot: 3>: 5, <ActionArgument.ix2: 7>: 6}
+    3 9 {<ActionArgument.action: 0>: 8, <ActionArgument.vLoc: 1>: [0.00017595291137695312, -0.00017595291137695312], <ActionArgument.sItem: 6>: 217, <ActionArgument.nSlot: 3>: 16, <ActionArgument.ix2: 7>: 9}
+
+    """
     CATEGORICAL_FIELDS = [ARG.action, ARG.sItem, ARG.nSlot, ARG.ix2]
 
     def argmax(self, msg, filter):
@@ -466,6 +513,24 @@ class ActionSampler:
             msg[field] = selected
 
         return msg, logprobs, entropy
+
+    def make_ipc_message(self, action, bots):
+        msg = new_ipc_message()
+
+        for i, pid in enumerate(bots):
+            f = 2
+            if pid > 4:
+                f = 3
+
+            msg[f][pid] = {
+                ARG.action: action[ARG.action][i].item(),
+                ARG.vLoc: action[ARG.vLoc][i].tolist(),
+                ARG.sItem: action[ARG.sItem][i].item(),
+                ARG.nSlot: action[ARG.nSlot][i].item(),
+                ARG.ix2: action[ARG.ix2][i].item(),
+            }
+
+        return msg
 
 
 class ActorCritic(nn.Module):

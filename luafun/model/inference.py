@@ -3,7 +3,7 @@ from luafun.utils.ring import RingBuffer
 from luafun.model.training import TrainEngine
 from luafun.model.filter import ActionFilter
 from luafun.model.actor_critic import ActionSampler
-from luafun.game.ipc_send import new_ipc_message
+
 
 from luafun.game.action import ARG
 
@@ -59,23 +59,7 @@ class InferenceEngine:
 
         return torch.stack(self.obs, dim=1)
 
-    def make_ipc_message(self, action):
-        msg = new_ipc_message()
 
-        for i, pid in enumerate(self.bots):
-            f = 2
-            if pid > 4:
-                f = 3
-
-            msg[f][pid] = {
-                ARG.action: action[ARG.action][i].item(),
-                ARG.vLoc: action[ARG.vLoc][i].tolist(),
-                ARG.sItem: action[ARG.sItem][i].item(),
-                ARG.nSlot: action[ARG.nSlot][i].item(),
-                ARG.ix2: action[ARG.ix2][i].item(),
-            }
-
-        return msg
 
     def action(self, uid, state) -> (torch.Tensor, torch.Tensor):
         """Build the observation batch and the action to take"""
@@ -103,7 +87,8 @@ class InferenceEngine:
 
             action, log_probs, entropy = self.action_sampler.sampled(action_probs, filter)
 
-            return self.make_ipc_message(action), log_probs, filter
+            actions = self.action_sampler.make_ipc_message(action, self.bots)
+            return actions, log_probs, filter
 
         # msg = self.model(state)
         # filter = self.filter(state, unit, rune, tree)
