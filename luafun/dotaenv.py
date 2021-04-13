@@ -237,6 +237,15 @@ class Dota2Env(Dota2Game):
         """Return the initial state of the game"""
         return None, None, None, None
 
+    def preprocessed_send(self, action):
+        print(action)
+        preprocessed = self._action_preprocessor(action)
+
+        # 1.2 Send the action
+        self.send_message(preprocessed)
+
+        return preprocessed
+
     def step(self, action):
         """Make an action and return the resulting state
 
@@ -332,6 +341,9 @@ class Dota2Env(Dota2Game):
                 hid = action[actions.DraftAction.SelectHero]
                 shero = const.HEROES[action[hid]]['name']
                 action[actions.DraftAction.BanHero] = shero
+                continue
+
+            if len(action) == 0:
                 continue
 
             # slots needs to be remapped from our unified slot

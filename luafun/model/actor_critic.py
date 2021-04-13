@@ -445,7 +445,7 @@ class ActionSampler:
     ActionArgument.ix2 torch.Size([10])
 
 
-    >>> ipc_msg = sampler.make_ipc_message(msg, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    >>> ipc_msg = sampler.make_ipc_message(msg, bots=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     >>> for faction, team in ipc_msg.items():
     ...     if faction == 'uid':
     ...         continue

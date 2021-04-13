@@ -20,6 +20,12 @@ class TrainEngine:
     def push(self, uid, state, reward, done, info, action, logprob, filter):
         self.engine.push(uid, state, reward, done, info, action, logprob, filter)
 
+    def train(self):
+        self.engine.train()
+
+    def ready(self):
+        return self.engine.ready()
+
 
 @dataclass
 class Observation:
@@ -38,7 +44,7 @@ class RolloutDataset:
         self.timestep = timestep
         # One sample is 16 time steps (2.1333 seconds)
         self.sample = 16
-        # One espisode is 16 Samples (34.1328 seconds)
+        # One episode is 16 Samples (34.1328 seconds)
         self.episode = 16
 
         self.memory = defaultdict(list)
@@ -121,10 +127,13 @@ class LocalTrainEngine:
     def push(self, uid, state, reward, done, info, action, logprob, filter):
         self.dataset.push(uid, state, reward, done, info, action, logprob, filter)
 
-    def train(self):
-        batch = self.sampler.new_sample()
-        print(batch)
+    def ready(self):
+        return self.dataset.size > 16
 
+    def train(self):
+        # batch = self.sampler.new_sample()
+        # print(batch)
+        pass
         # for _ in range(self.ppo_epochs):
         #     state, action, logprobs = memory.states, memory.action, action.logprobs
         #

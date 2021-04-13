@@ -13,9 +13,9 @@ class AbilitySlot(IntEnum):
     Item3 = 3
     Item4 = 4
     Item5 = 5
-    Bakcpack1 = 6
-    Bakcpack2 = 7
-    Bakcpack3 = 8
+    Backpack1 = 6
+    Backpack2 = 7
+    Backpack3 = 8
     Stash1 = 9
     Stash2 = 10
     Stash3 = 11

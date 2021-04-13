@@ -12,6 +12,7 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 
 from luafun.game.inspect.state import GameInspector, DrawMap
 from luafun.game.inspect.action import Actions
+from luafun.game.inspect.preprocessed_action import PreprocessedActions
 from luafun.game.inspect.status import Status
 from luafun.game.inspect.draft import Draft
 
@@ -108,6 +109,7 @@ def _http_inspect(state, rpc_recv, rpc_send, level, debug=False):
         dash.add_page(ShowRoutes(state))
         dash.add_page(GameInspector(state))
         dash.add_page(Actions(state))
+        dash.add_page(PreprocessedActions(state))
         dash.add_page(DrawMap(state))
         dash.add_page(Status(state))
         dash.add_page(Draft(state))

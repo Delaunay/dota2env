@@ -59,8 +59,6 @@ class InferenceEngine:
 
         return torch.stack(self.obs, dim=1)
 
-
-
     def action(self, uid, state) -> (torch.Tensor, torch.Tensor):
         """Build the observation batch and the action to take"""
         # batch = generate_game_batch(state, self.bots)

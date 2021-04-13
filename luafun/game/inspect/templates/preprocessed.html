@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<table class="table">
+    <tr>
+        <th>Raw State</th>
+        <th>Actions</th>
+    </tr>
+    <tr>
+        <td>
+            {{ body|safe }}
+        </td>
+        <td>
+            <h4>Actions</h4>
+            <table class="table">
+                <tr>
+                    <!--
+                        "name": #DOTA_OutpostName_South
+                        "location": {
+                            "x": 2549.722,
+                            "y": -4238.76,
+                            "z": 256.0
+                        },
+
+                        "name": "#DOTA_OutpostName_North",
+                        "location": {
+                            "x": -1941.7216,
+                            "y": 4542.76,
+                            "z": 256.0
+                        },
+
+                        Neutral Camp:
+                            1. http://localhost:5000/action/AttackMove/3/-283.50x-3411
+                            2. http://localhost:5000/action/AttackMove/3/-79.27x-2072.94
+                    -->
+                    <th>Movement</th>
+
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.Stop.value)}}/0/0/0/0/0">Stop</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.MoveToLocation.value)}}/0/0/0/0/0">MoveToLocation</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.MoveDirectly.value)}}/0/0/0/0/0">MoveDirectly</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.MoveToUnit.value)}}/0/0/0/0/0">MoveToUnit</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.AttackUnit.value)}}/0/0/0/0/0">AttackUnit</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.AttackMove.value)}}/0/0/0/0/0">AttackMove</a></td>
+                </tr>
+                <tr>
+                    <th>Courier</th>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.CourierBurst.value)}}/0/0/0/0/0">CourierBurst</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.CourierReturn.value)}}/0/0/0/0/0">CourierReturn</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.CourierSecret.value)}}/0/0/0/0/0">CourierSecret</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.CourierTakeStash.value)}}/0/0/0/0/0">CourierTakeStash</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.CourierTransfer.value)}}/0/0/0/0/0">CourierTransfer</a></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Others</th>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.Glyph.value)}}/0/0/0/0/0">AttackMove</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.Buyback.value)}}/0/0/0/0/0">AttackMove</a></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+
+            <h4>Items</h4>
+            <table class="table">
+                <tr>
+                    <th>Inventory</th>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbility).value}}/0/0/0/{{AbilitySlot.Item0.value}}/0">Item0</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbility).value}}/0/0/0/{{AbilitySlot.Item1.value}}/0">Item1</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbility).value}}/0/0/0/{{AbilitySlot.Item2.value}}/0">Item2</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbility).value}}/0/0/0/{{AbilitySlot.Item3.value}}/0">Item3</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbility).value}}/0/0/0/{{AbilitySlot.Item4.value}}/0">Item4</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbility).value}}/0/0/0/{{AbilitySlot.Item5.value}}/0">Item5</a></td>
+                </tr>
+                <tr>
+                    <th></th> <!-- This test moving main inventory item to backpack -->
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.SwapItems.value)}}/0/0/0/{{AbilitySlot.Item0.value}}/{{AbilitySlot.Backpack1.value}}">Swap B1</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.SwapItems.value)}}/0/0/0/{{AbilitySlot.Item0.value}}/{{AbilitySlot.Backpack2.value}}">Swap B2</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.SwapItems.value)}}/0/0/0/{{AbilitySlot.Item0.value}}/{{AbilitySlot.Backpack3.value}}">Swap B3</a></td>
+
+                    <td></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbility.value)}}/0/0/0/{{AbilitySlot.Item15.value}}/0">TP</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbility.value)}}/0/0/0/{{AbilitySlot.Item16.value}}/0">Neutral</a></td>
+                </tr>
+                <!-- use tango: http://localhost:5000/action/UseAbilityOnTree/0/1/10 -->
+                <tr>
+                    <th>Buy</th>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.PurchaseItem.value)}}/0/0/0/0/0">Tango</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.PurchaseItem.value)}}/0/0/0/0/0">Agility Slippers</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.PurchaseItem.value)}}/0/0/0/0/0">Circlet</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.PurchaseItem.value)}}/0/0/0/0/0">Quelling Blade</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.PurchaseItem.value)}}/0/0/0/0/0">Faerie Fire</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.PurchaseItem.value)}}/0/0/0/0/0">Gauntlets</a></td>
+                </tr>
+                <tr>
+                    <th>Item Action</th> <!-- This test moving main inventory item to stash -->
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.DropItem.value)}}/0/0/0/0/0">DropItem</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.PickUpItem.value)}}/0/0/0/0/0">PickUpItem</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.SellItem.value)}}/0/0/0/0/0">SellItem</a></td>
+
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.PickUpRune.value)}}/0/0/0/0/0">PickUpRune</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.AttackUnit.value)}}/0/0/0/0/0">TakeOutpost</a></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+
+            <h4>Abilities</h4>
+            <table class="table">
+                <tr>
+                    <th>Use Ability</th>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbility.value)}}/0/0/0/{{AbilitySlot.Q.value}}/0">Q</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbility.value)}}/0/0/0/{{AbilitySlot.W.value}}/0">W</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbility.value)}}/0/0/0/{{AbilitySlot.E.value}}/0">E</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbility.value)}}/0/0/0/{{AbilitySlot.D.value}}/0">D</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbility.value)}}/0/0/0/{{AbilitySlot.F.value}}/0">F</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbility.value)}}/0/0/0/{{AbilitySlot.R.value}}/0">R</a></td>
+                </tr>
+                <tr>
+                    <th>Use Ability On Location</th>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnLocation.value)}}/0/0/0/{{AbilitySlot.Q.value}}/0">Q</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnLocation.value)}}/0/0/0/{{AbilitySlot.W.value}}/0">W</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnLocation.value)}}/0/0/0/{{AbilitySlot.E.value}}/0">E</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnLocation.value)}}/0/0/0/{{AbilitySlot.D.value}}/0">D</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnLocation.value)}}/0/0/0/{{AbilitySlot.F.value}}/0">F</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnLocation.value)}}/0/0/0/{{AbilitySlot.R.value}}/0">R</a></td>
+                </tr>
+                <tr>
+                    <th>Use Ability On Entity</th>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnEntity.value)}}/0/0/0/{{AbilitySlot.Q.value}}/0">Q</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnEntity.value)}}/0/0/0/{{AbilitySlot.W.value}}/0">W</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnEntity.value)}}/0/0/0/{{AbilitySlot.E.value}}/0">E</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnEntity.value)}}/0/0/0/{{AbilitySlot.D.value}}/0">D</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnEntity.value)}}/0/0/0/{{AbilitySlot.F.value}}/0">F</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnEntity.value)}}/0/0/0/{{AbilitySlot.R.value}}/0">R</a></td>
+                </tr>
+                <tr>
+                    <th>Use Ability On Tree</th>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnTree.value)}}/0/0/0/{{AbilitySlot.Q.value}}/0">Q</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnTree.value)}}/0/0/0/{{AbilitySlot.W.value}}/0">W</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnTree.value)}}/0/0/0/{{AbilitySlot.E.value}}/0">E</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnTree.value)}}/0/0/0/{{AbilitySlot.D.value}}/0">D</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnTree.value)}}/0/0/0/{{AbilitySlot.F.value}}/0">F</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.UseAbilityOnTree.value)}}/0/0/0/{{AbilitySlot.R.value}}/0">R</a></td>
+                </tr>
+                <tr>
+                    <th>Level Ability</th>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.LevelAbility.value)}}/0/0/0/{{AbilitySlot.Q.value}}/0">Q</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.LevelAbility.value)}}/0/0/0/{{AbilitySlot.W.value}}/0">W</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.LevelAbility.value)}}/0/0/0/{{AbilitySlot.E.value}}/0">E</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.LevelAbility.value)}}/0/0/0/{{AbilitySlot.D.value}}/0">D</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.LevelAbility.value)}}/0/0/0/{{AbilitySlot.F.value}}/0">F</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.LevelAbility.value)}}/0/0/0/{{AbilitySlot.R.value}}/0">R</a></td>
+                </tr>
+                <tr>
+                    <th>Talents</th>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.LevelAbility.value)}}/0/0/0/{{AbilitySlot.Talent11.value}}/0">T1</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.LevelAbility.value)}}/0/0/0/{{AbilitySlot.Talent12.value}}/0">T2</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.LevelAbility.value)}}/0/0/0/{{AbilitySlot.Talent21.value}}/0">T3</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.LevelAbility.value)}}/0/0/0/{{AbilitySlot.Talent22.value}}/0">T4</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.LevelAbility.value)}}/0/0/0/{{AbilitySlot.Talent31.value}}/0">T5</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.LevelAbility.value)}}/0/0/0/{{AbilitySlot.Talent32.value}}/0">T6</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.LevelAbility.value)}}/0/0/0/{{AbilitySlot.Talent41.value}}/0">T7</a></td>
+                    <td><a class="btn btn-secondary" href="/paction/{{player}}/{{(Action.LevelAbility.value)}}/0/0/0/{{AbilitySlot.Talent42.value}}/0">T8</a></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+
+
+{% endblock %}

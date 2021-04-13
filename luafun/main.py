@@ -90,13 +90,14 @@ def main(config=None):
             # push the new observation
             train.push(uid, state, reward, done, info, action, logprob, filter)
 
+            if train.ready():
+                train.train()
+
             if state is None:
                 break
 
             if game.cnt > 0 and game.cnt % 100 == 0:
-                print(f'Step time {game.avg / game.cnt:.4f}')
-
-            print(reward[0])
+                print(f'Step time {game.avg / game.cnt:.4f} Reward {reward[0]}')
 
         print('Game Finished')
 
