@@ -19,6 +19,7 @@ class Config:
 
 
 class Actions(BasePage):
+    """Build a message as seen by the LUA bots"""
     def routes(self):
         return [
             '/action/<string:action>',

@@ -18,10 +18,11 @@ class Config:
 
 
 class PreprocessedActions(BasePage):
+    """Used to check that the (x, y) mapper, item mapper, ability mapper work"""
     def routes(self):
         return [
             '/paction',
-            '/paction/<int:player>/<int:action>/<int:x>/<int:y>/<int:item>/<int:nslot>/<int:ix2>',
+            '/paction/<int:player>/<int:action>/<float:x>/<float:y>/<int:item>/<int:nslot>/<int:ix2>',
         ]
 
     TEAM_RAD = [0, 1, 2, 3, 4]

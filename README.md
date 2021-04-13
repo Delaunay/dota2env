@@ -95,7 +95,6 @@ For installation procedure see [Installation][2]
 * Full Hero take over
 * No scripted logic
 
-
 # Dota2 Major Update Check list
 
 * Update Map: regenerate the map image
@@ -105,6 +104,7 @@ For installation procedure see [Installation][2]
 * Add Actions
 * Update Rune location
 * Update Outpost location
+* Update tree location
 
 # Known Issues
 
