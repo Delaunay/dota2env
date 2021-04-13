@@ -95,6 +95,17 @@ For installation procedure see [Installation][2]
 * Full Hero take over
 * No scripted logic
 
+
+# Dota2 Major Update Check list
+
+* Update Map: regenerate the map image
+* Add Abilities
+* Add Hero
+* Add Items
+* Add Actions
+* Update Rune location
+* Update Outpost location
+
 # Known Issues
 
 * Entering spectator mode after drafting phase can cause crashes
