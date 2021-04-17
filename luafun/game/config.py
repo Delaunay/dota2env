@@ -7,6 +7,7 @@ EXECUTABLE_PATH_LINUX = '/game/bin/linuxsteamrt64/dota2'
 BOT_PATH = '/game/dota/scripts/vscripts/bots/'
 CONSOLE_LOG = '/game/dota/scripts/vscripts/bots/console.log'
 SEND_MSG = '/game/dota/scripts/vscripts/bots/IPC_recv.lua'
+CONFIG_MSG = '/game/dota/scripts/vscripts/bots/IPC_config.lua'
 
 LINUX_APP_PATH = "~/Steam/steamapps/common/dota 2 beta"
 OSX_APP_PATH = "~/Library/Application Support/Steam/SteamApps/common/dota 2 beta"
@@ -54,6 +55,10 @@ class DotaPaths:
     @property
     def ipc_send_handle(self):
         return self.path + '/' + SEND_MSG
+
+    @property
+    def ipc_config_handle(self):
+        return self.path + '/' + CONFIG_MSG
 
     def bot_file(self, filename):
         """Return a file path that is located in the bot folder"""

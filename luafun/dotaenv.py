@@ -404,6 +404,20 @@ def ranked_allpick(path=None, config=None):
     return game
 
 
+def captains_mode(path=None, config=None):
+    """Tournament mode with a captain drafting for the whole team"""
+    game = _default_game(path, config=config)
+    game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_CM)
+    return game
+
+
+def captains_draft(path=None, config=None):
+    """Similar to captains mode with a 27 heroes, only 3 bans per teams"""
+    game = _default_game(path, config=config)
+    game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_CD)
+    return game
+
+
 def allrandom(path=None, config=None):
     game = _default_game(path, config=config)
     game.options.game_mode = int(DOTA_GameMode.DOTA_GAMEMODE_AR)
@@ -414,7 +428,9 @@ _environments = {
     'mid1v1': mid1v1,
     'allpick_nobans': allpick_nobans,
     'ranked_allpick': ranked_allpick,
-    'allrandom': allrandom
+    'allrandom': allrandom,
+    'captains_draft': captains_draft,
+    'captains_mode': captains_mode
 }
 
 

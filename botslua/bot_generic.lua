@@ -7,6 +7,7 @@ local pprint = require('bots/pprint')
 
 
 local RECV_MSG = 'bots/IPC_recv'
+local CONF_MSG = 'bots/IPC_config'
 local player_id = GetBot():GetPlayerID()
 local faction = GetBot():GetTeam()
 
@@ -41,6 +42,32 @@ local function send_message(data)
 
     print(ipc_prefix, dkjson.encode(data))
 end
+
+
+local function load_config()
+    local file = loadfile(CONF_MSG)
+
+    if file ~= nil then
+        local json_string = file()
+
+        if json_string ~= nil then
+            local config, pos, err = dkjson.decode(json_string, 1, nil)
+
+            if err then
+                send_message({E = tostring(err)})
+                return nil
+            end
+
+            return config
+        end
+    else
+        send_message({E = "No config file found"})
+    end
+
+    return nil
+end
+
+local config = load_config()
 
 -- Because we are inside a lua VM with limited capabilities
 -- We use lua file to receive messages included in the source file

@@ -2,6 +2,8 @@ local dkjson = require('game/dkjson')
 local pprint = require('bots/pprint')
 
 local RECV_MSG = 'bots/IPC_recv'
+local CONF_MSG = 'bots/IPC_config'
+
 local faction = GetTeam()
 local str_faction = '' .. faction
 local str_player_id = 'HS'
@@ -13,6 +15,31 @@ local ipc_prefix = '[IPC]' .. faction .. '.' .. 'HS'
 local function send_message(data)
     print(ipc_prefix, dkjson.encode(data))
 end
+
+local function load_config()
+    local file = loadfile(CONF_MSG)
+
+    if file ~= nil then
+        local json_string = file()
+
+        if json_string ~= nil then
+            local config, pos, err = dkjson.decode(json_string, 1, nil)
+
+            if err then
+                send_message({E = tostring(err)})
+                return nil
+            end
+
+            return config
+        end
+    else
+        send_message({E = "No config file found"})
+    end
+
+    return nil
+end
+
+local config = load_config()
 
 -- this is copy pasted from bot_genric.lua
 -- keep them in-sync
@@ -99,20 +126,10 @@ local lanes = {
 
 -- Same as SelectHero but checks for errors
 local n = 0
-local function pick_hero(player_id, hero_name, lane)
-    if not IsPlayerBot(player_id) then
-        lanes[player_id] = LANE_NONE
-        n = n + 1
-        return
-    end
 
-    if hero_name == nil then
-        return
-    end
-
+local function select_hero(player_id, hero_name, lane)
     if GetSelectedHeroName(player_id) == '' then
         SelectHero(player_id, hero_name)
-        -- CMPickHero
 
         if GetSelectedHeroName(player_id) == '' then
             send_message({E = 'Could not pick hero ' .. hero_name})
@@ -127,14 +144,53 @@ local function pick_hero(player_id, hero_name, lane)
     end
 end
 
+-- Always set first player of each time as captains
+if GetGameMode() == GAMEMODE_CM or GetGameMode() == GAMEMODE_CD then
+    if faction == TEAM_RADIANT then
+        SetCMCaptain(0)
+    else
+        SetCMCaptain(5)
+    end
+end
+
+local function pick_hero(player_id, hero_name, lane)
+    if not IsPlayerBot(player_id) then
+        lanes[player_id] = LANE_NONE
+        n = n + 1
+        return
+    end
+
+    if hero_name == nil then
+        return
+    end
+
+    if GetGameMode() == GAMEMODE_CM or GetGameMode() == GAMEMODE_CD then
+        CMPickHero(hero_name)
+
+        if not IsCMPickedHero(faction, hero_name) then
+            send_message({E = 'Could not pick hero: ' .. hero_name})
+        end
+    else
+        select_hero(player_id, hero_name, lane)
+    end
+end
+
 --
 local function ban_hero(hero_name)
     if hero_name == nil then
         return
     end
 
-    CMBanHero(hero_name)
-    send_message({E = 'Wanted to ban: ' .. hero_name})
+    if GetGameMode() == GAMEMODE_CM or GetGameMode() == GAMEMODE_CD then
+        CMBanHero(hero_name)
+
+        if not IsCMBannedHero(hero_name) then
+            send_message({E = 'Did not ban: ' .. hero_name})
+        end
+    else
+        CMBanHero(hero_name)
+        send_message({E = 'Game Mode does not support banning: ' .. hero_name})
+    end
 end
 
 local offset = 0
@@ -207,6 +263,85 @@ local EnableDraft = '0'
 local SelectHero = '1'
 local BanHero = '2'
 local Lane = '3'
+local start_wait_time = config["draft_start_wait"]
+local pick_wait_time = config["draft_pick_wait"]
+local start_time = 0
+local last_pick_time = 0
+
+local p0 = ""
+local p1 = ""
+local p2 = ""
+local p3 = ""
+local p4 = ""
+local p5 = ""
+local p6 = ""
+local p7 = ""
+local p8 = ""
+local p9 = ""
+
+-- This is just here for info
+-- bans are not really easily queryable from here
+-- so will track those from the python side
+function get_draft_state()
+    local pp0 = GetSelectedHeroName(0)
+    local pp1 = GetSelectedHeroName(1)
+    local pp2 = GetSelectedHeroName(2)
+    local pp3 = GetSelectedHeroName(3)
+    local pp4 = GetSelectedHeroName(4)
+    local pp5 = GetSelectedHeroName(5)
+    local pp6 = GetSelectedHeroName(6)
+    local pp7 = GetSelectedHeroName(7)
+    local pp8 = GetSelectedHeroName(8)
+    local pp9 = GetSelectedHeroName(9)
+    local state_changed = false
+
+    if pp0 ~= p0 then
+        p0 = pp0
+        state_changed = true
+    elseif pp1 ~= p1 then
+        p1 = pp1
+        state_changed = true
+    elseif pp2 ~= p2 then
+        p2 = pp2
+        state_changed = true
+    elseif pp3 ~= p3 then
+        p3 = pp3
+        state_changed = true
+    elseif pp4 ~= p4 then
+        p4 = pp4
+        state_changed = true
+    elseif pp5 ~= p5 then
+        p5 = pp5
+        state_changed = true
+    elseif pp6 ~= p6 then
+        p6 = pp6
+        state_changed = true
+    elseif pp7 ~= p7 then
+        p7 = pp7
+        state_changed = true
+    elseif pp8 ~= p8 then
+        p8 = pp8
+        state_changed = true
+    elseif pp9 ~= p9 then
+        p9 = pp9
+        state_changed = true
+    end
+
+    -- IsCMBannedHero
+    if state_changed then
+        send_message({
+            DS = {
+                p0, p1, p2, p3, p4,
+                p5, p6, p7, p8, p9,
+                -- Unsupported
+                b1, b2, b3, b4, b5,
+                b6, b7, b8, b9, b10,
+                b11, b12, b13, b14,
+                --
+            }
+        })
+    end
+end
 
 -- Called every frame. Responsible for selecting heroes for bots.
 function ThinkOverride()
@@ -215,8 +350,29 @@ function ThinkOverride()
         block_picks()
     end
 
+    -- Wait for the game to load and humans to pick
+    -- their heroes
+    --
+    -- This is necessary because DotaTime() is not 100% reliable
+    -- this makes sure start_time is correct because once
+    -- DotaTime() returns the right value the time only increase
+    start_time = math.min(DotaTime(), start_time)
+    if start_wait_time ~= nil and DotaTime() - start_time < start_wait_time then
+        -- initialize the last_pick_time to a value that is aligned with the dotatime
+        last_pick_time = DotaTime() - pick_wait_time
+        return
+    end
+    --
+
     -- finished picking
     if n >= 5 then
+        return
+    end
+
+    get_draft_state()
+
+    -- Give time to Humans to catch up when in picking mode
+    if DotaTime() - last_pick_time < pick_wait_time then
         return
     end
 
@@ -230,6 +386,7 @@ function ThinkOverride()
 
     if ml_draft ~= nil and ml_draft == 0 then
          default_logic()
+
     elseif msg ~= nil then
         -- Bots are manually drafting
         local selected = msg[SelectHero]
@@ -238,9 +395,15 @@ function ThinkOverride()
 
         local pid = offset + n
 
-        pick_hero(pid, selected, lane)
+        if selected ~= nil then
+            pick_hero(pid, selected, lane)
+            last_pick_time = DotaTime()
+        end
 
-        ban_hero(banned)
+        if banned ~= nil then
+            ban_hero(banned)
+            last_pick_time = DotaTime()
+        end
     end
 
     if n >= total_pick_count then

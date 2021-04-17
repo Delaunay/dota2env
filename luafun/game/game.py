@@ -139,6 +139,13 @@ class Dota2Game:
         log.debug(f'Main Process: {os.getpid()}')
         self._bots = []
 
+        # IPC config to configure bots
+        self.ipc_config = {
+            'draft_start_wait': 10,
+            'draft_pick_wait': 1,
+        }
+        ipc_send(self.paths.ipc_config_handle, self.ipc_config, StateHolder())
+
     def performance_counters(self):
         return self.perf
 
@@ -514,7 +521,9 @@ class Dota2Game:
         ds = message.get('DS')
         if ds is not None:
             self.state['draft'] = True
-            log.debug(f'draft has started')
+            log.debug(f'received draft state')
+            if isinstance(ds, list):
+                self.new_draft_state(ds)
 
         de = message.get('DE')
         if de is not None:
@@ -527,6 +536,10 @@ class Dota2Game:
             self.extractor.save(message)
 
         self.receive_message(faction, player_id, message)
+
+    def new_draft_state(self, ds):
+        """Called everytime a picks / ban is made"""
+        pass
 
     def receive_message(self, faction: int, player_id: int, message: dict):
         """Receive a message directly from the bots"""
