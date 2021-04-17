@@ -209,7 +209,7 @@ class Dota2Game:
     def _get_next(self, q1, q2):
         m1, m2 = None, None
 
-        while True:
+        while self.running:
             if m1 is None and not q1.empty():
                 m1 = q1.get()
 
@@ -359,6 +359,9 @@ class Dota2Game:
             self.radiant_state_delta_queue,
             self.dire_state_delta_queue
         )
+
+        if radiant is None or dire is None:
+            return
 
         self.replay.save(radiant, dire)
 
@@ -522,13 +525,13 @@ class Dota2Game:
         if ds is not None:
             self.state['draft'] = True
             log.debug(f'received draft state')
-            if isinstance(ds, list):
-                self.new_draft_state(ds)
+            self.new_draft_state(ds)
 
         de = message.get('DE')
         if de is not None:
             self.state['draft'] = False
             log.debug(f'draft has ended')
+            self.end_draft(ds)
 
         # Message Info
         info = message.get('I')
@@ -538,7 +541,11 @@ class Dota2Game:
         self.receive_message(faction, player_id, message)
 
     def new_draft_state(self, ds):
-        """Called everytime a picks / ban is made"""
+        """Called every time a picks / ban is made"""
+        pass
+
+    def end_draft(self, ds):
+        """Called every time a picks / ban is made"""
         pass
 
     def receive_message(self, faction: int, player_id: int, message: dict):

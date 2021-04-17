@@ -138,13 +138,13 @@ local function select_hero(player_id, hero_name, lane)
             success = 0
         end
 
-        send_message({DS = {S = success, B = hero_name, T = faction}})
+        send_message({DS = {S = success, P = hero_name, T = faction}})
 
         -- We picked a hero; increase offset
         lanes[player_id] = lane
         n = n + 1
     else
-        send_message({DS = {S = 0, B = hero_name, T = faction, M = 'Player already picked'}})
+        send_message({DS = {S = 0, P = hero_name, T = faction, M = 'Player already picked'}})
     end
 end
 
@@ -179,7 +179,7 @@ local function pick_hero(player_id, hero_name, lane)
             success = 0
         end
 
-        send_message({DS = {S = success, B = hero_name, T = faction}})
+        send_message({DS = {S = success, P = hero_name, T = faction}})
     else
         select_hero(player_id, hero_name, lane)
     end
@@ -298,6 +298,8 @@ local p9 = ""
 -- bans are not really easily queryable from here
 -- so will track those from the python side
 -- we need this function to know what the humans are picking
+--
+-- this does not work in captains mode because player are not assigned to heroes right away
 function get_draft_state()
     local pp0 = GetSelectedHeroName(0)
     local pp1 = GetSelectedHeroName(1)
@@ -343,18 +345,15 @@ function get_draft_state()
         state_changed = true
     end
 
-    -- IsCMBannedHero
     if state_changed then
         send_message({
-            DS = {STATE={
-                p0, p1, p2, p3, p4,
-                p5, p6, p7, p8, p9,
-                -- Unsupported
-                -- b1, b2, b3, b4, b5,
-                -- b6, b7, b8, b9, b10,
-                -- b11, b12, b13, b14,
-                --
-            }}
+            DS = {
+                T = faction,
+                PS = {
+                    p0, p1, p2, p3, p4,
+                    p5, p6, p7, p8, p9
+                }
+            }
         })
     end
 end
@@ -384,8 +383,6 @@ function ThinkOverride()
     if n >= 5 then
         return
     end
-
-    get_draft_state()
 
     -- Give time to Humans to catch up when in picking mode
     if DotaTime() - last_pick_time < pick_wait_time then
@@ -425,6 +422,8 @@ function ThinkOverride()
     if n >= total_pick_count then
         send_message({DE = 'Draft Over'})
     end
+
+    get_draft_state()
 end
 
 -- Called every frame prior to the game starting. Returns ten PlayerID-Lane pairs.

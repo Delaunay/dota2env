@@ -114,6 +114,14 @@ class Dota2Env(Dota2Game):
 
         # self.unit_size = open('unit_size.txt', 'w')
 
+    def new_draft_state(self, ds):
+        """Called every time a picks / ban is made"""
+        self.draft_tracker.update(ds)
+
+    def end_draft(self, ds):
+        """Called every time a picks / ban is made"""
+        self.draft_tracker.end_draft(ds)
+
     def cleanup(self):
         # self.radiant_message.close()
         # self.dire_message.close()
@@ -324,11 +332,6 @@ class Dota2Env(Dota2Game):
     # Helpers
     # -------
     def _action_preprocessor(self, message):
-        self.draft_tracker.update(
-            message[TEAM_RADIANT].get('HS', dict()),
-            message[TEAM_DIRE].get('HS', dict())
-        )
-
         players = chain(message[TEAM_RADIANT].items(), message[TEAM_DIRE].items())
 
         for pid, action in players:

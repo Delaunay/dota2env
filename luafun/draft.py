@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from enum import IntEnum, auto
+import json
+import logging
 
 import torch
 
@@ -7,6 +9,9 @@ from luafun.game.action import DraftAction
 import luafun.game.constants as const
 from luafun.utils.python_fix import asdict
 from luafun.game.ipc_send import TEAM_RADIANT, TEAM_DIRE
+
+
+log = logging.getLogger(__name__)
 
 
 class DraftFields(IntEnum):
@@ -135,28 +140,139 @@ class DraftStatus:
         return draft_status
 
 
-# TODO make sure actions are correct here
-# i.e no double hero selection
-# respect bans although bots cannot bans in the game
 class DraftTracker:
-    """Track Bots decision and reflect it on the draft status"""
+    """Track Bots decision and reflect it on the draft status
+
+    Examples
+    --------
+    >>> tracker = DraftTracker()
+
+    This is the kind of message we receive when a ban is successful
+
+    >>> msg = DraftTracker.ban(TEAM_DIRE, 'npc_dota_hero_morphling')
+    >>> msg
+    {'B': 'npc_dota_hero_morphling', 'S': 1, 'T': 3}
+    >>> tracker.update(msg)
+    >>> tracker.status
+    {2: ['', '', '', '', ''], 3: ['', '', '', '', ''], 'bans': ['npc_dota_hero_morphling']}
+
+    This is the kind of message we receive when a pick is successful
+
+    >>> msg = DraftTracker.pick(TEAM_RADIANT, 'npc_dota_hero_drow_ranger')
+    >>> msg
+    {'P': 'npc_dota_hero_drow_ranger', 'S': 1, 'T': 2}
+    >>> tracker.update(msg)
+    >>> tracker.status
+    {2: ['npc_dota_hero_drow_ranger', '', '', '', ''], 3: ['', '', '', '', ''], 'bans': ['npc_dota_hero_morphling']}
+
+    To keep track of human picks a summary of the pick state is send everytime
+    the draft changes (ban excluded)
+
+    >>> msg = DraftTracker.picks_summary(TEAM_RADIANT, 'npc_dota_hero_drow_ranger', p2='npc_dota_hero_antimage')
+    >>> msg
+    {'PS': ['npc_dota_hero_drow_ranger', '', 'npc_dota_hero_antimage', '', '', '', '', '', '', ''], 'S': 1, 'T': 2}
+    >>> tracker.update(msg)
+    >>> tracker.status
+    {2: ['npc_dota_hero_drow_ranger', '', 'npc_dota_hero_antimage', '', ''], 3: ['', '', '', '', ''], 'bans': ['npc_dota_hero_morphling']}
+
+    Get a the draft state in a one-hot encoded vector
+    >>> tracker.as_tensor(TEAM_RADIANT).shape
+    torch.Size([24, 121])
+    """
     def __init__(self):
         self.draft = DraftStatus()
         self.rhero = 0
         self.dhero = 0
-        self.bans = 0
+        self.radiant = ['', '', '', '', '']
+        self.dire = ['', '', '', '', '']
+        self.bans = []
+        self.dire_known = []
+        self.radiant_known = []
 
-    def update(self, radiant, dire):
-        # Ignore bans on purpose
-        h = radiant.get(DraftAction.SelectHero)
-        if h:
-            setattr(self.draft, f'Pick{self.rhero}', h)
+    @property
+    def status(self):
+        return {
+            TEAM_RADIANT: self.radiant,
+            TEAM_DIRE: self.dire,
+            'bans': self.bans
+        }
+
+    def __str__(self):
+        return json.dumps(self.status, indent=2)
+
+    @staticmethod
+    def ban(team, hero):
+        return {"B": hero, "S": 1, "T": team}
+
+    @staticmethod
+    def pick(team, hero):
+        return {"P": hero, "S": 1, "T": team}
+
+    @staticmethod
+    def picks_summary(team, p0='', p1='', p2='', p3='', p4='', p5='', p6='', p7='', p8='', p9=''):
+        return {"PS": [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9], "S": 1, "T": team}
+
+    def name_to_id(self, hero):
+        return 0
+
+    def add(self, team, hero):
+        if team == TEAM_RADIANT:
+            array = self.radiant
+            count = self.rhero
+            attribute = f'Pick{count}'
             self.rhero += 1
-
-        h = dire.get(DraftAction.SelectHero)
-        if h:
-            setattr(self.draft, f'Pick{self.dhero + 5}', h)
+        else:
+            array = self.dire
+            count = self.dhero
+            attribute = f'Pick{count + 5}'
             self.dhero += 1
+
+        array[count] = hero
+        hero_id = self.name_to_id(hero)
+        setattr(self.draft, attribute, hero_id)
+
+    def end_draft(self, state):
+        print(state)
+
+    def merge(self, ar1, ar2):
+        for i in range(len(ar1)):
+            v = ar1[i]
+            if v == '' and ar2[i] != '':
+                v = ar2[i]
+
+            ar1[i] = v
+
+    def update(self, state):
+        if not isinstance(state, dict):
+            return
+
+        success = state.get('S', 0)
+        ban = state.get('B')
+        pick = state.get('P')
+        team = state.get('T')
+
+        msg = state.get('M')
+        if msg:
+            log.debug(msg)
+
+        if success == 1 and ban is not None:
+            self.bans.append(ban)
+
+        if success == 1 and pick is not None:
+            self.add(team, pick)
+
+        # Human Picks
+        # FIXME: the picks are not revealed to the other team right away
+        # we need one draft status for each team
+        picks = state.get('PS')
+        if picks:
+            if team == TEAM_RADIANT:
+                self.merge(self.radiant, picks[:5])
+                self.radiant_known = picks
+
+            if team == TEAM_DIRE:
+                self.merge(self.dire, picks[5:])
+                self.dire_known = picks
 
     def as_tensor(self, faction):
         return self.draft.as_tensor(faction)
