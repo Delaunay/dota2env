@@ -131,16 +131,20 @@ local function select_hero(player_id, hero_name, lane)
     if GetSelectedHeroName(player_id) == '' then
         SelectHero(player_id, hero_name)
 
-        if GetSelectedHeroName(player_id) == '' then
-            send_message({E = 'Could not pick hero ' .. hero_name})
-            return
+        success = 0
+        if GetSelectedHeroName(player_id) ~= '' then
+            success = 1
+        else
+            success = 0
         end
+
+        send_message({DS = {S = success, B = hero_name, T = faction}})
 
         -- We picked a hero; increase offset
         lanes[player_id] = lane
         n = n + 1
     else
-        send_message({E = 'Player already selected an hero ' .. GetSelectedHeroName(player_id)})
+        send_message({DS = {S = 0, B = hero_name, T = faction, M = 'Player already picked'}})
     end
 end
 
@@ -152,6 +156,7 @@ if GetGameMode() == GAMEMODE_CM or GetGameMode() == GAMEMODE_CD then
         SetCMCaptain(5)
     end
 end
+
 
 local function pick_hero(player_id, hero_name, lane)
     if not IsPlayerBot(player_id) then
@@ -167,9 +172,14 @@ local function pick_hero(player_id, hero_name, lane)
     if GetGameMode() == GAMEMODE_CM or GetGameMode() == GAMEMODE_CD then
         CMPickHero(hero_name)
 
-        if not IsCMPickedHero(faction, hero_name) then
-            send_message({E = 'Could not pick hero: ' .. hero_name})
+        success = 0
+        if IsCMPickedHero(faction, hero_name) then
+            success = 1
+        else
+            success = 0
         end
+
+        send_message({DS = {S = success, B = hero_name, T = faction}})
     else
         select_hero(player_id, hero_name, lane)
     end
@@ -184,12 +194,17 @@ local function ban_hero(hero_name)
     if GetGameMode() == GAMEMODE_CM or GetGameMode() == GAMEMODE_CD then
         CMBanHero(hero_name)
 
-        if not IsCMBannedHero(hero_name) then
-            send_message({E = 'Did not ban: ' .. hero_name})
+        success = 0
+        if IsCMBannedHero(hero_name) then
+            success = 1
+        else
+            success = 0
         end
+
+        send_message({DS = {S = success, B = hero_name, T = faction}})
     else
         CMBanHero(hero_name)
-        send_message({E = 'Game Mode does not support banning: ' .. hero_name})
+        send_message({DS = {S = 0, B = hero_name, T = faction, M = 'Hero cannot be banned in the mode'}})
     end
 end
 
@@ -282,6 +297,7 @@ local p9 = ""
 -- This is just here for info
 -- bans are not really easily queryable from here
 -- so will track those from the python side
+-- we need this function to know what the humans are picking
 function get_draft_state()
     local pp0 = GetSelectedHeroName(0)
     local pp1 = GetSelectedHeroName(1)
@@ -330,15 +346,15 @@ function get_draft_state()
     -- IsCMBannedHero
     if state_changed then
         send_message({
-            DS = {
+            DS = {STATE={
                 p0, p1, p2, p3, p4,
                 p5, p6, p7, p8, p9,
                 -- Unsupported
-                b1, b2, b3, b4, b5,
-                b6, b7, b8, b9, b10,
-                b11, b12, b13, b14,
+                -- b1, b2, b3, b4, b5,
+                -- b6, b7, b8, b9, b10,
+                -- b11, b12, b13, b14,
                 --
-            }
+            }}
         })
     end
 end
