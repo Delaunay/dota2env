@@ -8,6 +8,7 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             'luafun = luafun.main:main',
+            'luafun-drafter = luafun.drafter:main',
         ]
     },
     package_data={
