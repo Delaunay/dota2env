@@ -86,5 +86,6 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
 
     parser = ArgumentParser()
+    parser.add_argument('--steam-id', type=str, help='Your steam id to retrieve your match')
 
 
