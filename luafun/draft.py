@@ -213,7 +213,7 @@ class DraftTracker:
         return {"PS": [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9], "S": 1, "T": team}
 
     def name_to_id(self, hero):
-        return 0
+        return const.HERO_LOOKUP.from_name(hero)['id']
 
     def add(self, team, hero):
         if team == TEAM_RADIANT:
