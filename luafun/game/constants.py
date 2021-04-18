@@ -387,10 +387,11 @@ class HeroLookup:
         self._from_name = dict()
         self._ability_remap = dict()
 
-        for hero in HEROES:
+        for offset, hero in enumerate(HEROES):
             self.ability_count = max(self.ability_count, len(hero.get('abilities', [])))
             self._from_id[hero['id']] = hero
             self._from_name[hero['name']] = hero
+            hero['offset'] = offset
             hero['remap'] = self._remap_abilities(hero)
 
     def _remap_abilities(self, hero):
@@ -421,8 +422,12 @@ class HeroLookup:
         return self._from_id.get(id)
 
     def from_name(self, name):
-        """Get hero info from its names"""
+        """Get hero info from its name"""
         return self._from_name.get(name)
+
+    def from_offset(self, offset):
+        """Get hero info from its offset"""
+        return HEROES[offset]
 
     @staticmethod
     def remap(hero, aid):

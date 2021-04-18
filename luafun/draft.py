@@ -212,8 +212,8 @@ class DraftTracker:
     def picks_summary(team, p0='', p1='', p2='', p3='', p4='', p5='', p6='', p7='', p8='', p9=''):
         return {"PS": [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9], "S": 1, "T": team}
 
-    def name_to_id(self, hero):
-        return const.HERO_LOOKUP.from_name(hero)['id']
+    def name_to_offset(self, hero):
+        return const.HERO_LOOKUP.from_name(hero)['offset']
 
     def add(self, team, hero):
         if team == TEAM_RADIANT:
@@ -228,7 +228,7 @@ class DraftTracker:
             self.dhero += 1
 
         array[count] = hero
-        hero_id = self.name_to_id(hero)
+        hero_id = self.name_to_offset(hero)
         setattr(self.draft, attribute, hero_id)
 
     def end_draft(self, state):

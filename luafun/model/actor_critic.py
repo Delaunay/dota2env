@@ -171,10 +171,13 @@ class SimpleDrafter(nn.Module):
     >>> drafter = SimpleDrafter()
     >>> select, ban = drafter(draft_batch)
     >>> select.shape
+    torch.Size([5, 121])
+
+    >>> hero_ids = torch.argmax(select, 1)
+    >>> hero_ids.shape
     torch.Size([5])
-    >>> hero = select[0]
-    >>> hero
-    tensor(69)
+    >>> hero_ids[0]
+    tensor(9)
     """
 
     # Check logic
@@ -214,14 +217,17 @@ class SimpleDrafter(nn.Module):
         encoded_draft = encoded_flat.view(batch_size, self.hidden_size)
 
         probs_select = self.hero_select(encoded_draft)
-        pros_ban = self.hero_ban(encoded_draft)
+        probs_ban = self.hero_ban(encoded_draft)
 
+        return probs_select, probs_ban
+
+    def sample(self, probs_select, probs_ban):
         dist = distributions.Categorical(probs_select)
         select = dist.sample()
         # action_logprobs = dist.log_prob(select)
         # dist_entropy = dist.entropy()
 
-        dist = distributions.Categorical(pros_ban)
+        dist = distributions.Categorical(probs_ban)
         ban = dist.sample()
         # action_logprobs = dist.log_prob(ban)
         # dist_entropy = dist.entropy()
