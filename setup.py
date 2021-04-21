@@ -9,6 +9,7 @@ setuptools.setup(
         'console_scripts': [
             'luafun = luafun.main:main',
             'luafun-drafter = luafun.drafter:main',
+            'luafun-draft-extractor = luafun.steamapi.steamapi:main',
         ]
     },
     package_data={
