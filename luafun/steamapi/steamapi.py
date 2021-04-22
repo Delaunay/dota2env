@@ -11,6 +11,7 @@ import requests
 
 from luafun.utils.options import option
 from luafun.game.game import DOTA_GameMode
+from luafun.steamapi.api import WebAPI, ServerError, LimitExceeded
 
 # set export LUAFUN_STEAM_API=XXXX
 STEAM_API_KEY = option('steam.api', None)
@@ -150,17 +151,9 @@ class LeagueListing:
     tournament_url: str
 
 
-class LimitExceeded(RuntimeError):
-    pass
-
-
-class ServerError(RuntimeError):
-    pass
-
-
 # TODO: add API query limiter
 # TODO: add a dynamic dataset builder that save the result of the queries and keep building it up
-class SteamAPI:
+class SteamAPI(WebAPI):
     """
 
     References
@@ -173,6 +166,8 @@ class SteamAPI:
     URL_STATS = 'https://api.steampowered.com/IDOTA2MatchStats_{game_id}/{method}/v1'
 
     def __init__(self):
+        super(SteamAPI, self).__init__()
+
         # 100,000 API calls per day.
         # 1 request per second
         # 60 request per minute
@@ -182,35 +177,6 @@ class SteamAPI:
         self.wait_time = 1
         self.limiter = True
         self.request_count = 0
-
-    def limit_stats(self):
-        return self.request_count / self.max_api_call_day
-
-    def handle_errors(self, response):
-        if response.status_code == 503:
-            time.sleep(30)
-            raise ServerError
-
-        if response.status_code != 200:
-            time.sleep(30)
-            print(f'Received {response.reason}')
-            raise ServerError
-
-    def limit(self):
-        if self.limiter:
-            # sleep a second to never go over the 1 request per second limit
-            time.sleep(self.wait_time)
-            self.request_count += 1
-
-            if self.start is None:
-                self.start = time.time()
-
-            # reset the request count to 0 after a day
-            if time.time() - self.start > 24 * 60 * 60:
-                self.request_count = 0
-
-            if self.request_count > self.max_api_call_day:
-                raise LimitExceeded('Cannot make more requests today')
 
     def get_match_history(self, mode: int = DOTA_GameMode.DOTA_GAMEMODE_CM.value, skill=3, min_players=10, count=500, league_id=None, date_min=None, start_at_match_id=None) -> MatchHistory:
         # Results are limited 500 per query
@@ -234,7 +200,7 @@ class SteamAPI:
 
         url = SteamAPI.URL.format(game_id=DOTA_ID, method='GetMatchHistory')
         response = requests.get(url, params=params)
-        print(response.url)
+
         self.handle_errors(response)
         self.limit()
         return response.json().get('result')
