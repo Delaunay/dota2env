@@ -56,6 +56,7 @@ class CategoryEncoder(nn.Module):
     """
     def __init__(self, in_size, out_size=128):
         super(CategoryEncoder, self).__init__()
+        self.out_size = out_size
         self.linear: nn.Module = nn.Linear(in_size, out_size, bias=False)
 
     def forward(self, x):
@@ -100,10 +101,14 @@ class SelectionCategorical(nn.Module):
     def __init__(self, state_shape, n_classes, n_hidden=None):
         super(SelectionCategorical, self).__init__()
         if n_hidden is None:
-            n_hidden = int(n_classes)
+            n_hidden = int(n_classes) * 2
 
         self.selector = nn.Sequential(
             nn.Linear(state_shape, n_hidden),
+            nn.ReLU(),
+            nn.Linear(n_hidden, n_hidden),
+            nn.ReLU(),
+            nn.Linear(n_hidden, n_hidden),
             nn.ReLU(),
             nn.Linear(n_hidden, n_classes),
             nn.Softmax(dim=-1)
@@ -137,6 +142,83 @@ class ItemPurchaser(SelectionCategorical):
         super(ItemPurchaser, self).__init__()
 
 
+class LSTMDrafter(nn.Module):
+    """
+
+    Examples
+    --------
+    >>> import torch
+    >>> from luafun.dataset.draft import Dota2PickBan
+
+    >>> dataset = Dota2PickBan('/home/setepenre/work/LuaFun/opendota_CM_20210421.zip', patch='7.29')
+    >>> state, pic, ban = dataset[0]
+    >>> state.shape
+    torch.Size([12, 24, 122])
+
+    12 Decision to make each decision has a state of 24 selected/ban heroes
+
+    >>> batch = torch.stack([state, state])
+    >>> batch.shape
+    torch.Size([2, 12, 24, 122])
+
+    >>> drafter = LSTMDrafter()
+    >>> pick, ban = drafter(batch)
+    >>> pick.shape
+    torch.Size([2, 12, 122])
+    """
+
+    def __init__(self):
+        super(LSTMDrafter, self).__init__()
+        self.encoded_vector = 32
+
+        self.hero_encoder = CategoryEncoder(const.HERO_COUNT, self.encoded_vector)
+        self.lstm_in = DraftFields.Size * self.encoded_vector
+        self.lstm_hidden = 256
+        self.lstm_layer = 2
+
+        self.rnn = nn.LSTM(
+            batch_first=True,
+            input_size=self.lstm_in,
+            hidden_size=self.lstm_hidden,
+            num_layers=self.lstm_layer,
+            bidirectional=False,
+        )
+
+        # self.h0_init = nn.Parameter(torch.zeros(self.lstm_layer, self.batch_size, self.lstm_hidden))
+        # self.c0_init = nn.Parameter(torch.zeros(self.lstm_layer, self.batch_size, self.lstm_hidden))
+
+        self.hero_select = nn.Sequential(
+            nn.Linear(self.lstm_hidden, const.HERO_COUNT),
+            nn.Softmax(dim=-1)
+        )
+
+        self.hero_ban = nn.Sequential(
+            nn.Linear(self.lstm_hidden, const.HERO_COUNT),
+            nn.Softmax(dim=-1)
+        )
+
+    def forward(self, draft):
+        # batch, seq_len, hidden_size
+        batch_size = draft.shape[0]
+        seq_len = draft.shape[1]
+
+        # [batch_size=2, seq_len=12, DraftSize=24, HeroCount=122]
+        flat_draft = draft.view(batch_size * seq_len * DraftFields.Size, const.HERO_COUNT)
+
+        encoded_flat = self.hero_encoder(flat_draft)
+        encoded_draft = encoded_flat.view(batch_size, seq_len, self.lstm_in)
+
+        common, _ = self.rnn(encoded_draft)     # , (self.h0_init, self.c0_init))
+
+        #  torch.Size([2, 12, 256])
+        common = common.reshape(batch_size * seq_len, self.lstm_hidden)
+
+        pick = self.hero_select(common).view(batch_size, seq_len, const.HERO_COUNT)
+        ban = self.hero_ban(common).view(batch_size, seq_len, const.HERO_COUNT)
+
+        return pick, ban
+
+
 class SimpleDrafter(nn.Module):
     """Works by encoding one-hot vectors of heroes to a dense vector which makes the internal state of the model.
     Decoders are then used to extract which pick or ban should be made given the information present
@@ -146,6 +228,9 @@ class SimpleDrafter(nn.Module):
     The drafter as a whole can only be trained on finished matches, but
     underlying parts of the network such as the ``hero_encoder`` can and will
     be trained continuously during the game.
+
+    Seems to be impossible to train (from 9.5849 reached 9.1360 after 4300 epochs.
+    Might be missing capacity to understand
 
     Examples
     --------
@@ -196,13 +281,37 @@ class SimpleDrafter(nn.Module):
 
     def __init__(self):
         super(SimpleDrafter, self).__init__()
-        self.encoded_vector = 64
-        self.hero_encoder = CategoryEncoder(const.HERO_COUNT, self.encoded_vector)
+        self.encoded_vector = 32
 
+        self.hero_encoder = CategoryEncoder(const.HERO_COUNT, self.encoded_vector)
         self.hidden_size = DraftFields.Size * self.encoded_vector
 
-        self.hero_select = SelectionCategorical(self.hidden_size, const.HERO_COUNT)
-        self.hero_ban    = SelectionCategorical(self.hidden_size, const.HERO_COUNT)
+        state_shape = self.hidden_size
+        n_hidden = 512
+        self.common = nn.Sequential(
+            nn.Linear(state_shape, n_hidden),
+            nn.ReLU(),
+            nn.Linear(n_hidden, n_hidden),
+            nn.ReLU(),
+            nn.Linear(n_hidden, n_hidden),
+            nn.ReLU(),
+        )
+
+        self.hero_select = nn.Sequential(
+            nn.Linear(n_hidden, const.HERO_COUNT),
+            nn.Softmax(dim=-1)
+        )
+
+        self.hero_ban = nn.Sequential(
+            nn.Linear(n_hidden, const.HERO_COUNT),
+            nn.Softmax(dim=-1)
+        )
+
+    def pertub(self):
+        with torch.no_grad():
+            for param in self.parameters():
+                if param.grad is not None:
+                    param += param.grad * torch.randn_like(param) * 2
 
     def forward(self, draft):
         # draft         : (batch_size x 24 x const.HERO_COUNT)
@@ -216,8 +325,10 @@ class SimpleDrafter(nn.Module):
         encoded_flat = self.hero_encoder(flat_draft)
         encoded_draft = encoded_flat.view(batch_size, self.hidden_size)
 
-        probs_select = self.hero_select(encoded_draft)
-        probs_ban = self.hero_ban(encoded_draft)
+        common = self.common(encoded_draft)
+
+        probs_select = self.hero_select(common)
+        probs_ban = self.hero_ban(common)
 
         return probs_select, probs_ban
 

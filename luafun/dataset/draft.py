@@ -1,3 +1,4 @@
+from collections import defaultdict
 import json
 import zipfile
 
@@ -24,20 +25,50 @@ class Dota2PickBan(Dataset):
     1366
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename, patch=None):
+        self.patch_count = defaultdict(int)
         self.matches = []
         self.dataset = None
 
+        self.filename = filename
         self.dataset = zipfile.ZipFile(filename, mode='r')
-        self.matches = list(self.dataset.namelist())
+        self.matches = self.filter_by(self.dataset, patch)
         self.hero_size = const.HERO_COUNT
+
+        # for multi worker setup the dataset need to be opened on the worker process
+        self.dataset.close()
+        self.dataset = None
+
+    def show_patches(self):
+        return self.patch_count
+
+    def filter_by(self, dataset, patch):
+        if patch is None:
+            return list(dataset.namelist())
+
+        matches = []
+        for match in dataset.namelist():
+            match_patch = self.load_match(match)['patch']
+
+            if match_patch == patch:
+                matches.append(match)
+
+            self.patch_count[match_patch] += 1
+
+        return matches
+
+    def _lazy(self):
+        if self.dataset is None:
+            self.dataset = zipfile.ZipFile(self.filename, mode='r')
+        return self.dataset
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.dataset.close()
-        self.dataset = None
+        if self.dataset:
+            self.dataset.close()
+            self.dataset = None
 
     def __del__(self):
         if self.dataset:
@@ -47,7 +78,7 @@ class Dota2PickBan(Dataset):
         return len(self.matches)
 
     def load_match(self, name):
-        with self.dataset.open(name, 'r') as match:
+        with self._lazy().open(name, 'r') as match:
             return json.load(match)
 
     def __getitem__(self, item):
@@ -104,7 +135,9 @@ class Dota2PickBan(Dataset):
 
 
 if __name__ == '__main__':
-    dataset = Dota2PickBan('/home/setepenre/work/LuaFun/opendota_CM_20210421.zip')
+    dataset = Dota2PickBan('/home/setepenre/work/LuaFun/opendota_CM_20210421.zip', patch='7.29')
 
-    x, y = dataset[0]
-    print(x.shape, y.shape)
+    # x, y = dataset[0]
+    # print(x.shape, y.shape)
+
+    print(json.dumps(dataset.show_patches(), indent=2))

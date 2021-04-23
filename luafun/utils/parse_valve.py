@@ -315,6 +315,7 @@ def generate_hero_array():
 
     # Invoker has 24 slot
     ability_count = 24
+    roles = set()
 
     heroes = []
     for k, v in p.root['DOTAHeroes'].items():
@@ -325,12 +326,21 @@ def generate_hero_array():
             log.debug(f'Ignoring hero {k} {v}')
             break
 
+        role = v.get('Role').split(',')
+        level = v.get('Rolelevels').split(',')
+
+        role_dict = dict()
+        for r, l in zip(role, level):
+            roles.add(r)
+            role_dict[r] = l
+
         hero = dict(
             name=k,
             id=int(v['HeroID']),
             abilities=[None] * ability_count,
             alias=v.get('NameAliases'),
-            pretty_name=v.get('workshop_guide_name')
+            pretty_name=v.get('workshop_guide_name'),
+            roles=role_dict
         )
 
         for i in range(ability_count):
@@ -342,6 +352,10 @@ def generate_hero_array():
     f = os.path.join(folder, '..', 'game', 'resources', 'heroes.json')
     with open(f, 'w') as f:
         json.dump(heroes, f, indent=2)
+
+    f = os.path.join(folder, '..', 'game', 'resources', 'roles.json')
+    with open(f, 'w') as f:
+        json.dump(list(roles), f, indent=2)
 
 
 if __name__ == '__main__':

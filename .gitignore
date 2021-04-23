@@ -37,3 +37,4 @@ replay*.txt
 .ipynb_checkpoints/
 *.json
 *.zip
+*.pt

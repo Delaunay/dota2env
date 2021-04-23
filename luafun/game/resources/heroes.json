@@ -14,10 +14,10 @@
       null,
       "special_bonus_strength_9",
       "special_bonus_attack_speed_15",
-      "special_bonus_unique_antimage_3",
+      "special_bonus_unique_antimage_7",
       "special_bonus_armor_8",
       "special_bonus_unique_antimage_6",
-      "special_bonus_unique_antimage",
+      "special_bonus_unique_antimage_8",
       "special_bonus_unique_antimage_4",
       "special_bonus_unique_antimage_2",
       null,
@@ -29,7 +29,12 @@
       null
     ],
     "alias": "am",
-    "pretty_name": "Anti-Mage"
+    "pretty_name": "Anti-Mage",
+    "roles": {
+      "Carry": "3",
+      "Escape": "3",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_axe",
@@ -44,8 +49,8 @@
       null,
       null,
       null,
-      "special_bonus_mp_regen_175",
-      "special_bonus_attack_speed_25",
+      "special_bonus_mp_regen_150",
+      "special_bonus_strength_9",
       "special_bonus_movement_speed_25",
       "special_bonus_hp_300",
       "special_bonus_unique_axe_5",
@@ -61,7 +66,14 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Axe"
+    "pretty_name": "Axe",
+    "roles": {
+      "Initiator": "3",
+      "Durable": "3",
+      "Disabler": "2",
+      "Jungler": "2",
+      "Carry": "1"
+    }
   },
   {
     "name": "npc_dota_hero_bane",
@@ -78,8 +90,8 @@
       null,
       "special_bonus_armor_6",
       "special_bonus_magic_resistance_15",
-      "special_bonus_spell_amplify_12",
-      "special_bonus_cast_range_100",
+      "special_bonus_unique_bane_8",
+      "special_bonus_unique_bane_9",
       "special_bonus_unique_bane_5",
       "special_bonus_movement_speed_30",
       "special_bonus_unique_bane_2",
@@ -93,7 +105,13 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Bane"
+    "pretty_name": "Bane",
+    "roles": {
+      "Support": "2",
+      "Disabler": "3",
+      "Nuker": "1",
+      "Durable": "1"
+    }
   },
   {
     "name": "npc_dota_hero_bloodseeker",
@@ -109,7 +127,7 @@
       null,
       null,
       "special_bonus_unique_bloodseeker_5",
-      "special_bonus_armor_6",
+      "special_bonus_armor_7",
       "special_bonus_lifesteal_15",
       "special_bonus_unique_bloodseeker_2",
       "special_bonus_unique_bloodseeker_3",
@@ -125,7 +143,14 @@
       null
     ],
     "alias": "bs",
-    "pretty_name": "Bloodseeker"
+    "pretty_name": "Bloodseeker",
+    "roles": {
+      "Carry": "1",
+      "Disabler": "1",
+      "Jungler": "1",
+      "Nuker": "1",
+      "Initiator": "1"
+    }
   },
   {
     "name": "npc_dota_hero_crystal_maiden",
@@ -137,11 +162,11 @@
       "generic_hidden",
       "generic_hidden",
       "crystal_maiden_freezing_field",
-      null,
+      "crystal_maiden_freezing_field_stop",
       null,
       null,
       "special_bonus_hp_200",
-      "special_bonus_cast_range_75",
+      "special_bonus_unique_crystal_maiden_6",
       "special_bonus_unique_crystal_maiden_4",
       "special_bonus_unique_crystal_maiden_5",
       "special_bonus_attack_speed_200",
@@ -157,7 +182,13 @@
       null
     ],
     "alias": "cm;rylai",
-    "pretty_name": "Crystal Maiden"
+    "pretty_name": "Crystal Maiden",
+    "roles": {
+      "Support": "3",
+      "Disabler": "2",
+      "Nuker": "2",
+      "Jungler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_drow_ranger",
@@ -189,7 +220,12 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Drow Ranger"
+    "pretty_name": "Drow Ranger",
+    "roles": {
+      "Carry": "2",
+      "Disabler": "1",
+      "Pusher": "1"
+    }
   },
   {
     "name": "npc_dota_hero_earthshaker",
@@ -207,7 +243,7 @@
       "special_bonus_attack_base_damage_20",
       "special_bonus_mp_200",
       "special_bonus_movement_speed_25",
-      "special_bonus_armor_6",
+      "special_bonus_armor_7",
       "special_bonus_unique_earthshaker_2",
       "special_bonus_unique_earthshaker_3",
       "special_bonus_magic_resistance_40",
@@ -221,7 +257,13 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Earthshaker"
+    "pretty_name": "Earthshaker",
+    "roles": {
+      "Support": "1",
+      "Initiator": "3",
+      "Disabler": "2",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_juggernaut",
@@ -253,7 +295,12 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Juggernaut"
+    "pretty_name": "Juggernaut",
+    "roles": {
+      "Carry": "2",
+      "Pusher": "1",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_mirana",
@@ -285,7 +332,14 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Mirana"
+    "pretty_name": "Mirana",
+    "roles": {
+      "Carry": "1",
+      "Support": "1",
+      "Escape": "2",
+      "Nuker": "1",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_nevermore",
@@ -317,7 +371,11 @@
       null
     ],
     "alias": "sf",
-    "pretty_name": "Shadow Fiend"
+    "pretty_name": "Shadow Fiend",
+    "roles": {
+      "Carry": "2",
+      "Nuker": "3"
+    }
   },
   {
     "name": "npc_dota_hero_morphling",
@@ -337,19 +395,26 @@
       null,
       null,
       null,
-      "special_bonus_agility_10",
+      "special_bonus_magic_resistance_15",
       "special_bonus_unique_morphling_1",
       "special_bonus_unique_morphling_8",
-      "special_bonus_attack_speed_30",
-      "special_bonus_cooldown_reduction_12",
+      "special_bonus_agility_15",
+      "special_bonus_strength_20",
       "special_bonus_unique_morphling_4",
       "special_bonus_unique_morphling_6",
-      "special_bonus_strength_30",
+      "special_bonus_unique_morphling_10",
       null,
       null
     ],
     "alias": null,
-    "pretty_name": "Morphling"
+    "pretty_name": "Morphling",
+    "roles": {
+      "Carry": "3",
+      "Escape": "3",
+      "Durable": "2",
+      "Nuker": "1",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_phantom_lancer",
@@ -364,9 +429,9 @@
       null,
       null,
       null,
-      "special_bonus_evasion_16",
+      "special_bonus_hp_150",
       "special_bonus_attack_speed_15",
-      "special_bonus_hp_200",
+      "special_bonus_evasion_16",
       "special_bonus_unique_phantom_lancer_5",
       "special_bonus_unique_phantom_lancer",
       "special_bonus_unique_phantom_lancer_6",
@@ -381,7 +446,13 @@
       null
     ],
     "alias": "pl",
-    "pretty_name": "Phantom Lancer"
+    "pretty_name": "Phantom Lancer",
+    "roles": {
+      "Carry": "2",
+      "Escape": "2",
+      "Pusher": "1",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_puck",
@@ -396,12 +467,12 @@
       null,
       null,
       null,
-      "special_bonus_attack_damage_30",
-      "special_bonus_cast_range_150",
+      "special_bonus_attack_damage_25",
+      "special_bonus_unique_puck_7",
       "special_bonus_spell_amplify_12",
       "special_bonus_unique_puck_5",
       "special_bonus_unique_puck_2",
-      "special_bonus_unique_puck",
+      "special_bonus_unique_puck_8",
       "special_bonus_unique_puck_6",
       "special_bonus_unique_puck_3",
       null,
@@ -413,7 +484,13 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Puck"
+    "pretty_name": "Puck",
+    "roles": {
+      "Initiator": "3",
+      "Disabler": "3",
+      "Escape": "3",
+      "Nuker": "2"
+    }
   },
   {
     "name": "npc_dota_hero_pudge",
@@ -445,7 +522,13 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Pudge"
+    "pretty_name": "Pudge",
+    "roles": {
+      "Disabler": "2",
+      "Initiator": "2",
+      "Durable": "2",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_razor",
@@ -461,9 +544,9 @@
       null,
       null,
       "special_bonus_hp_175",
-      "special_bonus_agility_8",
+      "special_bonus_agility_9",
       "special_bonus_unique_razor",
-      "special_bonus_strength_12",
+      "special_bonus_strength_14",
       "special_bonus_armor_8",
       "special_bonus_unique_razor_2",
       "special_bonus_attack_speed_80",
@@ -477,7 +560,13 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Razor"
+    "pretty_name": "Razor",
+    "roles": {
+      "Carry": "2",
+      "Durable": "2",
+      "Nuker": "1",
+      "Pusher": "1"
+    }
   },
   {
     "name": "npc_dota_hero_sand_king",
@@ -493,11 +582,11 @@
       null,
       null,
       "special_bonus_unique_sand_king_5",
-      "special_bonus_hp_175",
+      "special_bonus_hp_200",
       "special_bonus_unique_sand_king_2",
       "special_bonus_unique_sand_king_6",
       "special_bonus_unique_sand_king_7",
-      "special_bonus_hp_regen_20",
+      "special_bonus_hp_regen_25",
       "special_bonus_unique_sand_king",
       "special_bonus_unique_sand_king_4",
       null,
@@ -509,7 +598,15 @@
       null
     ],
     "alias": "sk",
-    "pretty_name": "Sand King"
+    "pretty_name": "Sand King",
+    "roles": {
+      "Initiator": "3",
+      "Disabler": "2",
+      "Support": "1",
+      "Nuker": "2",
+      "Escape": "2",
+      "Jungler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_storm_spirit",
@@ -518,18 +615,18 @@
       "storm_spirit_static_remnant",
       "storm_spirit_electric_vortex",
       "storm_spirit_overload",
-      "storm_spirit_electric_rave",
+      "generic_hidden",
       "generic_hidden",
       "storm_spirit_ball_lightning",
       null,
       null,
       null,
-      "special_bonus_unique_storm_spirit_6",
+      "special_bonus_hp_200",
       "special_bonus_mp_regen_250",
       "special_bonus_unique_storm_spirit_5",
-      "special_bonus_hp_375",
-      "special_bonus_unique_storm_spirit",
       "special_bonus_attack_speed_25",
+      "special_bonus_unique_storm_spirit",
+      "special_bonus_unique_storm_spirit_8",
       "special_bonus_unique_storm_spirit_7",
       "special_bonus_unique_storm_spirit_4",
       null,
@@ -541,7 +638,14 @@
       null
     ],
     "alias": "ss;raijin",
-    "pretty_name": "Storm Spirit"
+    "pretty_name": "Storm Spirit",
+    "roles": {
+      "Carry": "2",
+      "Escape": "3",
+      "Nuker": "2",
+      "Initiator": "1",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_sven",
@@ -556,12 +660,12 @@
       null,
       null,
       null,
-      "special_bonus_strength_7",
-      "special_bonus_mp_regen_250",
-      "special_bonus_lifesteal_15",
       "special_bonus_unique_sven_5",
+      "special_bonus_attack_speed_15",
+      "special_bonus_lifesteal_15",
+      "special_bonus_unique_sven_8",
       "special_bonus_movement_speed_25",
-      "special_bonus_unique_sven",
+      "special_bonus_unique_sven_7",
       "special_bonus_unique_sven_2",
       "special_bonus_unique_sven_4",
       null,
@@ -573,7 +677,14 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Sven"
+    "pretty_name": "Sven",
+    "roles": {
+      "Carry": "2",
+      "Disabler": "2",
+      "Initiator": "2",
+      "Durable": "2",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_tiny",
@@ -583,16 +694,16 @@
       "tiny_toss",
       "tiny_tree_grab",
       "tiny_tree_channel",
-      "tiny_craggy_exterior",
+      "generic_hidden",
       "tiny_grow",
       "tiny_toss_tree",
       null,
       null,
-      "special_bonus_movement_speed_15",
-      "special_bonus_attack_damage_25",
-      "special_bonus_unique_tiny_6",
+      "special_bonus_movement_speed_20",
+      "special_bonus_strength_10",
+      "special_bonus_unique_tiny_7",
       "special_bonus_unique_tiny",
-      "special_bonus_strength_18",
+      "special_bonus_status_resistance_15",
       "special_bonus_unique_tiny_5",
       "special_bonus_unique_tiny_3",
       "special_bonus_unique_tiny_2",
@@ -605,7 +716,15 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Tiny"
+    "pretty_name": "Tiny",
+    "roles": {
+      "Carry": "3",
+      "Nuker": "2",
+      "Pusher": "2",
+      "Initiator": "2",
+      "Durable": "2",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_vengefulspirit",
@@ -621,11 +740,11 @@
       null,
       null,
       "special_bonus_magic_resistance_12",
+      "special_bonus_agility_10",
       "special_bonus_unique_vengeful_spirit_4",
-      "special_bonus_agility_12",
       "special_bonus_unique_vengeful_spirit_5",
       "special_bonus_unique_vengeful_spirit_1",
-      "special_bonus_cast_range_125",
+      "special_bonus_unique_vengeful_spirit_9",
       "special_bonus_unique_vengeful_spirit_2",
       "special_bonus_unique_vengeful_spirit_3",
       null,
@@ -637,7 +756,14 @@
       null
     ],
     "alias": "vs",
-    "pretty_name": "Vengeful Spirit"
+    "pretty_name": "Vengeful Spirit",
+    "roles": {
+      "Support": "3",
+      "Initiator": "2",
+      "Disabler": "2",
+      "Nuker": "1",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_windrunner",
@@ -669,7 +795,14 @@
       null
     ],
     "alias": "wr",
-    "pretty_name": "Windranger"
+    "pretty_name": "Windranger",
+    "roles": {
+      "Carry": "1",
+      "Support": "1",
+      "Disabler": "1",
+      "Escape": "1",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_zuus",
@@ -685,12 +818,12 @@
       null,
       null,
       "special_bonus_mp_regen_125",
-      "special_bonus_hp_200",
-      "special_bonus_movement_speed_25",
+      "special_bonus_movement_speed_20",
+      "special_bonus_hp_350",
       "special_bonus_unique_zeus",
       "special_bonus_unique_zeus_4",
       "special_bonus_unique_zeus_3",
-      "special_bonus_cast_range_275",
+      "special_bonus_spell_lifesteal_50",
       "special_bonus_unique_zeus_2",
       null,
       null,
@@ -701,7 +834,11 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Zeus"
+    "pretty_name": "Zeus",
+    "roles": {
+      "Nuker": "3",
+      "Carry": "1"
+    }
   },
   {
     "name": "npc_dota_hero_kunkka",
@@ -717,13 +854,13 @@
       null,
       null,
       "special_bonus_attack_damage_30",
-      "special_bonus_cast_range_150",
-      "special_bonus_hp_regen_8",
+      "special_bonus_unique_kunkka_7",
+      "special_bonus_strength_16",
       "special_bonus_unique_kunkka_2",
       "special_bonus_unique_kunkka",
-      "special_bonus_strength_20",
-      "special_bonus_unique_kunkka_3",
       "special_bonus_unique_kunkka_4",
+      "special_bonus_unique_kunkka_3",
+      "special_bonus_unique_kunkka_5",
       null,
       null,
       null,
@@ -733,7 +870,15 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Kunkka"
+    "pretty_name": "Kunkka",
+    "roles": {
+      "Carry": "2",
+      "Support": "1",
+      "Disabler": "2",
+      "Initiator": "2",
+      "Durable": "1",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_lina",
@@ -749,12 +894,12 @@
       null,
       null,
       "special_bonus_attack_damage_30",
-      "special_bonus_cast_range_75",
+      "special_bonus_unique_lina_1",
       "special_bonus_hp_350",
       "special_bonus_unique_lina_3",
       "special_bonus_spell_amplify_11",
       "special_bonus_unique_lina_2",
-      "special_bonus_unique_lina_1",
+      "special_bonus_unique_lina_6",
       "special_bonus_attack_range_150",
       null,
       null,
@@ -765,7 +910,13 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Lina"
+    "pretty_name": "Lina",
+    "roles": {
+      "Support": "1",
+      "Carry": "1",
+      "Nuker": "3",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_lich",
@@ -780,7 +931,7 @@
       null,
       null,
       null,
-      "special_bonus_cast_range_100",
+      "special_bonus_unique_lich_8",
       "special_bonus_unique_lich_6",
       "special_bonus_attack_damage_100",
       "special_bonus_unique_lich_3",
@@ -797,7 +948,11 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Lich"
+    "pretty_name": "Lich",
+    "roles": {
+      "Support": "3",
+      "Nuker": "2"
+    }
   },
   {
     "name": "npc_dota_hero_lion",
@@ -812,12 +967,12 @@
       null,
       null,
       null,
-      "special_bonus_unique_lion_6",
+      "special_bonus_movement_speed_15",
       "special_bonus_attack_damage_70",
       "special_bonus_unique_lion_7",
-      "special_bonus_cast_range_125",
+      "special_bonus_unique_lion_11",
       "special_bonus_unique_lion_8",
-      "special_bonus_unique_lion",
+      "special_bonus_unique_lion_10",
       "special_bonus_unique_lion_2",
       "special_bonus_unique_lion_4",
       null,
@@ -829,7 +984,13 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Lion"
+    "pretty_name": "Lion",
+    "roles": {
+      "Support": "2",
+      "Disabler": "3",
+      "Nuker": "3",
+      "Initiator": "2"
+    }
   },
   {
     "name": "npc_dota_hero_shadow_shaman",
@@ -844,9 +1005,9 @@
       null,
       null,
       null,
-      "special_bonus_hp_175",
       "special_bonus_unique_shadow_shaman_6",
-      "special_bonus_cast_range_100",
+      "special_bonus_hp_175",
+      "special_bonus_unique_shadow_shaman_8",
       "special_bonus_unique_shadow_shaman_5",
       "special_bonus_unique_shadow_shaman_2",
       "special_bonus_unique_shadow_shaman_1",
@@ -861,7 +1022,14 @@
       null
     ],
     "alias": "ss",
-    "pretty_name": "Shadow Shaman"
+    "pretty_name": "Shadow Shaman",
+    "roles": {
+      "Support": "2",
+      "Pusher": "3",
+      "Disabler": "3",
+      "Nuker": "2",
+      "Initiator": "1"
+    }
   },
   {
     "name": "npc_dota_hero_slardar",
@@ -876,9 +1044,9 @@
       null,
       null,
       null,
-      "special_bonus_hp_regen_6",
+      "special_bonus_hp_regen_7",
       "special_bonus_attack_damage_20",
-      "special_bonus_hp_275",
+      "special_bonus_hp_325",
       "special_bonus_unique_slardar_2",
       "special_bonus_lifesteal_25",
       "special_bonus_unique_slardar_5",
@@ -893,7 +1061,14 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Slardar"
+    "pretty_name": "Slardar",
+    "roles": {
+      "Carry": "2",
+      "Durable": "2",
+      "Initiator": "2",
+      "Disabler": "1",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_tidehunter",
@@ -925,7 +1100,14 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Tidehunter"
+    "pretty_name": "Tidehunter",
+    "roles": {
+      "Initiator": "3",
+      "Durable": "3",
+      "Disabler": "2",
+      "Nuker": "1",
+      "Carry": "1"
+    }
   },
   {
     "name": "npc_dota_hero_witch_doctor",
@@ -941,7 +1123,7 @@
       null,
       null,
       "special_bonus_attack_damage_60",
-      "special_bonus_armor_5",
+      "special_bonus_hp_200",
       "special_bonus_unique_witch_doctor_3",
       "special_bonus_unique_witch_doctor_6",
       "special_bonus_unique_witch_doctor_1",
@@ -957,7 +1139,12 @@
       null
     ],
     "alias": "wd",
-    "pretty_name": "Witch Doctor"
+    "pretty_name": "Witch Doctor",
+    "roles": {
+      "Support": "3",
+      "Nuker": "2",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_riki",
@@ -972,12 +1159,12 @@
       null,
       null,
       null,
-      "special_bonus_hp_regen_6",
+      "special_bonus_strength_8",
       "special_bonus_attack_speed_20",
-      "special_bonus_attack_damage_20",
+      "special_bonus_unique_riki_8",
       "special_bonus_unique_riki_2",
       "special_bonus_unique_riki_1",
-      "special_bonus_unique_riki_3",
+      "special_bonus_unique_riki_9",
       "special_bonus_unique_riki_6",
       "special_bonus_unique_riki_7",
       null,
@@ -989,7 +1176,12 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Riki"
+    "pretty_name": "Riki",
+    "roles": {
+      "Carry": "2",
+      "Escape": "2",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_enigma",
@@ -1021,7 +1213,13 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Enigma"
+    "pretty_name": "Enigma",
+    "roles": {
+      "Disabler": "2",
+      "Jungler": "3",
+      "Initiator": "2",
+      "Pusher": "2"
+    }
   },
   {
     "name": "npc_dota_hero_tinker",
@@ -1037,9 +1235,9 @@
       null,
       null,
       "special_bonus_spell_amplify_8",
-      "special_bonus_cast_range_125",
+      "special_bonus_mana_reduction_8",
       "special_bonus_unique_tinker_5",
-      "special_bonus_mana_reduction_9",
+      "special_bonus_unique_tinker_6",
       "special_bonus_armor_8",
       "special_bonus_unique_tinker_2",
       "special_bonus_unique_tinker",
@@ -1053,7 +1251,12 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Tinker"
+    "pretty_name": "Tinker",
+    "roles": {
+      "Carry": "1",
+      "Nuker": "3",
+      "Pusher": "2"
+    }
   },
   {
     "name": "npc_dota_hero_sniper",
@@ -1085,7 +1288,11 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Sniper"
+    "pretty_name": "Sniper",
+    "roles": {
+      "Carry": "3",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_necrolyte",
@@ -1117,7 +1324,13 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Necrophos"
+    "pretty_name": "Necrophos",
+    "roles": {
+      "Carry": "1",
+      "Nuker": "2",
+      "Durable": "1",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_warlock",
@@ -1133,11 +1346,11 @@
       null,
       null,
       "special_bonus_unique_warlock_5",
-      "special_bonus_cast_range_150",
-      "special_bonus_armor_8",
+      "special_bonus_unique_warlock_8",
+      "special_bonus_unique_warlock_10",
       "special_bonus_unique_warlock_3",
       "special_bonus_unique_warlock_4",
-      "special_bonus_unique_warlock_6",
+      "special_bonus_unique_warlock_7",
       "special_bonus_unique_warlock_2",
       "special_bonus_unique_warlock_1",
       null,
@@ -1149,7 +1362,12 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Warlock"
+    "pretty_name": "Warlock",
+    "roles": {
+      "Support": "1",
+      "Initiator": "2",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_beastmaster",
@@ -1164,14 +1382,14 @@
       null,
       null,
       null,
-      "special_bonus_attack_damage_25",
+      "special_bonus_attack_damage_30",
       "special_bonus_movement_speed_20",
       "special_bonus_mp_regen_3",
-      "special_bonus_armor_6",
-      "special_bonus_unique_beastmaster_2",
-      "special_bonus_unique_beastmaster",
-      "special_bonus_unique_beastmaster_4",
       "special_bonus_unique_beastmaster_6",
+      "special_bonus_unique_beastmaster_2",
+      "special_bonus_unique_beastmaster_7",
+      "special_bonus_unique_beastmaster_4",
+      "special_bonus_unique_beastmaster_9",
       null,
       null,
       null,
@@ -1181,7 +1399,13 @@
       null
     ],
     "alias": "bm",
-    "pretty_name": "Beastmaster"
+    "pretty_name": "Beastmaster",
+    "roles": {
+      "Initiator": "2",
+      "Disabler": "2",
+      "Durable": "2",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_queenofpain",
@@ -1200,9 +1424,9 @@
       "special_bonus_strength_9",
       "special_bonus_cooldown_reduction_10",
       "special_bonus_attack_speed_30",
-      "special_bonus_spell_lifesteal_25",
+      "special_bonus_spell_lifesteal_30",
       "special_bonus_unique_queen_of_pain",
-      "special_bonus_unique_queen_of_pain_4",
+      "special_bonus_unique_queen_of_pain_6",
       "special_bonus_spell_block_18",
       null,
       null,
@@ -1213,7 +1437,12 @@
       null
     ],
     "alias": "qop",
-    "pretty_name": "Queen of Pain"
+    "pretty_name": "Queen of Pain",
+    "roles": {
+      "Carry": "1",
+      "Nuker": "3",
+      "Escape": "3"
+    }
   },
   {
     "name": "npc_dota_hero_venomancer",
@@ -1229,11 +1458,11 @@
       null,
       null,
       "special_bonus_unique_venomancer_3",
-      "special_bonus_unique_venomancer_7",
       "special_bonus_attack_range_100",
+      "special_bonus_spell_lifesteal_12",
       "special_bonus_unique_venomancer_2",
       "special_bonus_unique_venomancer_4",
-      "special_bonus_spell_lifesteal_12",
+      "special_bonus_unique_venomancer_8",
       "special_bonus_unique_venomancer_6",
       "special_bonus_unique_venomancer",
       null,
@@ -1245,7 +1474,14 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Venomancer"
+    "pretty_name": "Venomancer",
+    "roles": {
+      "Support": "2",
+      "Nuker": "1",
+      "Initiator": "1",
+      "Pusher": "1",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_faceless_void",
@@ -1260,10 +1496,10 @@
       null,
       null,
       null,
-      "special_bonus_attack_damage_12",
-      "special_bonus_strength_8",
+      "special_bonus_agility_7",
+      "special_bonus_strength_9",
       "special_bonus_unique_faceless_void_3",
-      "special_bonus_unique_faceless_void",
+      "special_bonus_hp_300",
       "special_bonus_attack_speed_40",
       "special_bonus_unique_faceless_void_5",
       "special_bonus_unique_faceless_void_4",
@@ -1277,7 +1513,14 @@
       null
     ],
     "alias": "fv",
-    "pretty_name": "Faceless Void"
+    "pretty_name": "Faceless Void",
+    "roles": {
+      "Carry": "2",
+      "Initiator": "3",
+      "Disabler": "2",
+      "Escape": "1",
+      "Durable": "1"
+    }
   },
   {
     "name": "npc_dota_hero_skeleton_king",
@@ -1292,11 +1535,11 @@
       null,
       null,
       null,
-      "special_bonus_unique_wraith_king_9",
+      "special_bonus_unique_wraith_king_11",
       "special_bonus_attack_speed_15",
-      "special_bonus_strength_12",
+      "special_bonus_movement_speed_25",
       "special_bonus_unique_wraith_king_6",
-      "special_bonus_movement_speed_30",
+      "special_bonus_strength_16",
       "special_bonus_unique_wraith_king_5",
       "special_bonus_unique_wraith_king_10",
       "special_bonus_unique_wraith_king_4",
@@ -1309,7 +1552,14 @@
       null
     ],
     "alias": "sk;snk;wk;skeleton",
-    "pretty_name": "Wraith King"
+    "pretty_name": "Wraith King",
+    "roles": {
+      "Carry": "2",
+      "Support": "1",
+      "Durable": "3",
+      "Disabler": "2",
+      "Initiator": "1"
+    }
   },
   {
     "name": "npc_dota_hero_death_prophet",
@@ -1327,7 +1577,7 @@
       "special_bonus_attack_damage_30",
       "special_bonus_magic_resistance_12",
       "special_bonus_unique_death_prophet_3",
-      "special_bonus_cast_range_150",
+      "special_bonus_movement_speed_percentage_6",
       "special_bonus_hp_400",
       "special_bonus_unique_death_prophet_2",
       "special_bonus_unique_death_prophet_5",
@@ -1341,7 +1591,13 @@
       null
     ],
     "alias": "dp",
-    "pretty_name": "Death Prophet"
+    "pretty_name": "Death Prophet",
+    "roles": {
+      "Carry": "1",
+      "Pusher": "3",
+      "Nuker": "1",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_phantom_assassin",
@@ -1356,7 +1612,7 @@
       null,
       null,
       null,
-      "special_bonus_hp_150",
+      "special_bonus_hp_175",
       "special_bonus_unique_phantom_assassin_7",
       "special_bonus_lifesteal_12",
       "special_bonus_unique_phantom_assassin_6",
@@ -1373,7 +1629,11 @@
       null
     ],
     "alias": "pa;mortred",
-    "pretty_name": "Phantom Assassin"
+    "pretty_name": "Phantom Assassin",
+    "roles": {
+      "Carry": "3",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_pugna",
@@ -1405,7 +1665,11 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Pugna"
+    "pretty_name": "Pugna",
+    "roles": {
+      "Nuker": "2",
+      "Pusher": "2"
+    }
   },
   {
     "name": "npc_dota_hero_templar_assassin",
@@ -1420,8 +1684,8 @@
       null,
       null,
       null,
-      "special_bonus_attack_speed_15",
-      "special_bonus_movement_speed_20",
+      "special_bonus_attack_speed_20",
+      "special_bonus_unique_templar_assassin_8",
       "special_bonus_evasion_15",
       "special_bonus_unique_templar_assassin_3",
       "special_bonus_unique_templar_assassin_4",
@@ -1437,7 +1701,11 @@
       null
     ],
     "alias": "ta",
-    "pretty_name": "Templar Assassin"
+    "pretty_name": "Templar Assassin",
+    "roles": {
+      "Carry": "2",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_viper",
@@ -1455,11 +1723,11 @@
       "special_bonus_attack_speed_20",
       "special_bonus_spell_lifesteal_8",
       "special_bonus_attack_range_100",
-      "special_bonus_unique_viper_1",
+      "special_bonus_hp_300",
       "special_bonus_unique_viper_2",
       "special_bonus_attack_damage_70",
       "special_bonus_unique_viper_5",
-      "special_bonus_unique_viper_4",
+      "special_bonus_unique_viper_6",
       null,
       null,
       null,
@@ -1469,7 +1737,13 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Viper"
+    "pretty_name": "Viper",
+    "roles": {
+      "Carry": "1",
+      "Durable": "2",
+      "Initiator": "1",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_luna",
@@ -1485,7 +1759,7 @@
       null,
       null,
       "special_bonus_attack_speed_15",
-      "special_bonus_cast_range_350",
+      "special_bonus_unique_luna_4",
       "special_bonus_unique_luna_2",
       "special_bonus_movement_speed_25",
       "special_bonus_all_stats_8",
@@ -1501,7 +1775,12 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Luna"
+    "pretty_name": "Luna",
+    "roles": {
+      "Carry": "2",
+      "Nuker": "2",
+      "Pusher": "1"
+    }
   },
   {
     "name": "npc_dota_hero_dragon_knight",
@@ -1516,14 +1795,14 @@
       null,
       null,
       null,
-      "special_bonus_mp_regen_2",
+      "special_bonus_attack_damage_15",
       "special_bonus_unique_dragon_knight_3",
-      "special_bonus_attack_damage_25",
+      "special_bonus_unique_dragon_knight_2",
       "special_bonus_hp_400",
-      "special_bonus_cooldown_reduction_15",
+      "special_bonus_unique_dragon_knight_7",
       "special_bonus_strength_20",
       "special_bonus_unique_dragon_knight",
-      "special_bonus_unique_dragon_knight_2",
+      "special_bonus_unique_dragon_knight_8",
       null,
       null,
       null,
@@ -1532,8 +1811,16 @@
       null,
       null
     ],
-    "alias": "dk",
-    "pretty_name": "Dragon Knight"
+    "alias": "dk,davion",
+    "pretty_name": "Dragon Knight",
+    "roles": {
+      "Carry": "2",
+      "Pusher": "3",
+      "Durable": "2",
+      "Disabler": "2",
+      "Initiator": "1",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_dazzle",
@@ -1550,8 +1837,8 @@
       null,
       "special_bonus_attack_damage_50",
       "special_bonus_mp_regen_175",
-      "special_bonus_cast_range_150",
-      "special_bonus_attack_speed_35",
+      "special_bonus_unique_dazzle_5",
+      "special_bonus_attack_speed_60",
       "special_bonus_movement_speed_30",
       "special_bonus_unique_dazzle_3",
       "special_bonus_unique_dazzle_1",
@@ -1565,7 +1852,12 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Dazzle"
+    "pretty_name": "Dazzle",
+    "roles": {
+      "Support": "3",
+      "Nuker": "1",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_rattletrap",
@@ -1580,8 +1872,8 @@
       null,
       null,
       null,
-      "special_bonus_armor_4",
-      "special_bonus_movement_speed_15",
+      "special_bonus_armor_5",
+      "special_bonus_movement_speed_20",
       "special_bonus_unique_clockwerk_5",
       "special_bonus_unique_clockwerk_3",
       "special_bonus_unique_clockwerk_4",
@@ -1597,7 +1889,13 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Clockwerk"
+    "pretty_name": "Clockwerk",
+    "roles": {
+      "Initiator": "3",
+      "Disabler": "2",
+      "Durable": "1",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_leshrac",
@@ -1614,12 +1912,12 @@
       null,
       "special_bonus_armor_4",
       "special_bonus_unique_leshrac_5",
-      "special_bonus_strength_12",
+      "special_bonus_unique_leshrac_6",
       "special_bonus_movement_speed_25",
-      "special_bonus_unique_leshrac_2",
+      "special_bonus_strength_20",
       "special_bonus_unique_leshrac_3",
       "special_bonus_unique_leshrac_1",
-      "special_bonus_unique_leshrac_6",
+      "special_bonus_magic_resistance_30",
       null,
       null,
       null,
@@ -1629,7 +1927,14 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Leshrac"
+    "pretty_name": "Leshrac",
+    "roles": {
+      "Carry": "1",
+      "Support": "1",
+      "Nuker": "3",
+      "Pusher": "3",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_furion",
@@ -1661,7 +1966,14 @@
       null
     ],
     "alias": "np",
-    "pretty_name": "Nature's Prophet"
+    "pretty_name": "Nature's Prophet",
+    "roles": {
+      "Carry": "1",
+      "Jungler": "3",
+      "Pusher": "3",
+      "Escape": "1",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_life_stealer",
@@ -1676,10 +1988,10 @@
       "life_stealer_consume",
       null,
       null,
-      "special_bonus_hp_200",
       "special_bonus_attack_speed_30",
-      "special_bonus_attack_damage_25",
       "special_bonus_movement_speed_20",
+      "special_bonus_attack_damage_25",
+      "special_bonus_hp_325",
       "special_bonus_evasion_16",
       "special_bonus_unique_lifestealer_6",
       "special_bonus_unique_lifestealer_3",
@@ -1693,7 +2005,14 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Lifestealer"
+    "pretty_name": "Lifestealer",
+    "roles": {
+      "Carry": "2",
+      "Durable": "2",
+      "Jungler": "1",
+      "Escape": "1",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_dark_seer",
@@ -1709,10 +2028,10 @@
       null,
       null,
       "special_bonus_unique_dark_seer_5",
-      "special_bonus_unique_dark_seer_2",
       "special_bonus_armor_6",
+      "special_bonus_unique_dark_seer_2",
       "special_bonus_unique_dark_seer_7",
-      "special_bonus_unique_dark_seer_12",
+      "special_bonus_unique_dark_seer_13",
       "special_bonus_unique_dark_seer",
       "special_bonus_unique_dark_seer_4",
       "special_bonus_unique_dark_seer_3",
@@ -1725,7 +2044,13 @@
       null
     ],
     "alias": "ds",
-    "pretty_name": "Dark Seer"
+    "pretty_name": "Dark Seer",
+    "roles": {
+      "Initiator": "1",
+      "Jungler": "1",
+      "Escape": "1",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_clinkz",
@@ -1757,7 +2082,12 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Clinkz"
+    "pretty_name": "Clinkz",
+    "roles": {
+      "Carry": "2",
+      "Escape": "3",
+      "Pusher": "1"
+    }
   },
   {
     "name": "npc_dota_hero_omniknight",
@@ -1773,7 +2103,7 @@
       null,
       null,
       "special_bonus_unique_omniknight_5",
-      "special_bonus_attack_base_damage_40",
+      "special_bonus_attack_base_damage_50",
       "special_bonus_unique_omniknight_6",
       "special_bonus_movement_speed_30",
       "special_bonus_unique_omniknight_2",
@@ -1789,7 +2119,12 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Omniknight"
+    "pretty_name": "Omniknight",
+    "roles": {
+      "Support": "2",
+      "Durable": "1",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_enchantress",
@@ -1821,7 +2156,14 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Enchantress"
+    "pretty_name": "Enchantress",
+    "roles": {
+      "Support": "2",
+      "Jungler": "3",
+      "Pusher": "2",
+      "Durable": "1",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_huskar",
@@ -1842,7 +2184,7 @@
       "special_bonus_lifesteal_15",
       "special_bonus_unique_huskar_6",
       "special_bonus_unique_huskar_7",
-      "special_bonus_attack_range_200",
+      "special_bonus_spell_lifesteal_25",
       "special_bonus_unique_huskar_5",
       null,
       null,
@@ -1853,7 +2195,12 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Huskar"
+    "pretty_name": "Huskar",
+    "roles": {
+      "Carry": "2",
+      "Durable": "2",
+      "Initiator": "1"
+    }
   },
   {
     "name": "npc_dota_hero_night_stalker",
@@ -1869,10 +2216,10 @@
       null,
       null,
       "special_bonus_unique_night_stalker_4",
-      "special_bonus_armor_4",
+      "special_bonus_armor_6",
       "special_bonus_strength_12",
       "special_bonus_unique_night_stalker_5",
-      "special_bonus_movement_speed_30",
+      "special_bonus_unique_night_stalker_6",
       "special_bonus_attack_damage_35",
       "special_bonus_unique_night_stalker_2",
       "special_bonus_unique_night_stalker",
@@ -1885,18 +2232,25 @@
       null
     ],
     "alias": "ns",
-    "pretty_name": "Night Stalker"
+    "pretty_name": "Night Stalker",
+    "roles": {
+      "Carry": "1",
+      "Initiator": "2",
+      "Durable": "2",
+      "Disabler": "2",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_broodmother",
     "id": 61,
     "abilities": [
-      "broodmother_spawn_spiderlings",
+      "broodmother_insatiable_hunger",
       "broodmother_spin_web",
-      "broodmother_incapacitating_bite",
       "broodmother_silken_bola",
       "generic_hidden",
-      "broodmother_insatiable_hunger",
+      "generic_hidden",
+      "broodmother_spawn_spiderlings",
       null,
       null,
       null,
@@ -1917,7 +2271,13 @@
       null
     ],
     "alias": "bm",
-    "pretty_name": "Broodmother"
+    "pretty_name": "Broodmother",
+    "roles": {
+      "Carry": "1",
+      "Pusher": "3",
+      "Escape": "3",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_bounty_hunter",
@@ -1949,7 +2309,11 @@
       null
     ],
     "alias": "bh",
-    "pretty_name": "Bounty Hunter"
+    "pretty_name": "Bounty Hunter",
+    "roles": {
+      "Escape": "2",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_weaver",
@@ -1965,12 +2329,12 @@
       null,
       null,
       "special_bonus_unique_weaver_1",
-      "special_bonus_attack_damage_15",
-      "special_bonus_mana_break_20",
-      "special_bonus_strength_11",
       "special_bonus_unique_weaver_3",
+      "special_bonus_mana_break_20",
+      "special_bonus_strength_12",
+      "special_bonus_attack_damage_35",
       "special_bonus_unique_weaver_4",
-      "special_bonus_unique_weaver_2",
+      "special_bonus_unique_weaver_6",
       "special_bonus_unique_weaver_5",
       null,
       null,
@@ -1981,7 +2345,11 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Weaver"
+    "pretty_name": "Weaver",
+    "roles": {
+      "Carry": "2",
+      "Escape": "3"
+    }
   },
   {
     "name": "npc_dota_hero_jakiro",
@@ -1998,12 +2366,12 @@
       null,
       "special_bonus_attack_range_325",
       "special_bonus_spell_amplify_6",
-      "special_bonus_unique_jakiro_6",
-      "special_bonus_unique_jakiro_2",
       "special_bonus_unique_jakiro_4",
-      "special_bonus_unique_jakiro_5",
-      "special_bonus_unique_jakiro_3",
+      "special_bonus_hp_325",
       "special_bonus_unique_jakiro",
+      "special_bonus_unique_jakiro_7",
+      "special_bonus_unique_jakiro_2",
+      "special_bonus_unique_jakiro_6",
       null,
       null,
       null,
@@ -2013,7 +2381,13 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Jakiro"
+    "pretty_name": "Jakiro",
+    "roles": {
+      "Support": "1",
+      "Nuker": "2",
+      "Pusher": "2",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_batrider",
@@ -2029,10 +2403,10 @@
       null,
       null,
       "special_bonus_spell_amplify_5",
-      "special_bonus_armor_4",
+      "special_bonus_armor_6",
       "special_bonus_unique_batrider_4",
       "special_bonus_hp_250",
-      "special_bonus_unique_batrider_5",
+      "special_bonus_magic_resistance_20",
       "special_bonus_movement_speed_30",
       "special_bonus_unique_batrider_1",
       "special_bonus_unique_batrider_6",
@@ -2045,7 +2419,13 @@
       null
     ],
     "alias": "br",
-    "pretty_name": "Batrider"
+    "pretty_name": "Batrider",
+    "roles": {
+      "Initiator": "3",
+      "Jungler": "2",
+      "Disabler": "2",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_chen",
@@ -2060,7 +2440,7 @@
       null,
       null,
       null,
-      "special_bonus_cast_range_175",
+      "special_bonus_unique_chen_11",
       "special_bonus_hp_175",
       "special_bonus_unique_chen_5",
       "special_bonus_unique_chen_8",
@@ -2077,7 +2457,12 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Chen"
+    "pretty_name": "Chen",
+    "roles": {
+      "Support": "2",
+      "Jungler": "3",
+      "Pusher": "2"
+    }
   },
   {
     "name": "npc_dota_hero_spectre",
@@ -2109,7 +2494,12 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Spectre"
+    "pretty_name": "Spectre",
+    "roles": {
+      "Carry": "3",
+      "Durable": "1",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_doom_bringer",
@@ -2124,12 +2514,12 @@
       null,
       null,
       null,
-      "special_bonus_unique_doom_7",
-      "special_bonus_unique_doom_6",
+      "special_bonus_magic_resistance_12",
       "special_bonus_unique_doom_4",
-      "special_bonus_unique_doom_3",
-      "special_bonus_unique_doom_5",
+      "special_bonus_unique_doom_9",
       "special_bonus_unique_doom_2",
+      "special_bonus_unique_doom_5",
+      "special_bonus_unique_doom_6",
       "special_bonus_unique_doom_1",
       "special_bonus_cleave_150",
       null,
@@ -2141,7 +2531,14 @@
       null
     ],
     "alias": "db",
-    "pretty_name": "Doom"
+    "pretty_name": "Doom",
+    "roles": {
+      "Carry": "1",
+      "Disabler": "2",
+      "Initiator": "2",
+      "Durable": "2",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_ancient_apparition",
@@ -2173,7 +2570,12 @@
       null
     ],
     "alias": "aa",
-    "pretty_name": "Ancient Apparition"
+    "pretty_name": "Ancient Apparition",
+    "roles": {
+      "Support": "2",
+      "Disabler": "1",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_ursa",
@@ -2189,10 +2591,10 @@
       null,
       null,
       "special_bonus_unique_ursa_4",
-      "special_bonus_mp_regen_150",
-      "special_bonus_agility_12",
+      "special_bonus_mp_regen_175",
+      "special_bonus_agility_10",
       "special_bonus_hp_350",
-      "special_bonus_unique_ursa_2",
+      "special_bonus_unique_ursa_8",
       "special_bonus_unique_ursa",
       "special_bonus_unique_ursa_5",
       "special_bonus_unique_ursa_7",
@@ -2205,7 +2607,13 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Ursa"
+    "pretty_name": "Ursa",
+    "roles": {
+      "Carry": "2",
+      "Jungler": "1",
+      "Durable": "1",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_spirit_breaker",
@@ -2227,7 +2635,7 @@
       "special_bonus_unique_spirit_breaker_3",
       "special_bonus_unique_spirit_breaker_2",
       "special_bonus_unique_spirit_breaker_1",
-      "special_bonus_hp_650",
+      "special_bonus_hp_800",
       null,
       null,
       null,
@@ -2237,7 +2645,14 @@
       null
     ],
     "alias": "sb",
-    "pretty_name": "Spirit Breaker"
+    "pretty_name": "Spirit Breaker",
+    "roles": {
+      "Carry": "1",
+      "Initiator": "2",
+      "Disabler": "2",
+      "Durable": "2",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_gyrocopter",
@@ -2269,7 +2684,12 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Gyrocopter"
+    "pretty_name": "Gyrocopter",
+    "roles": {
+      "Carry": "3",
+      "Nuker": "1",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_alchemist",
@@ -2301,7 +2721,15 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Alchemist"
+    "pretty_name": "Alchemist",
+    "roles": {
+      "Carry": "2",
+      "Support": "1",
+      "Durable": "2",
+      "Disabler": "1",
+      "Initiator": "1",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_invoker",
@@ -2333,7 +2761,14 @@
       "special_bonus_unique_invoker_11"
     ],
     "alias": null,
-    "pretty_name": "Invoker"
+    "pretty_name": "Invoker",
+    "roles": {
+      "Carry": "1",
+      "Nuker": "3",
+      "Disabler": "2",
+      "Escape": "1",
+      "Pusher": "1"
+    }
   },
   {
     "name": "npc_dota_hero_silencer",
@@ -2348,7 +2783,7 @@
       null,
       null,
       null,
-      "special_bonus_armor_5",
+      "special_bonus_armor_6",
       "special_bonus_attack_speed_20",
       "special_bonus_unique_silencer",
       "special_bonus_unique_silencer_2",
@@ -2365,7 +2800,14 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Silencer"
+    "pretty_name": "Silencer",
+    "roles": {
+      "Carry": "1",
+      "Support": "1",
+      "Disabler": "2",
+      "Initiator": "2",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_obsidian_destroyer",
@@ -2397,7 +2839,12 @@
       null
     ],
     "alias": "od",
-    "pretty_name": "Outworld Devourer"
+    "pretty_name": "Outworld Devourer",
+    "roles": {
+      "Carry": "2",
+      "Nuker": "2",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_lycan",
@@ -2414,8 +2861,8 @@
       null,
       "special_bonus_unique_lycan_3",
       "special_bonus_attack_damage_15",
-      "special_bonus_unique_lycan_6",
-      "special_bonus_cooldown_reduction_8",
+      "special_bonus_unique_lycan_7",
+      "special_bonus_cooldown_reduction_12",
       "special_bonus_unique_lycan_1",
       "special_bonus_unique_lycan_4",
       "special_bonus_unique_lycan_5",
@@ -2429,7 +2876,14 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Lycan"
+    "pretty_name": "Lycan",
+    "roles": {
+      "Carry": "2",
+      "Pusher": "3",
+      "Jungler": "1",
+      "Durable": "1",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_brewmaster",
@@ -2444,8 +2898,8 @@
       null,
       null,
       null,
-      "special_bonus_attack_damage_12",
-      "special_bonus_unique_brewmaster_3",
+      "special_bonus_attack_damage_15",
+      "special_bonus_unique_brewmaster_7",
       "special_bonus_unique_brewmaster_5",
       "special_bonus_hp_350",
       "special_bonus_unique_brewmaster",
@@ -2461,7 +2915,14 @@
       null
     ],
     "alias": "bm",
-    "pretty_name": "Brewmaster"
+    "pretty_name": "Brewmaster",
+    "roles": {
+      "Carry": "1",
+      "Initiator": "3",
+      "Durable": "2",
+      "Disabler": "2",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_shadow_demon",
@@ -2476,13 +2937,13 @@
       null,
       null,
       null,
-      "special_bonus_intelligence_15",
-      "special_bonus_cast_range_75",
-      "special_bonus_movement_speed_20",
       "special_bonus_unique_shadow_demon_4",
+      "special_bonus_strength_10",
+      "special_bonus_movement_speed_25",
+      "special_bonus_unique_shadow_demon_1",
       "special_bonus_unique_shadow_demon_2",
       "special_bonus_unique_shadow_demon_3",
-      "special_bonus_unique_shadow_demon_1",
+      "special_bonus_unique_shadow_demon_9",
       "special_bonus_unique_shadow_demon_7",
       null,
       null,
@@ -2493,7 +2954,13 @@
       null
     ],
     "alias": "sd",
-    "pretty_name": "Shadow Demon"
+    "pretty_name": "Shadow Demon",
+    "roles": {
+      "Support": "2",
+      "Disabler": "2",
+      "Initiator": "1",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_lone_druid",
@@ -2525,7 +2992,13 @@
       null
     ],
     "alias": "ld",
-    "pretty_name": "Lone Druid"
+    "pretty_name": "Lone Druid",
+    "roles": {
+      "Carry": "2",
+      "Pusher": "3",
+      "Jungler": "1",
+      "Durable": "1"
+    }
   },
   {
     "name": "npc_dota_hero_chaos_knight",
@@ -2543,11 +3016,11 @@
       "special_bonus_all_stats_5",
       "special_bonus_movement_speed_20",
       "special_bonus_strength_12",
-      "special_bonus_cooldown_reduction_14",
-      "special_bonus_unique_chaos_knight_4",
+      "special_bonus_cleave_35",
+      "special_bonus_unique_chaos_knight_3",
       "special_bonus_unique_chaos_knight",
       "special_bonus_unique_chaos_knight_5",
-      "special_bonus_unique_chaos_knight_3",
+      "special_bonus_unique_chaos_knight_4",
       null,
       null,
       null,
@@ -2557,7 +3030,14 @@
       null
     ],
     "alias": "ck",
-    "pretty_name": "Chaos Knight"
+    "pretty_name": "Chaos Knight",
+    "roles": {
+      "Carry": "3",
+      "Disabler": "2",
+      "Durable": "2",
+      "Pusher": "2",
+      "Initiator": "1"
+    }
   },
   {
     "name": "npc_dota_hero_meepo",
@@ -2573,12 +3053,12 @@
       null,
       null,
       "special_bonus_strength_6",
-      "special_bonus_attack_damage_15",
+      "special_bonus_attack_base_damage_20",
       "special_bonus_evasion_15",
       "special_bonus_unique_meepo_2",
       "special_bonus_unique_meepo_3",
       "special_bonus_unique_meepo_6",
-      "special_bonus_hp_325",
+      "special_bonus_hp_375",
       "special_bonus_unique_meepo_5",
       null,
       null,
@@ -2589,7 +3069,15 @@
       null
     ],
     "alias": "geomancer;meepwn",
-    "pretty_name": "Meepo"
+    "pretty_name": "Meepo",
+    "roles": {
+      "Carry": "2",
+      "Escape": "2",
+      "Nuker": "2",
+      "Disabler": "1",
+      "Initiator": "1",
+      "Pusher": "1"
+    }
   },
   {
     "name": "npc_dota_hero_treant",
@@ -2604,11 +3092,11 @@
       null,
       null,
       null,
-      "special_bonus_attack_damage_60",
-      "special_bonus_unique_treant_4",
+      "special_bonus_mp_regen_175",
+      "special_bonus_unique_treant_12",
       "special_bonus_unique_treant_8",
       "special_bonus_unique_treant_9",
-      "special_bonus_cooldown_reduction_12",
+      "special_bonus_unique_treant_13",
       "special_bonus_unique_treant_2",
       "special_bonus_unique_treant_11",
       "special_bonus_unique_treant_7",
@@ -2621,7 +3109,14 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Treant Protector"
+    "pretty_name": "Treant Protector",
+    "roles": {
+      "Support": "3",
+      "Initiator": "2",
+      "Durable": "1",
+      "Disabler": "1",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_ogre_magi",
@@ -2637,10 +3132,10 @@
       null,
       null,
       "special_bonus_unique_ogre_magi_4",
-      "special_bonus_cast_range_75",
+      "special_bonus_unique_ogre_magi_5",
       "special_bonus_attack_damage_80",
       "special_bonus_hp_275",
-      "special_bonus_strength_30",
+      "special_bonus_strength_25",
       "special_bonus_unique_ogre_magi",
       "special_bonus_20_bash_2",
       "special_bonus_unique_ogre_magi_2",
@@ -2653,7 +3148,14 @@
       null
     ],
     "alias": "om",
-    "pretty_name": "Ogre Magi"
+    "pretty_name": "Ogre Magi",
+    "roles": {
+      "Support": "2",
+      "Nuker": "2",
+      "Disabler": "2",
+      "Durable": "1",
+      "Initiator": "1"
+    }
   },
   {
     "name": "npc_dota_hero_undying",
@@ -2668,8 +3170,8 @@
       null,
       null,
       null,
-      "special_bonus_cast_range_125",
-      "special_bonus_unique_undying_4",
+      "special_bonus_armor_5",
+      "special_bonus_unique_undying_7",
       "special_bonus_unique_undying",
       "special_bonus_unique_undying_6",
       "special_bonus_unique_undying_3",
@@ -2685,7 +3187,13 @@
       null
     ],
     "alias": "dirge",
-    "pretty_name": "Undying"
+    "pretty_name": "Undying",
+    "roles": {
+      "Support": "1",
+      "Durable": "2",
+      "Disabler": "1",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_rubick",
@@ -2702,10 +3210,10 @@
       "rubick_hidden2",
       "rubick_hidden3",
       "rubick_telekinesis_land_self",
-      "special_bonus_hp_150",
+      "special_bonus_unique_rubick_8",
       "special_bonus_unique_rubick_6",
-      "special_bonus_cast_range_100",
       "special_bonus_attack_base_damage_100",
+      "special_bonus_unique_rubick_7",
       "special_bonus_unique_rubick_3",
       "special_bonus_unique_rubick",
       "special_bonus_unique_rubick_4",
@@ -2717,7 +3225,12 @@
       null
     ],
     "alias": "rubick",
-    "pretty_name": "Rubick"
+    "pretty_name": "Rubick",
+    "roles": {
+      "Support": "2",
+      "Disabler": "1",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_disruptor",
@@ -2734,12 +3247,12 @@
       null,
       "special_bonus_unique_disruptor_2",
       "special_bonus_unique_disruptor_3",
-      "special_bonus_cast_range_125",
+      "special_bonus_unique_disruptor_9",
       "special_bonus_unique_disruptor_7",
-      "special_bonus_unique_disruptor_6",
+      "special_bonus_unique_disruptor_5",
       "special_bonus_unique_disruptor",
       "special_bonus_unique_disruptor_4",
-      "special_bonus_unique_disruptor_5",
+      "special_bonus_unique_disruptor_8",
       null,
       null,
       null,
@@ -2749,7 +3262,13 @@
       null
     ],
     "alias": "disruptor",
-    "pretty_name": "Disruptor"
+    "pretty_name": "Disruptor",
+    "roles": {
+      "Support": "2",
+      "Disabler": "2",
+      "Nuker": "1",
+      "Initiator": "1"
+    }
   },
   {
     "name": "npc_dota_hero_nyx_assassin",
@@ -2768,7 +3287,7 @@
       "special_bonus_unique_nyx_4",
       "special_bonus_hp_250",
       "special_bonus_movement_speed_20",
-      "special_bonus_unique_nyx",
+      "special_bonus_unique_nyx_6",
       "special_bonus_unique_nyx_2",
       "special_bonus_agility_80",
       "special_bonus_unique_nyx_3",
@@ -2781,7 +3300,13 @@
       null
     ],
     "alias": "na",
-    "pretty_name": "Nyx Assassin"
+    "pretty_name": "Nyx Assassin",
+    "roles": {
+      "Disabler": "2",
+      "Nuker": "2",
+      "Initiator": "2",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_naga_siren",
@@ -2802,7 +3327,7 @@
       "special_bonus_strength_13",
       "special_bonus_unique_naga_siren_5",
       "special_bonus_unique_naga_siren",
-      "special_bonus_evasion_25",
+      "special_bonus_unique_naga_siren_6",
       "special_bonus_unique_naga_siren_3",
       null,
       null,
@@ -2813,7 +3338,15 @@
       null
     ],
     "alias": "naga",
-    "pretty_name": "Naga Siren"
+    "pretty_name": "Naga Siren",
+    "roles": {
+      "Carry": "3",
+      "Support": "1",
+      "Pusher": "2",
+      "Disabler": "2",
+      "Initiator": "1",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_keeper_of_the_light",
@@ -2831,10 +3364,10 @@
       "keeper_of_the_light_recall",
       "special_bonus_unique_keeper_of_the_light_8",
       "special_bonus_movement_speed_20",
-      "special_bonus_unique_keeper_of_the_light_5",
-      "special_bonus_cast_range_200",
-      "special_bonus_unique_keeper_of_the_light_11",
       "special_bonus_unique_keeper_of_the_light_7",
+      "special_bonus_unique_keeper_of_the_light_13",
+      "special_bonus_unique_keeper_of_the_light_11",
+      "special_bonus_unique_keeper_of_the_light_14",
       "special_bonus_unique_keeper_of_the_light_10",
       "special_bonus_unique_keeper_of_the_light",
       null,
@@ -2845,7 +3378,13 @@
       null
     ],
     "alias": "keeper;ezalor;kotl",
-    "pretty_name": "Keeper of the Light"
+    "pretty_name": "Keeper of the Light",
+    "roles": {
+      "Support": "3",
+      "Nuker": "2",
+      "Disabler": "1",
+      "Jungler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_wisp",
@@ -2860,13 +3399,13 @@
       "wisp_tether_break",
       null,
       null,
-      "special_bonus_hp_regen_4",
-      "special_bonus_attack_damage_35",
+      "special_bonus_hp_regen_5",
+      "special_bonus_attack_damage_30",
       "special_bonus_unique_wisp_3",
-      "special_bonus_spell_lifesteal_10",
+      "special_bonus_spell_lifesteal_15",
       "special_bonus_unique_wisp",
       "special_bonus_unique_wisp_6",
-      "special_bonus_hp_700",
+      "special_bonus_hp_900",
       "special_bonus_unique_wisp_4",
       null,
       null,
@@ -2877,7 +3416,12 @@
       null
     ],
     "alias": "wisp",
-    "pretty_name": "Io"
+    "pretty_name": "Io",
+    "roles": {
+      "Support": "3",
+      "Escape": "2",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_visage",
@@ -2892,7 +3436,7 @@
       "visage_summon_familiars_stone_form",
       null,
       null,
-      "special_bonus_cast_range_75",
+      "special_bonus_unique_visage_8",
       "special_bonus_attack_damage_25",
       "special_bonus_corruption_3",
       "special_bonus_unique_visage_3",
@@ -2909,7 +3453,14 @@
       null
     ],
     "alias": "visage",
-    "pretty_name": "Visage"
+    "pretty_name": "Visage",
+    "roles": {
+      "Support": "1",
+      "Nuker": "2",
+      "Durable": "1",
+      "Disabler": "1",
+      "Pusher": "1"
+    }
   },
   {
     "name": "npc_dota_hero_slark",
@@ -2918,16 +3469,16 @@
       "slark_dark_pact",
       "slark_pounce",
       "slark_essence_shift",
-      "slark_fish_bait",
+      "slark_depth_shroud",
       "generic_hidden",
       "slark_shadow_dance",
       null,
       null,
       null,
       "special_bonus_strength_9",
-      "special_bonus_agility_7",
+      "special_bonus_agility_8",
       "special_bonus_attack_speed_20",
-      "special_bonus_lifesteal_15",
+      "special_bonus_lifesteal_18",
       "special_bonus_unique_slark_2",
       "special_bonus_unique_slark",
       "special_bonus_unique_slark_3",
@@ -2941,7 +3492,13 @@
       null
     ],
     "alias": "slark",
-    "pretty_name": "Slark"
+    "pretty_name": "Slark",
+    "roles": {
+      "Carry": "2",
+      "Escape": "3",
+      "Disabler": "1",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_medusa",
@@ -2973,7 +3530,12 @@
       null
     ],
     "alias": "medusa,gorgon",
-    "pretty_name": "Medusa"
+    "pretty_name": "Medusa",
+    "roles": {
+      "Carry": "3",
+      "Disabler": "1",
+      "Durable": "1"
+    }
   },
   {
     "name": "npc_dota_hero_troll_warlord",
@@ -2983,13 +3545,13 @@
       "troll_warlord_whirling_axes_ranged",
       "troll_warlord_whirling_axes_melee",
       "troll_warlord_fervor",
-      "generic_hidden",
+      "troll_warlord_rampage",
       "troll_warlord_battle_trance",
       null,
       null,
       null,
-      "special_bonus_agility_8",
-      "special_bonus_hp_200",
+      "special_bonus_agility_7",
+      "special_bonus_hp_225",
       "special_bonus_unique_troll_warlord_5",
       "special_bonus_unique_troll_warlord_3",
       "special_bonus_evasion_20",
@@ -3005,7 +3567,13 @@
       null
     ],
     "alias": "troll,jahrakal",
-    "pretty_name": "Troll Warlord"
+    "pretty_name": "Troll Warlord",
+    "roles": {
+      "Carry": "3",
+      "Pusher": "2",
+      "Disabler": "1",
+      "Durable": "1"
+    }
   },
   {
     "name": "npc_dota_hero_centaur",
@@ -3020,9 +3588,9 @@
       null,
       null,
       null,
-      "special_bonus_hp_regen_5",
-      "special_bonus_movement_speed_15",
-      "special_bonus_unique_centaur_7",
+      "special_bonus_hp_regen_6",
+      "special_bonus_movement_speed_20",
+      "special_bonus_armor_6",
       "special_bonus_unique_centaur_4",
       "special_bonus_unique_centaur_3",
       "special_bonus_unique_centaur_5",
@@ -3037,7 +3605,14 @@
       null
     ],
     "alias": "centaur",
-    "pretty_name": "Centaur Warrunner"
+    "pretty_name": "Centaur Warrunner",
+    "roles": {
+      "Durable": "3",
+      "Initiator": "3",
+      "Disabler": "1",
+      "Nuker": "1",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_magnataur",
@@ -3054,7 +3629,7 @@
       null,
       "special_bonus_attack_damage_20",
       "special_bonus_unique_magnus_6",
-      "special_bonus_strength_10",
+      "special_bonus_strength_12",
       "special_bonus_unique_magnus_7",
       "special_bonus_hp_350",
       "special_bonus_unique_magnus_3",
@@ -3069,7 +3644,13 @@
       null
     ],
     "alias": "magnataur, magnus",
-    "pretty_name": "Magnus"
+    "pretty_name": "Magnus",
+    "roles": {
+      "Initiator": "3",
+      "Disabler": "2",
+      "Nuker": "1",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_shredder",
@@ -3101,7 +3682,12 @@
       null
     ],
     "alias": "Rizzrack; Shredder; Timbersaw",
-    "pretty_name": "Timbersaw"
+    "pretty_name": "Timbersaw",
+    "roles": {
+      "Nuker": "3",
+      "Durable": "2",
+      "Escape": "2"
+    }
   },
   {
     "name": "npc_dota_hero_bristleback",
@@ -3116,10 +3702,10 @@
       null,
       null,
       null,
-      "special_bonus_movement_speed_15",
-      "special_bonus_mp_regen_250",
+      "special_bonus_movement_speed_20",
+      "special_bonus_mp_regen_2",
       "special_bonus_hp_200",
-      "special_bonus_attack_speed_15",
+      "special_bonus_attack_speed_20",
       "special_bonus_hp_regen_20",
       "special_bonus_unique_bristleback_2",
       "special_bonus_spell_lifesteal_13",
@@ -3133,7 +3719,13 @@
       null
     ],
     "alias": "Rigwarl;bb",
-    "pretty_name": "Bristleback"
+    "pretty_name": "Bristleback",
+    "roles": {
+      "Carry": "2",
+      "Durable": "3",
+      "Initiator": "1",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_tusk",
@@ -3165,7 +3757,12 @@
       null
     ],
     "alias": "Tuskarr",
-    "pretty_name": "Tusk"
+    "pretty_name": "Tusk",
+    "roles": {
+      "Initiator": "2",
+      "Disabler": "2",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_skywrath_mage",
@@ -3180,7 +3777,7 @@
       null,
       null,
       null,
-      "special_bonus_movement_speed_15",
+      "special_bonus_hp_175",
       "special_bonus_intelligence_10",
       "special_bonus_unique_skywrath",
       "special_bonus_unique_skywrath_2",
@@ -3197,7 +3794,12 @@
       null
     ],
     "alias": "dragonus",
-    "pretty_name": "Skywrath Mage"
+    "pretty_name": "Skywrath Mage",
+    "roles": {
+      "Support": "2",
+      "Nuker": "3",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_abaddon",
@@ -3217,7 +3819,7 @@
       "special_bonus_attack_damage_65",
       "special_bonus_unique_abaddon_2",
       "special_bonus_cooldown_reduction_15",
-      "special_bonus_armor_8",
+      "special_bonus_armor_9",
       "special_bonus_unique_abaddon",
       "special_bonus_unique_abaddon_4",
       null,
@@ -3229,7 +3831,12 @@
       null
     ],
     "alias": "Abaddon",
-    "pretty_name": "Abaddon"
+    "pretty_name": "Abaddon",
+    "roles": {
+      "Support": "2",
+      "Carry": "1",
+      "Durable": "2"
+    }
   },
   {
     "name": "npc_dota_hero_elder_titan",
@@ -3261,7 +3868,13 @@
       null
     ],
     "alias": "TC,Cairne",
-    "pretty_name": "Elder Titan"
+    "pretty_name": "Elder Titan",
+    "roles": {
+      "Initiator": "2",
+      "Disabler": "1",
+      "Nuker": "1",
+      "Durable": "1"
+    }
   },
   {
     "name": "npc_dota_hero_legion_commander",
@@ -3279,7 +3892,7 @@
       "special_bonus_strength_7",
       "special_bonus_mp_regen_150",
       "special_bonus_attack_speed_20",
-      "special_bonus_unique_legion_commander_6",
+      "special_bonus_unique_legion_commander_4",
       "special_bonus_movement_speed_30",
       "special_bonus_unique_legion_commander_3",
       "special_bonus_unique_legion_commander",
@@ -3293,7 +3906,14 @@
       null
     ],
     "alias": "Tresdin,Legion",
-    "pretty_name": "Legion Commander"
+    "pretty_name": "Legion Commander",
+    "roles": {
+      "Carry": "1",
+      "Disabler": "2",
+      "Initiator": "1",
+      "Durable": "1",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_ember_spirit",
@@ -3325,7 +3945,14 @@
       null
     ],
     "alias": "Xin,Ember",
-    "pretty_name": "Ember Spirit"
+    "pretty_name": "Ember Spirit",
+    "roles": {
+      "Carry": "2",
+      "Escape": "3",
+      "Nuker": "1",
+      "Disabler": "1",
+      "Initiator": "1"
+    }
   },
   {
     "name": "npc_dota_hero_earth_spirit",
@@ -3341,10 +3968,10 @@
       null,
       null,
       "special_bonus_unique_earth_spirit_4",
-      "special_bonus_attack_damage_50",
-      "special_bonus_armor_6",
+      "special_bonus_attack_damage_60",
+      "special_bonus_armor_8",
       "special_bonus_unique_earth_spirit",
-      "special_bonus_spell_amplify_16",
+      "special_bonus_spell_amplify_18",
       "special_bonus_unique_earth_spirit_5",
       "special_bonus_unique_earth_spirit_2",
       "special_bonus_unique_earth_spirit_3",
@@ -3357,7 +3984,14 @@
       null
     ],
     "alias": "Kaolin,Earth",
-    "pretty_name": "Earth Spirit"
+    "pretty_name": "Earth Spirit",
+    "roles": {
+      "Nuker": "2",
+      "Escape": "2",
+      "Disabler": "1",
+      "Initiator": "1",
+      "Durable": "1"
+    }
   },
   {
     "name": "npc_dota_hero_terrorblade",
@@ -3372,7 +4006,7 @@
       null,
       null,
       null,
-      "special_bonus_movement_speed_15",
+      "special_bonus_movement_speed_20",
       "special_bonus_evasion_16",
       "special_bonus_hp_250",
       "special_bonus_attack_speed_25",
@@ -3389,7 +4023,12 @@
       null
     ],
     "alias": "tb",
-    "pretty_name": "Terrorblade"
+    "pretty_name": "Terrorblade",
+    "roles": {
+      "Carry": "3",
+      "Pusher": "2",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_phoenix",
@@ -3409,7 +4048,7 @@
       "special_bonus_unique_phoenix_3",
       "special_bonus_hp_500",
       "special_bonus_unique_phoenix_4",
-      "special_bonus_unique_phoenix_7",
+      "special_bonus_unique_phoenix_2",
       "special_bonus_unique_phoenix_1",
       "special_bonus_unique_phoenix_5",
       null,
@@ -3421,7 +4060,14 @@
       null
     ],
     "alias": "ph",
-    "pretty_name": "Phoenix"
+    "pretty_name": "Phoenix",
+    "roles": {
+      "Support": "1",
+      "Nuker": "3",
+      "Initiator": "2",
+      "Escape": "2",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_oracle",
@@ -3438,7 +4084,7 @@
       null,
       "special_bonus_unique_oracle_2",
       "special_bonus_intelligence_12",
-      "special_bonus_cast_range_125",
+      "special_bonus_unique_oracle_9",
       "special_bonus_unique_oracle_5",
       "special_bonus_unique_oracle_6",
       "special_bonus_unique_oracle_8",
@@ -3453,7 +4099,13 @@
       null
     ],
     "alias": "ora",
-    "pretty_name": "Oracle"
+    "pretty_name": "Oracle",
+    "roles": {
+      "Support": "3",
+      "Nuker": "3",
+      "Disabler": "2",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_techies",
@@ -3471,7 +4123,7 @@
       "special_bonus_magic_resistance_20",
       "special_bonus_unique_techies_3",
       "special_bonus_unique_techies",
-      "special_bonus_mp_regen_5",
+      "special_bonus_mp_regen_3",
       "special_bonus_movement_speed_40",
       "special_bonus_unique_techies_5",
       "special_bonus_attack_damage_252",
@@ -3485,7 +4137,11 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Techies"
+    "pretty_name": "Techies",
+    "roles": {
+      "Nuker": "3",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_target_dummy",
@@ -3517,7 +4173,11 @@
       null
     ],
     "alias": null,
-    "pretty_name": null
+    "pretty_name": null,
+    "roles": {
+      "Nuker": "3",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_winter_wyvern",
@@ -3537,7 +4197,7 @@
       "special_bonus_hp_275",
       "special_bonus_night_vision_400",
       "special_bonus_unique_winter_wyvern_1",
-      "special_bonus_unique_winter_wyvern_2",
+      "special_bonus_unique_winter_wyvern_7",
       "special_bonus_unique_winter_wyvern_3",
       "special_bonus_unique_winter_wyvern_4",
       null,
@@ -3549,7 +4209,12 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Winter Wyvern"
+    "pretty_name": "Winter Wyvern",
+    "roles": {
+      "Support": "3",
+      "Disabler": "2",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_arc_warden",
@@ -3565,7 +4230,7 @@
       null,
       null,
       "special_bonus_unique_arc_warden_5",
-      "special_bonus_hp_200",
+      "special_bonus_hp_225",
       "special_bonus_attack_speed_40",
       "special_bonus_cooldown_reduction_12",
       "special_bonus_unique_arc_warden",
@@ -3581,7 +4246,12 @@
       null
     ],
     "alias": "zet",
-    "pretty_name": "Arc Warden"
+    "pretty_name": "Arc Warden",
+    "roles": {
+      "Carry": "3",
+      "Escape": "3",
+      "Nuker": "1"
+    }
   },
   {
     "name": "npc_dota_hero_abyssal_underlord",
@@ -3597,13 +4267,13 @@
       null,
       null,
       "special_bonus_armor_5",
-      "special_bonus_unique_underlord_7",
+      "special_bonus_unique_underlord_8",
       "special_bonus_unique_underlord_6",
       "special_bonus_unique_underlord_5",
-      "special_bonus_attack_speed_50",
+      "special_bonus_attack_speed_60",
       "special_bonus_hp_regen_20",
       "special_bonus_unique_underlord",
-      "special_bonus_unique_underlord_4",
+      "special_bonus_unique_underlord_9",
       null,
       null,
       null,
@@ -3613,7 +4283,14 @@
       null
     ],
     "alias": "PitLord,Azgalor",
-    "pretty_name": "Underlord"
+    "pretty_name": "Underlord",
+    "roles": {
+      "Support": "1",
+      "Nuker": "1",
+      "Disabler": "1",
+      "Durable": "1",
+      "Escape": "2"
+    }
   },
   {
     "name": "npc_dota_hero_monkey_king",
@@ -3633,8 +4310,8 @@
       "special_bonus_unique_monkey_king_7",
       "special_bonus_unique_monkey_king_2",
       "special_bonus_unique_monkey_king",
-      "special_bonus_unique_monkey_king_3",
-      "special_bonus_unique_monkey_king_4",
+      "special_bonus_unique_monkey_king_10",
+      "special_bonus_unique_monkey_king_8",
       "special_bonus_unique_monkey_king_6",
       null,
       null,
@@ -3645,7 +4322,13 @@
       null
     ],
     "alias": "mk",
-    "pretty_name": "Monkey King"
+    "pretty_name": "Monkey King",
+    "roles": {
+      "Carry": "2",
+      "Escape": "2",
+      "Disabler": "1",
+      "Initiator": "1"
+    }
   },
   {
     "name": "npc_dota_hero_pangolier",
@@ -3660,7 +4343,7 @@
       "pangolier_gyroshell_stop",
       null,
       null,
-      "special_bonus_mp_regen_2",
+      "special_bonus_mp_regen_150",
       "special_bonus_unique_pangolier_7",
       "special_bonus_unique_pangolier_2",
       "special_bonus_unique_pangolier_6",
@@ -3677,7 +4360,15 @@
       null
     ],
     "alias": "ar",
-    "pretty_name": "Pangolier"
+    "pretty_name": "Pangolier",
+    "roles": {
+      "Carry": "2",
+      "Nuker": "2",
+      "Disabler": "1",
+      "Durable": "1",
+      "Escape": "2",
+      "Initiator": "2"
+    }
   },
   {
     "name": "npc_dota_hero_dark_willow",
@@ -3695,7 +4386,7 @@
       "special_bonus_unique_dark_willow_6",
       "special_bonus_unique_dark_willow_5",
       "special_bonus_unique_dark_willow_4",
-      "special_bonus_cast_range_125",
+      "special_bonus_unique_dark_willow_7",
       "special_bonus_attack_damage_50",
       "special_bonus_unique_dark_willow_3",
       "special_bonus_attack_speed_110",
@@ -3709,7 +4400,13 @@
       null
     ],
     "alias": null,
-    "pretty_name": "Dark Willow"
+    "pretty_name": "Dark Willow",
+    "roles": {
+      "Support": "2",
+      "Nuker": "2",
+      "Disabler": "1",
+      "Escape": "2"
+    }
   },
   {
     "name": "npc_dota_hero_grimstroke",
@@ -3719,12 +4416,12 @@
       "grimstroke_ink_creature",
       "grimstroke_spirit_walk",
       "grimstroke_dark_portrait",
-      "grimstroke_ink_over",
+      "generic_hidden",
       "grimstroke_soul_chain",
       null,
       null,
       null,
-      "special_bonus_cast_range_100",
+      "special_bonus_unique_grimstroke_8",
       "special_bonus_unique_grimstroke_7",
       "special_bonus_spell_amplify_15",
       "special_bonus_unique_grimstroke_6",
@@ -3741,7 +4438,13 @@
       null
     ],
     "alias": "gs",
-    "pretty_name": "Grimstroke"
+    "pretty_name": "Grimstroke",
+    "roles": {
+      "Support": "1",
+      "Nuker": "2",
+      "Disabler": "2",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_mars",
@@ -3757,9 +4460,9 @@
       null,
       null,
       "special_bonus_attack_damage_15",
-      "special_bonus_movement_speed_15",
+      "special_bonus_movement_speed_20",
       "special_bonus_unique_mars_rebuke_cooldown",
-      "special_bonus_armor_6",
+      "special_bonus_armor_8",
       "special_bonus_unique_mars_spear_bonus_damage",
       "special_bonus_unique_mars_spear_stun_duration",
       "special_bonus_unique_mars_gods_rebuke_extra_crit",
@@ -3773,7 +4476,13 @@
       null
     ],
     "alias": "mars",
-    "pretty_name": "Mars"
+    "pretty_name": "Mars",
+    "roles": {
+      "Carry": "1",
+      "Initiator": "2",
+      "Disabler": "2",
+      "Durable": "3"
+    }
   },
   {
     "name": "npc_dota_hero_void_spirit",
@@ -3805,7 +4514,13 @@
       null
     ],
     "alias": "Void,VS,Inai",
-    "pretty_name": "Void Spirit"
+    "pretty_name": "Void Spirit",
+    "roles": {
+      "Carry": "2",
+      "Escape": "3",
+      "Nuker": "2",
+      "Disabler": "1"
+    }
   },
   {
     "name": "npc_dota_hero_snapfire",
@@ -3837,7 +4552,13 @@
       null
     ],
     "alias": "snap,mortimer",
-    "pretty_name": "Snapfire"
+    "pretty_name": "Snapfire",
+    "roles": {
+      "Support": "1",
+      "Nuker": "3",
+      "Disabler": "1",
+      "Escape": "1"
+    }
   },
   {
     "name": "npc_dota_hero_hoodwink",
@@ -3846,16 +4567,16 @@
       "hoodwink_acorn_shot",
       "hoodwink_bushwhack",
       "hoodwink_scurry",
-      "generic_hidden",
-      "generic_hidden",
+      "hoodwink_decoy",
+      "hoodwink_hunters_boomerang",
       "hoodwink_sharpshooter",
       "hoodwink_sharpshooter_release",
       null,
       null,
-      "special_bonus_hp_175",
+      "special_bonus_hp_200",
       "special_bonus_unique_hoodwink_bushwhack_cooldown",
       "special_bonus_unique_hoodwink_camouflage",
-      "special_bonus_agility_14",
+      "special_bonus_agility_16",
       "special_bonus_unique_hoodwink_sharpshooter_speed",
       "special_bonus_corruption_3",
       "special_bonus_unique_hoodwink_acorn_shot_charges",
@@ -3869,6 +4590,47 @@
       null
     ],
     "alias": "squirrel",
-    "pretty_name": "Hoodwink"
+    "pretty_name": "Hoodwink",
+    "roles": {
+      "Nuker": "2",
+      "Escape": "2",
+      "Disabler": "1"
+    }
+  },
+  {
+    "name": "npc_dota_hero_dawnbreaker",
+    "id": 135,
+    "abilities": [
+      "dawnbreaker_fire_wreath",
+      "dawnbreaker_celestial_hammer",
+      "dawnbreaker_luminosity",
+      "dawnbreaker_converge",
+      "generic_hidden",
+      "dawnbreaker_solar_guardian",
+      null,
+      null,
+      null,
+      "special_bonus_strength_8",
+      "special_bonus_movement_speed_20",
+      "special_bonus_attack_damage_20",
+      "special_bonus_unique_dawnbreaker_solar_guardian_cooldown",
+      "special_bonus_unique_dawnbreaker_fire_wreath_charges",
+      "special_bonus_unique_dawnbreaker_luminosity_crit",
+      "special_bonus_unique_dawnbreaker_solar_guardian_radius",
+      "special_bonus_unique_dawnbreaker_celestial_hammer_cast_range",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "alias": "Dawnbreaker, Valora",
+    "pretty_name": "Dawnbreaker",
+    "roles": {
+      "Carry": "1",
+      "Durable": "2"
+    }
   }
 ]

@@ -281,7 +281,9 @@ assert ABILITY_COUNT == 2031
 HEROES = load_source_file('resources/heroes.json')
 HERO_COUNT = len(HEROES)
 
-assert HERO_COUNT == 121
+assert HERO_COUNT == 122
+
+ROLES = load_source_file('resources/roles.json')
 
 MAX_ABILITY_COUNT_PER_HEROES = 24
 
