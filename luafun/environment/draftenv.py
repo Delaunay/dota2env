@@ -126,7 +126,7 @@ class Dota2DraftEnv(gym.Env):
                     reward.value += self.bad_order_penalty
 
                 self.booked_id.add(action[1])
-                self.tracker.add(team, action[1])
+                self.tracker.pick(team, action[1])
             else:
                 raise RuntimeError('Unreachable')
 

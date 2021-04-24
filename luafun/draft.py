@@ -149,7 +149,7 @@ class DraftTracker:
 
     This is the kind of message we receive when a ban is successful
 
-    >>> msg = DraftTracker.ban(TEAM_DIRE, 'npc_dota_hero_morphling')
+    >>> msg = DraftTracker._ban(TEAM_DIRE, 'npc_dota_hero_morphling')
     >>> msg
     {'B': 'npc_dota_hero_morphling', 'S': 1, 'T': 3}
     >>> tracker.update(msg)
@@ -158,7 +158,7 @@ class DraftTracker:
 
     This is the kind of message we receive when a pick is successful
 
-    >>> msg = DraftTracker.pick(TEAM_RADIANT, 'npc_dota_hero_drow_ranger')
+    >>> msg = DraftTracker._pick(TEAM_RADIANT, 'npc_dota_hero_drow_ranger')
     >>> msg
     {'P': 'npc_dota_hero_drow_ranger', 'S': 1, 'T': 2}
     >>> tracker.update(msg)
@@ -168,7 +168,7 @@ class DraftTracker:
     To keep track of human picks a summary of the pick state is send everytime
     the draft changes (ban excluded)
 
-    >>> msg = DraftTracker.picks_summary(TEAM_RADIANT, 'npc_dota_hero_drow_ranger', p2='npc_dota_hero_antimage')
+    >>> msg = DraftTracker._picks_summary(TEAM_RADIANT, 'npc_dota_hero_drow_ranger', p2='npc_dota_hero_antimage')
     >>> msg
     {'PS': ['npc_dota_hero_drow_ranger', '', 'npc_dota_hero_antimage', '', '', '', '', '', '', ''], 'S': 1, 'T': 2}
     >>> tracker.update(msg)
@@ -201,21 +201,21 @@ class DraftTracker:
         return json.dumps(self.status, indent=2)
 
     @staticmethod
-    def ban(team, hero):
+    def _ban(team, hero):
         return {"B": hero, "S": 1, "T": team}
 
     @staticmethod
-    def pick(team, hero):
+    def _pick(team, hero):
         return {"P": hero, "S": 1, "T": team}
 
     @staticmethod
-    def picks_summary(team, p0='', p1='', p2='', p3='', p4='', p5='', p6='', p7='', p8='', p9=''):
+    def _picks_summary(team, p0='', p1='', p2='', p3='', p4='', p5='', p6='', p7='', p8='', p9=''):
         return {"PS": [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9], "S": 1, "T": team}
 
     def name_to_offset(self, hero):
         return const.HERO_LOOKUP.from_name(hero)['offset']
 
-    def add(self, team, hero):
+    def pick(self, team, hero):
         if team == TEAM_RADIANT:
             array = self.radiant
             count = self.rhero
@@ -228,6 +228,17 @@ class DraftTracker:
             self.dhero += 1
 
         array[count] = hero
+        hero_id = self.name_to_offset(hero)
+        setattr(self.draft, attribute, hero_id)
+
+    def ban(self, team, hero):
+        count = len(self.bans) + 1
+
+        attribute = f'Ban{count}'
+        if count < 10:
+            attribute = f'Ban0{count}'
+
+        self.bans.append(hero)
         hero_id = self.name_to_offset(hero)
         setattr(self.draft, attribute, hero_id)
 
@@ -256,10 +267,10 @@ class DraftTracker:
             log.debug(msg)
 
         if success == 1 and ban is not None:
-            self.bans.append(ban)
+            self.ban(team, ban)
 
         if success == 1 and pick is not None:
-            self.add(team, pick)
+            self.pick(team, pick)
 
         # Human Picks
         # FIXME: the picks are not revealed to the other team right away

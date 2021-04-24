@@ -100,10 +100,12 @@ def train(args, dataset):
     # simple_drafter_2795_7.27
     epoch = 0
 
+    # lstm_drafter_9354_7
+    # .27.pt
     if True:
         # lstm_drafter_6534_7.27.pt
         model_name = 'lstm_drafter'
-        epoch = 7225
+        epoch = 9354
         state = torch.load(f'{model_name}_{epoch}_7.27.pt')
         model.load_state_dict(state)
 

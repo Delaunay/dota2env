@@ -181,9 +181,11 @@ class Dota2PickBan(Dataset):
                 ban_target.append(yban)
 
             if pick['is_pick']:
-                draft.add(team, hname)
+                draft.pick(team, hname)
             else:
                 draft.ban(team, hname)
+
+        # assert draft.as_tensor(TEAM_RADIANT).sum() == len(picks)
 
         return torch.stack(input), \
                torch.tensor(pick_target, dtype=torch.int64), \
