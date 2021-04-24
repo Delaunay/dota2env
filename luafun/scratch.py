@@ -110,5 +110,34 @@ def position_viz(div=100, hash=position_to_key):
     # img.show()
 
 
+def check_tensor_view():
+    import torch
+
+    from luafun.model.actor_critic import LSTMDrafter
+
+    draft = torch.randn(2, 12, 24, 122)
+
+    drafter = LSTMDrafter()
+
+    e1 = drafter.encode_draft_fast(draft).cpu()
+
+    e2 = drafter.encode_draft(draft).cpu()
+
+    print((e1 - e2).abs().mean())
+
+    import json
+    with open('a.txt', 'w') as a:
+        a.write(json.dumps(e1.tolist(), indent=2))
+
+    with open('b.txt', 'w') as b:
+        b.write(json.dumps(e2.tolist(), indent=2))
+
+
+
 if __name__ == '__main__':
-    position_viz(hash=make_pos_v3)
+    import torch
+
+    # draft = torch.randn(2, 12, 24, 122)
+
+    # position_viz(hash=make_pos_v3)
+    check_tensor_view()

@@ -10,6 +10,51 @@ from luafun.draft import DraftTracker
 import luafun.game.constants as const
 
 
+DECISION_COUNT = {
+    "6.77": 20,
+    "6.78": 20,
+    "6.79": 20,
+    "6.80": 20,
+    "6.81": 20,
+    "6.82": 20,
+    "6.83": 20,
+    "6.84": 20,
+    "6.85": 20,
+    "6.86": 20,
+    "6.87": 20,
+    "6.88": 20,
+    "7.00": 20,
+    "7.01": 20,
+    "7.02": 20,
+    "7.03": 20,
+    "7.04": 20,
+    "7.05": 20,
+    "7.06": 20,
+    "7.07": 22,
+    "7.08": 22,
+    "7.09": 22,
+    "7.10": 22,
+    "7.11": 22,
+    "7.12": 22,
+    "7.13": 22,
+    "7.14": 22,
+    "7.15": 22,
+    "7.16": 22,
+    "7.17": 22,
+    "7.18": 22,
+    "7.19": 22,
+    "7.20": 22,
+    "7.21": 22,
+    "7.22": 22,
+    "7.23": 22,
+    "7.24": 22,
+    "7.25": 22,
+    "7.26": 22,
+    "7.27": 24,
+    "7.29": 24,
+}
+
+
 class Dota2PickBan(Dataset):
     """Iterate over dumps of Match details
 
@@ -27,6 +72,7 @@ class Dota2PickBan(Dataset):
 
     def __init__(self, filename, patch=None):
         self.patch_count = defaultdict(int)
+        self.patch_decision = defaultdict(lambda: defaultdict(int))
         self.matches = []
         self.dataset = None
 
@@ -46,12 +92,21 @@ class Dota2PickBan(Dataset):
         if patch is None:
             return list(dataset.namelist())
 
+        count = DECISION_COUNT.get(patch, 24)
         matches = []
         for match in dataset.namelist():
-            match_patch = self.load_match(match)['patch']
+            match_data = self.load_match(match)
+            match_patch = match_data['patch']
+
+            decision_count = len(match_data['picks_bans'])
+            self.patch_decision[match_patch][decision_count] += 1
 
             if match_patch == patch:
-                matches.append(match)
+                if decision_count != count:
+                    self.patch_count['error'] += 1
+
+                else:
+                    matches.append(match)
 
             self.patch_count[match_patch] += 1
 
@@ -141,3 +196,7 @@ if __name__ == '__main__':
     # print(x.shape, y.shape)
 
     print(json.dumps(dataset.show_patches(), indent=2))
+    #
+    # for k, v in dataset.patch_decision.items():
+    #     print(f'{k:>20}: {v}')
+    print(json.dumps(dataset.patch_decision, indent=2))

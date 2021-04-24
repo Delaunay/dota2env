@@ -144,6 +144,13 @@ class ItemPurchaser(SelectionCategorical):
 
 class LSTMDrafter(nn.Module):
     """
+    Notes
+    -----
+    This is hopefully better than the simple drafter because it is aware than
+    decisions are linked together
+
+    reached 8.85727 after epoch 4358,
+
 
     Examples
     --------
@@ -169,14 +176,15 @@ class LSTMDrafter(nn.Module):
 
     def __init__(self):
         super(LSTMDrafter, self).__init__()
-        self.encoded_vector = 32
+        self.encoded_vector = 128
 
         self.hero_encoder = CategoryEncoder(const.HERO_COUNT, self.encoded_vector)
         self.lstm_in = DraftFields.Size * self.encoded_vector
         self.lstm_hidden = 256
-        self.lstm_layer = 2
+        self.lstm_layer = 4
 
         self.rnn = nn.LSTM(
+            # nonlinearity='tanh',
             batch_first=True,
             input_size=self.lstm_in,
             hidden_size=self.lstm_hidden,
@@ -197,24 +205,52 @@ class LSTMDrafter(nn.Module):
             nn.Softmax(dim=-1)
         )
 
-    def forward(self, draft):
-        # batch, seq_len, hidden_size
-        batch_size = draft.shape[0]
-        seq_len = draft.shape[1]
+    def encode_draft_fast(self, draft):
+        # 2, 12, 24, 122
+        bs, sq, hero, size = draft.shape
 
-        # [batch_size=2, seq_len=12, DraftSize=24, HeroCount=122]
-        flat_draft = draft.view(batch_size * seq_len * DraftFields.Size, const.HERO_COUNT)
+        #  flat_draft = torch.flatten(draft, end_dim=2)
+        flat_draft = torch.flatten(draft, end_dim=2)
 
+        # (2 * 12 * 24) x 122
         encoded_flat = self.hero_encoder(flat_draft)
-        encoded_draft = encoded_flat.view(batch_size, seq_len, self.lstm_in)
+
+        # 2 x 12 x 24 x (embedding_size: 128)
+        encoded_draft = encoded_flat.view(bs, sq, DraftFields.Size, self.encoded_vector)
+
+        # 2 x 12 x (24 * 128)
+        encoded_draft = torch.flatten(encoded_draft, start_dim=2)
+        return encoded_draft
+
+    def encode_draft(self, draft):
+        # 2, 12, 24, 122
+        bs, sq, hero, _ = draft.shape
+
+        result = torch.zeros(bs, sq, self.lstm_in).cpu()
+
+        for b in range(bs):
+            for s in range(sq):
+                # 24 x self.encoded_vector
+                encoded_hero = self.hero_encoder(draft[b, s])
+                result[b, s] = torch.flatten(encoded_hero)
+
+        return result
+
+    def forward(self, draft):
+        # 2, 12, 24, 122
+        bs, sq, hero, size = draft.shape
+
+        # 2 x 12 x (24 * 128)
+        encoded_draft = self.encode_draft_fast(draft)
 
         common, _ = self.rnn(encoded_draft)     # , (self.h0_init, self.c0_init))
 
         #  torch.Size([2, 12, 256])
-        common = common.reshape(batch_size * seq_len, self.lstm_hidden)
+        common = torch.flatten(common, end_dim=1)
 
-        pick = self.hero_select(common).view(batch_size, seq_len, const.HERO_COUNT)
-        ban = self.hero_ban(common).view(batch_size, seq_len, const.HERO_COUNT)
+        #  torch.Size([2, 12, 122])
+        pick = self.hero_select(common).view(bs, sq, const.HERO_COUNT)
+        ban = self.hero_ban(common).view(bs, sq, const.HERO_COUNT)
 
         return pick, ban
 
@@ -306,12 +342,6 @@ class SimpleDrafter(nn.Module):
             nn.Linear(n_hidden, const.HERO_COUNT),
             nn.Softmax(dim=-1)
         )
-
-    def pertub(self):
-        with torch.no_grad():
-            for param in self.parameters():
-                if param.grad is not None:
-                    param += param.grad * torch.randn_like(param) * 2
 
     def forward(self, draft):
         # draft         : (batch_size x 24 x const.HERO_COUNT)

@@ -66,12 +66,20 @@ class RoleTrainer:
         return cost.item()
 
 
+def pertub(params, var=2):
+    with torch.no_grad():
+        for param in params:
+            if param.grad is not None:
+                param += param.grad * torch.randn_like(param) * var
+
+
 def train(args, dataset):
     sampler = RandomSampler(dataset)
 
+    batch_size = 4096
     loader = DataLoader(
         dataset,
-        batch_size=256,
+        batch_size=batch_size,
         sampler=sampler,
         num_workers=4,
         collate_fn=stack_obs)
@@ -93,19 +101,14 @@ def train(args, dataset):
     epoch = 0
 
     if False:
-        epoch = 2795
-        state = torch.load(f'simple_drafter_{epoch}_7.27.pt')
+        # lstm_drafter_6534_7.27.pt
+        model_name = 'lstm_drafter'
+        epoch = 6534
+        state = torch.load(f'{model_name}_{epoch}_7.27.pt')
         model.load_state_dict(state)
 
     model = model.cuda()
     hero_role = hero_role.cuda()
-
-    if False:
-        for param in model.parameters():
-            param.grad = torch.zeros_like(param).cuda()
-
-        model.pertub()
-
     trainer = RoleTrainer(hero_role)
 
     loss = nn.CrossEntropyLoss(ignore_index=-1).cuda()
@@ -135,7 +138,15 @@ def train(args, dataset):
                 optimizer.zero_grad()
                 total_role += trainer.forward()
 
+                bs = x.shape[0]
                 ppick, pban = model(x.cuda())
+
+                ppick = ppick.view(bs * 12, const.HERO_COUNT)
+                pban = ppick.view(bs * 12, const.HERO_COUNT)
+
+                y = y.view(bs * 12)
+                z = z.view(bs * 12)
+
                 cost = (loss(ppick, y.cuda()) + loss(pban, z.cuda()))
                 cost.backward()
                 optimizer.step()
@@ -160,7 +171,7 @@ def train(args, dataset):
             print(', '.join([str(v) for v in values]))
 
             if grad < 1e-5 or abs(current_cost - prev) < 1e-5:
-                model.pertub()
+                pertub(model.parameters())
                 optimizer = optim.Adam(
                     params=list(model.parameters()) + list(hero_role.hero_role_decoder.parameters()),
                     lr=1e-4,
@@ -174,7 +185,7 @@ def train(args, dataset):
         # except:
         #     break
 
-    torch.save(model.state_dict(), f'simple_drafter_{epoch}_7.27.pt')
+    torch.save(model.state_dict(), f'lstm_drafter_{epoch}_7.27.pt')
 
 
 def main():
