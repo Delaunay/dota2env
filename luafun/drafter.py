@@ -6,7 +6,7 @@ import torch
 
 from luafun.draft import DraftTracker
 from luafun.game.ipc_send import TEAM_RADIANT
-from luafun.model.actor_critic import SimpleDrafter
+from luafun.model.drafter import SimpleDrafter
 import luafun.game.constants as const
 
 

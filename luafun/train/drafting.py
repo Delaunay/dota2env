@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 import luafun.game.constants as const
 from luafun.dataset.draft import Dota2PickBan
-from luafun.model.actor_critic import SimpleDrafter, LSTMDrafter
+from luafun.model.drafter import SimpleDrafter, LSTMDrafter
 
 import torch
 import torch.nn as nn
@@ -100,10 +100,10 @@ def train(args, dataset):
     # simple_drafter_2795_7.27
     epoch = 0
 
-    if False:
+    if True:
         # lstm_drafter_6534_7.27.pt
         model_name = 'lstm_drafter'
-        epoch = 6534
+        epoch = 7225
         state = torch.load(f'{model_name}_{epoch}_7.27.pt')
         model.load_state_dict(state)
 
@@ -112,12 +112,18 @@ def train(args, dataset):
     trainer = RoleTrainer(hero_role)
 
     loss = nn.CrossEntropyLoss(ignore_index=-1).cuda()
-    optimizer = optim.Adam(
-        params=list(model.parameters()) + list(hero_role.hero_role_decoder.parameters()),
-        lr=1e-4,
-        betas=(0.9, 0.999),
-        eps=1e-8,
-    )
+
+    def init_optim():
+        optimizer = optim.Adam(
+            params=list(model.parameters()) + list(hero_role.hero_role_decoder.parameters()),
+            lr=1e-3,
+            betas=(0.9, 0.999),
+            eps=1e-8,
+        )
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=1000, eta_min=1e-6)
+        return optimizer, scheduler
+
+    optimizer, scheduler = init_optim()
     prev = 0
     current_cost = 0
 
@@ -154,6 +160,7 @@ def train(args, dataset):
                 total_count += 1
                 total_cost += cost.item()
 
+            scheduler.step()
             grad = sum([
                 abs(p.grad.abs().mean().item()) for p in model.parameters() if p.grad is not None
             ])
@@ -172,12 +179,7 @@ def train(args, dataset):
 
             if grad < 1e-5 or abs(current_cost - prev) < 1e-5:
                 pertub(model.parameters())
-                optimizer = optim.Adam(
-                    params=list(model.parameters()) + list(hero_role.hero_role_decoder.parameters()),
-                    lr=1e-4,
-                    betas=(0.9, 0.999),
-                    eps=1e-8,
-                )
+                optimizer, scheduler = init_optim()
                 print('pertub')
 
         except KeyboardInterrupt:
