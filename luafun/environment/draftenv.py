@@ -44,9 +44,13 @@ class Dota2DraftEnv(gym.Env):
 
         self.phase_step = 0
         self.reset(self.radiant_start)
-        self.bad_order_penalty = -1
+        self.bad_order_penalty = -0.01
         self.booked_id = set()
         self.done = False
+
+    @property
+    def reserved_offsets(self):
+        return list(self.booked_id)
 
     def _load_phase(self, version):
         for phase, decisions in PICK_BAN_ORDER.get(version, v7_27):
@@ -69,6 +73,12 @@ class Dota2DraftEnv(gym.Env):
             self.dire = 'R'
 
         self.phase_step = 0
+        self.booked_id = set()
+
+        state = self.tracker.as_tensor(TEAM_RADIANT), self.tracker.as_tensor(TEAM_DIRE)
+        info = None
+        reward = (0, 0)
+        return state, reward, False, info
 
     def __enter__(self):
         self.reset(self.radiant_start)
@@ -118,12 +128,14 @@ class Dota2DraftEnv(gym.Env):
             if dec[0] == 'B':
                 if action[0] in self.booked_id:
                     reward.value += self.bad_order_penalty
+                    print(f'[BAN] Applying penalty: {action[0]}')
 
                 self.booked_id.add(action[0])
                 self.tracker.ban(team, action[0])
             elif dec[0] == 'P':
                 if action[1] in self.booked_id:
                     reward.value += self.bad_order_penalty
+                    print(f'[PICK] Applying penalty: {action[0]}')
 
                 self.booked_id.add(action[1])
                 self.tracker.pick(team, action[1])

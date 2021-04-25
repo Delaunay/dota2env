@@ -105,9 +105,11 @@ def train(args, dataset):
     if True:
         # lstm_drafter_6534_7.27.pt
         model_name = 'lstm_drafter'
-        epoch = 9354
+        epoch = 3179
         state = torch.load(f'{model_name}_{epoch}_7.27.pt')
         model.load_state_dict(state)
+
+        # model.hero_encoder.load_state_dict(torch.load(f'henc_898_7.27.pt'))
 
     model = model.cuda()
     hero_role = hero_role.cuda()
@@ -142,6 +144,8 @@ def train(args, dataset):
             total_role += trainer.forward()
             optimizer.step()
 
+            total_pick_acc = 0
+            total_ban_acc = 0
             for x, y, z in loader:
                 optimizer.zero_grad()
                 total_role += trainer.forward()
@@ -152,12 +156,21 @@ def train(args, dataset):
                 ppick = ppick.view(bs * 12, const.HERO_COUNT)
                 pban = ppick.view(bs * 12, const.HERO_COUNT)
 
-                y = y.view(bs * 12)
-                z = z.view(bs * 12)
+                y = y.view(bs * 12).cuda()
+                z = z.view(bs * 12).cuda()
 
-                cost = (loss(ppick, y.cuda()) + loss(pban, z.cuda()))
+                cost = (loss(ppick, y) + loss(pban, z))
                 cost.backward()
                 optimizer.step()
+
+                _, pick_prediction = torch.max(ppick, 1)
+                _, ban_prediction = torch.max(pban, 1)
+
+                pick_acc = ((pick_prediction == y) * (y != -1)).sum()
+                ban_acc = ((ban_prediction == z) * (z != -1)).sum()
+
+                total_pick_acc += pick_acc.item()
+                total_ban_acc += ban_acc.item()
 
                 total_count += 1
                 total_cost += cost.item()
@@ -175,7 +188,9 @@ def train(args, dataset):
                 current_cost,
                 total_role / total_count,
                 grad,
-                current_cost - prev
+                current_cost - prev,
+                total_pick_acc / (len(loader.dataset) * 5),
+                total_ban_acc / (len(loader.dataset) * 7),
             ]
             print(', '.join([str(v) for v in values]))
 

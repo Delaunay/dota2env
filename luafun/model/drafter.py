@@ -87,6 +87,10 @@ class LSTMDrafter(nn.Module):
             nn.Softmax(dim=-1)
         )
 
+        self.critic = nn.Sequential(
+            nn.Linear(self.lstm_hidden, 1),
+        )
+
     def encode_draft_fast(self, draft):
         # 2, 12, 24, 122
         bs, sq, hero, size = draft.shape
@@ -117,6 +121,57 @@ class LSTMDrafter(nn.Module):
                 result[b, s] = torch.flatten(encoded_hero)
 
         return result
+
+    def filter(self, pick_probs, ban_probs, reserved):
+        # set the probability of selected heroes to 0
+        # No incorrect action can be made
+        if reserved:
+            pick_filter = torch.ones_like(pick_probs)
+            ban_filter = torch.ones_like(ban_probs)
+
+            for r in reserved:
+                pick_filter[:, :, r] = 0
+                ban_filter[:, :, r] =  0
+
+            pick_probs = pick_probs * pick_filter
+            ban_probs = ban_probs * ban_filter
+
+        return pick_probs, ban_probs
+
+    def action(self, draft, prev=None, reserved=None):
+        # seq == 1
+        draft = draft.unsqueeze(1)
+        bs, sq, hero, size = draft.shape
+
+        # 2 x 12 x (24 * 128)
+        encoded_draft = self.encode_draft_fast(draft)
+
+        common, next = self.rnn(encoded_draft, prev)  # , (self.h0_init, self.c0_init))
+
+        #  torch.Size([2, 12, 256])
+        common = torch.flatten(common, end_dim=1)
+
+        #  torch.Size([2, 12, 122])
+        pick_probs = self.hero_select(common).view(bs, sq, const.HERO_COUNT)
+        ban_probs  = self.hero_ban(common).view(bs, sq, const.HERO_COUNT)
+
+        pick_probs, ban_probs = self.filter(pick_probs, ban_probs, reserved)
+
+        pick_dist = distributions.Categorical(pick_probs)
+        ban_dist = distributions.Categorical(ban_probs)
+
+        pick = pick_dist.sample()
+        ban = ban_dist.sample()
+
+        pick_logprobs = pick_dist.log_prob(pick)
+        ban_logprobs = ban_dist.log_prob(ban)
+
+        pick_entropy = pick_dist.entropy()
+        ban_entropy = ban_dist.entropy()
+
+        value = self.critic(common)
+
+        return (pick, ban), (pick_logprobs, ban_logprobs), (pick_entropy, ban_entropy), value, next
 
     def forward(self, draft):
         # 2, 12, 24, 122
@@ -289,9 +344,9 @@ class DraftJudge(nn.Module):
 
         self.common = nn.Sequential(
             nn.Linear(self.encoded_draft_size, 256),
-            nn.Tanh(),
+            nn.ReLU(),
             nn.Linear(256, 256),
-            nn.Tanh(),
+            nn.ReLU(),
             nn.Linear(256, 2),
             nn.Softmax(dim=-1),
         )

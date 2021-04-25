@@ -5,6 +5,7 @@ from luafun.dataset.draft import Dota2PickBan, Dota2Matchup
 from luafun.model.drafter import SimpleDrafter, LSTMDrafter, DraftJudge
 from luafun.model.components import CategoryEncoder
 from luafun.model.categorizer import HeroRole
+from luafun.environment.draftenv import Dota2DraftEnv
 
 import torch
 import torch.nn as nn
@@ -96,12 +97,23 @@ class Trainer:
         return torch.stack([x for x, _ in args]), torch.stack([y for _, y in args])
 
     def parameters(self):
-        return (
-            list(self.drafter.parameters()) +
-            list(self.hero_encoder.parameters()) +
-            list(self.judge.parameters()) +
-            list(self.hero_role.parameters())
+        params = (
+                list(self.drafter.parameters()) +
+                list(self.hero_encoder.parameters()) +
+                list(self.judge.parameters()) +
+                list(self.hero_role.parameters())
         )
+
+        param_ids = set()
+        unique_params = []
+        for p in params:
+            if id(p) in param_ids:
+                continue
+
+            param_ids.add(id(p))
+            unique_params.append(p)
+
+        return unique_params
 
     def init_model(self):
         for param in list(self.parameters()):
@@ -142,16 +154,16 @@ class Trainer:
         epoch = 0
         current_cost = 0
 
-        if False:
+        if True:
             model_name = 'lstm_drafter'
-            epoch = 9354
+            epoch = 3674
             state = torch.load(f'{model_name}_{epoch}_7.27.pt')
 
-            self.drafter.load_state_dict(state)
-            self.judge.load_state_dict(torch.load(f'judge_{epoch}_7.27.pt'))
-            self.hero_encoder.load_state_dict(torch.load(f'henc_{epoch}_7.27.pt'))
+            self.drafter.load_state_dict(state, strict=False)
+            self.judge.load_state_dict(torch.load(f'judge_44_7.27.pt'))
+            # self.hero_encoder.load_state_dict(torch.load(f'henc_{epoch}_7.27.pt'))
 
-        return 0, current_cost
+        return epoch, current_cost
 
     def train_draft_supervised_epoch(self, epoch, loader, optimizer, scheduler):
         optimizer.zero_grad()
@@ -232,35 +244,43 @@ class Trainer:
 
         count = 0
         total_cost = 0
+        total_acc = 0
 
         for x, win_target in loader:
             optimizer.zero_grad()
 
+            win_target = win_target.cuda()
             win_predict = self.judge(x.cuda())
-            cost = nn.CrossEntropyLoss()(win_predict, win_target.cuda())
+            cost = nn.CrossEntropyLoss()(win_predict, win_target)
             cost.backward()
             optimizer.step()
 
+            _, predicted = torch.max(win_predict, 1)
+            acc = (predicted == win_target).sum()
+
             count += 1
             total_cost += cost.item()
+            total_acc += acc.item()
 
         scheduler.step()
-        return role_cost, total_cost / count
+        return role_cost, total_cost / count, total_acc / len(loader.dataset)
 
-    def train_draft_judge_supervised(self):
+    def train_draft_judge_supervised(self, epochs):
         draft_file = '/home/setepenre/work/LuaFun/drafting_all.zip'
 
         dataset = Dota2Matchup(draft_file)
         optimizer, scheduler = self.init_optim()
         loader = self.init_judge_dataloader(dataset)
 
-        epoch, current_cost = self.resume()
+        epoch = 0
+        current_cost = 0
+        # epoch, current_cost = self.resume()
         err = None
-        while True:
+        for _ in range(epochs):
             epoch += 1
             try:
                 prev = current_cost
-                role_cost, current_cost = self.train_draft_judge_supervised_epoch(epoch, loader, optimizer, scheduler)
+                role_cost, current_cost, total_acc = self.train_draft_judge_supervised_epoch(epoch, loader, optimizer, scheduler)
 
                 grad = sum([
                     abs(p.grad.abs().mean().item()) for p in self.judge.parameters() if p.grad is not None
@@ -271,7 +291,8 @@ class Trainer:
                     current_cost,
                     role_cost,
                     grad,
-                    current_cost - prev
+                    current_cost - prev,
+                    total_acc
                 ]
                 print(', '.join([str(v) for v in values]))
 
@@ -289,6 +310,83 @@ class Trainer:
         if err is not None:
             raise err
 
+    def train_draft_rl_selfplay(self):
+        env = Dota2DraftEnv()
+        optimizer, scheduler = self.init_optim()
+
+        self.resume()
+
+        while True:
+
+            for _ in range(32):
+                cost, total_reward = self.train_draft_rl_selfplay_episode(env, optimizer, scheduler)
+                print(cost, total_reward)
+
+            self.train_draft_judge_supervised(2)
+
+    def train_draft_rl_selfplay_episode(self, env, optimizer, scheduler):
+        state, reward, done, info = env.reset()
+
+        rnn_state = None
+        optimizer.zero_grad()
+
+        advantage = torch.zeros(25, 2)
+        logprobs = torch.zeros(25, 2)
+        entropy = torch.zeros(25, 2)
+        i = 0
+
+        total_reward = 0
+
+        while not done:
+            state = torch.stack(state).cuda()
+
+            (pick, ban), (pick_logprobs, ban_logprobs), (pick_entropy, ban_entropy), value, rnn_state\
+                = self.drafter.action(state, prev=rnn_state, reserved=env.reserved_offsets)
+
+            radiant = (pick[0, 0].item(), ban[0, 0].item())
+            dire = (pick[1, 0].item(), ban[1, 0].item())
+            state, reward, done, info = env.step((radiant, dire))
+
+            # radiant
+            advantage[i, 0] = reward[0] - value[0]
+            logprobs[i, 0] = pick_logprobs[0] + ban_logprobs[0]
+            entropy[i, 0] = pick_entropy[0] + ban_entropy[0]
+
+            # dire
+            advantage[i, 1] = reward[1] - value[1]
+            logprobs[i, 1] = pick_logprobs[1] + ban_logprobs[1]
+            entropy[i, 1] = pick_entropy[1] + ban_entropy[1]
+            i += 1
+
+            total_reward += sum(reward)
+
+        advantage = advantage.cuda()
+        logprobs = logprobs.cuda()
+        entropy = entropy.cuda()
+
+        with torch.no_grad():
+            radiant_draft_state = state[0].unsqueeze(0).cuda()
+            last_reward = self.judge(radiant_draft_state)
+
+            advantage[i - 1, 0] += (last_reward[0, 0] > 0.50) * 1
+
+            # dire
+            advantage[i - 1, 1] += (last_reward[0, 1] > 0.50) * 5
+
+            total_reward += last_reward.sum().item()
+
+        value_loss = advantage.pow(2).mean()
+        action_loss = -(advantage.detach() * logprobs).mean()
+
+        loss = (value_loss + action_loss - entropy.mean())
+        loss.backward()
+
+        # cost.backward()
+        optimizer.step()
+        scheduler.step()
+
+        return loss.item(), total_reward
+
 
 if __name__ == '__main__':
     # loss = nn.CrossEntropyLoss()
@@ -302,7 +400,9 @@ if __name__ == '__main__':
 
     t = Trainer()
     t.cuda()
-    t.train_draft_judge_supervised()
+    # t.init_optim()
+    # t.train_draft_rl_selfplay()
+    # t.train_draft_judge_supervised()
 
 
 

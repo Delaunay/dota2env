@@ -53,6 +53,7 @@ def get_latest_patch():
     return latest_path
 
 
+#  https://api.opendota.com/api/players/81280209
 class OpenDotaAPI(WebAPI):
     URL = 'https://api.opendota.com/api/{method}'
     KEY = option('opendota.api', None)
@@ -87,6 +88,48 @@ class OpenDotaAPI(WebAPI):
             return rows
 
         return data
+
+    def get_player(self, player_id):
+        """
+
+        >>> OpenDotaAPI().get_player(81280209)
+        {
+          "tracked_until": "1621953083",
+          "leaderboard_rank": null,
+          "solo_competitive_rank": null,
+          "profile": {
+            "account_id": 81280209,
+            "personaname": "Sétepenrê",
+            "name": null,
+            "plus": false,
+            "cheese": 0,
+            "steamid": "76561198041545937",
+            "avatar": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/e6/e68a0b9be84eafb21eadd5fa73a32c995fc7991b.jpg",
+            "avatarmedium": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/e6/e68a0b9be84eafb21eadd5fa73a32c995fc7991b_medium.jpg",
+            "avatarfull": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/e6/e68a0b9be84eafb21eadd5fa73a32c995fc7991b_full.jpg",
+            "profileurl": "https://steamcommunity.com/id/setepenre/",
+            "last_login": "2021-04-10T23:03:15.390Z",
+            "loccountrycode": null,
+            "is_contributor": false
+          },
+          "rank_tier": 24,
+          "competitive_rank": null,
+          "mmr_estimate": {
+            "estimate": 2223
+          }
+        }
+        """
+        params = {
+            'key': self.KEY,
+        }
+
+        url = self.URL.format(method='players') + f'/{player_id}'
+        response = requests.get(url, params=params)
+
+        self.handle_errors(response)
+        self.limit()
+
+        return response.json()
 
     def get_captains_mode_matches(self, count, offset, version="7.28", mode=2):
         """To make sure your query is fast you should use a time constrain
