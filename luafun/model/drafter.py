@@ -52,12 +52,16 @@ class LSTMDrafter(nn.Module):
     torch.Size([2, 12, 122])
     """
 
-    def __init__(self):
+    def __init__(self, hero_encoder=None):
         super(LSTMDrafter, self).__init__()
-        self.encoded_vector = 128
 
-        self.hero_encoder = CategoryEncoder(const.HERO_COUNT, self.encoded_vector)
-        self.lstm_in = DraftFields.Size * self.encoded_vector
+        if hero_encoder is None:
+            hero_encoder = CategoryEncoder(const.HERO_COUNT, 128)
+
+        self.hero_vec = hero_encoder.out_size
+        self.hero_encoder = hero_encoder
+
+        self.lstm_in = DraftFields.Size * self.hero_vec
         self.lstm_hidden = 256
         self.lstm_layer = 4
 
@@ -94,7 +98,7 @@ class LSTMDrafter(nn.Module):
         encoded_flat = self.hero_encoder(flat_draft)
 
         # 2 x 12 x 24 x (embedding_size: 128)
-        encoded_draft = encoded_flat.view(bs, sq, DraftFields.Size, self.encoded_vector)
+        encoded_draft = encoded_flat.view(bs, sq, DraftFields.Size, self.hero_vec)
 
         # 2 x 12 x (24 * 128)
         encoded_draft = torch.flatten(encoded_draft, start_dim=2)
@@ -108,7 +112,7 @@ class LSTMDrafter(nn.Module):
 
         for b in range(bs):
             for s in range(sq):
-                # 24 x self.encoded_vector
+                # 24 x self.hero_vec
                 encoded_hero = self.hero_encoder(draft[b, s])
                 result[b, s] = torch.flatten(encoded_hero)
 
@@ -193,12 +197,15 @@ class SimpleDrafter(nn.Module):
     # ...         nb = flat_draft[b * obs.DraftFields.Size + d, :]
     # ...         print((nb - fb).square().sum())
 
-    def __init__(self):
+    def __init__(self, hero_encoder=None):
         super(SimpleDrafter, self).__init__()
-        self.encoded_vector = 32
 
-        self.hero_encoder = CategoryEncoder(const.HERO_COUNT, self.encoded_vector)
-        self.hidden_size = DraftFields.Size * self.encoded_vector
+        if hero_encoder is None:
+            hero_encoder = CategoryEncoder(const.HERO_COUNT, 128)
+
+        self.hero_vec = hero_encoder.out_size
+        self.hero_encoder = hero_encoder
+        self.hidden_size = DraftFields.Size * self.hero_vec
 
         state_shape = self.hidden_size
         n_hidden = 512
@@ -255,9 +262,45 @@ class SimpleDrafter(nn.Module):
 
 
 class DraftJudge(nn.Module):
-    """Returns which faction is more likely to win the game given a draft"""
-    def __init__(self):
+    """Returns which faction is more likely to win the game given a draft
+
+    Examples
+    --------
+
+    >>> judge = DraftJudge(None)
+    >>> draft = torch.randn(24, 122)
+    >>> batch = torch.stack([draft, draft])
+    >>> result = judge(batch)
+    >>> result.shape
+    torch.Size([2])
+    >>> result
+    tensor([0.4986, 0.4986], grad_fn=<ViewBackward>)
+    """
+    def __init__(self, hero_encoder):
         super(DraftJudge, self).__init__()
 
-    def forward(self, x):
-        pass
+        if hero_encoder is None:
+            hero_encoder = CategoryEncoder(const.HERO_COUNT, 128)
+
+        self.hero_encoder = hero_encoder
+        self.hero_vec = self.hero_encoder.out_size
+
+        self.encoded_draft_size = DraftFields.Size * 128
+
+        self.common = nn.Sequential(
+            nn.Linear(self.encoded_draft_size, 256),
+            nn.Tanh(),
+            nn.Linear(256, 256),
+            nn.Tanh(),
+            nn.Linear(256, 2),
+            nn.Softmax(dim=-1),
+        )
+
+    def forward(self, draft):
+        bs, ds, hc = draft.shape
+
+        draft_flat = torch.flatten(draft, end_dim=1)
+        encoded_flat = self.hero_encoder(draft_flat)
+        encoded_draft = encoded_flat.view(bs, ds * 128)
+
+        return self.common(encoded_draft)
