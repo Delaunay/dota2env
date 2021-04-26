@@ -131,7 +131,7 @@ class LSTMDrafter(nn.Module):
 
             for r in reserved:
                 pick_filter[:, :, r] = 0
-                ban_filter[:, :, r] =  0
+                ban_filter[:, :, r] = 0
 
             pick_probs = pick_probs * pick_filter
             ban_probs = ban_probs * ban_filter

@@ -47,6 +47,7 @@ class Dota2DraftEnv(gym.Env):
         self.bad_order_penalty = -0.01
         self.booked_id = set()
         self.done = False
+        self.radiant_started = False
 
     @property
     def reserved_offsets(self):
@@ -60,8 +61,10 @@ class Dota2DraftEnv(gym.Env):
                 self.phase_lookup[d] = phase
 
     def reset(self, radiant_start=None):
+        self.radiant_started = False
         if radiant_start is None:
             radiant_start = random.random() < 0.5
+            self.radiant_started = True
 
         self.tracker = DraftTracker()
 

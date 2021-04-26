@@ -59,7 +59,7 @@ def get_active_options():
     return _active_options
 
 
-def fetch_option(name, default, type=str):
+def fetch_option(name, default, type=str) -> str:
     """Look for an option locally and using the environment variables
     Environment variables are use as the ultimate overrides
     """
@@ -77,10 +77,23 @@ def fetch_option(name, default, type=str):
     return type(value)
 
 
-def option(name, default, type=str):
+def option(name, default, type=str) -> str:
     global _active_options
 
     value = fetch_option(name, default, type)
     _active_options[name] = value
 
     return value
+
+
+def datapath(folder):
+    """Returns the data path, defaults to luafun/../data"""
+    dirname = os.path.dirname(__file__)
+    default_data_dir = os.path.join(dirname, '..', '..', 'data')
+
+    datadir = option('data.path', default_data_dir, type=str)
+    return os.path.join(datadir, folder)
+
+
+def datafile(folder, name):
+    return os.path.join(datapath(folder), name)
