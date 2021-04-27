@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data import RandomSampler
 import torch.optim as optim
 
+import random
 import json
 import math
 
@@ -201,10 +202,10 @@ class Trainer:
             ppick = ppick.view(bs * 12, const.HERO_COUNT)
             pban = ppick.view(bs * 12, const.HERO_COUNT)
 
-            y = y.view(bs * 12)
-            z = z.view(bs * 12)
+            y = y.view(bs * 12).cuda()
+            z = z.view(bs * 12).cuda()
 
-            cost = (self.draft_loss(ppick, y.cuda()) + self.draft_loss(pban, z.cuda()))
+            cost = (self.draft_loss(ppick, y) + self.draft_loss(pban, z))
             cost.backward()
             optimizer.step()
 
@@ -360,7 +361,20 @@ class Trainer:
 
             self.train_draft_judge_supervised(2)
 
-            print(json.dumps(stats, indent=2))
+            total = 0
+            for k, v in stats.items():
+                total += v
+
+            first_pick = stats["rad_first_pick"] + stats["dire_first_pick"]
+            radiant = stats["rad_first_pick"] + stats["rad_last_pick"]
+
+            print()
+            print(f'- First Pick Win Rate: {first_pick * 100 / total:6.2f} ({first_pick})')
+            print(f'- Radiant Win Rate   : {radiant * 100 / total:6.2f} ({radiant})')
+
+            for k, v in stats.items():
+                print(f'    - {k:>15}: {v / total * 100:6.2f} ({v}))')
+            print()
 
     def train_draft_rl_selfplay_episode(self, env, optimizer, scheduler, stats):
         state, reward, done, info = env.reset()
@@ -418,9 +432,15 @@ class Trainer:
             reward_dire[i - 1] += 1 - radiant_win
 
             if radiant_win > 0.50:
-                stats[f'rad_{env.radiant_started}'] += 1
+                if env.radiant_started:
+                    stats[f'rad_first_pick'] += 1
+                else:
+                    stats[f'rad_last_pick'] += 1
             else:
-                stats[f'dire_{env.radiant_started}'] += 1
+                if env.radiant_started:
+                    stats[f'dire_last_pick'] += 1
+                else:
+                    stats[f'dire_first_pick'] += 1
 
             total_reward += last_reward[0, 0].item()
 
@@ -454,7 +474,11 @@ class Trainer:
         action_loss_dire = -(advantage_dire.detach() * logprobs_dire).mean()
         loss_dire = (value_loss_dire + action_loss_dire - entropy_dire.mean())
 
-        loss = loss_rad + loss_dire
+        if random.random() < 0.5:
+            loss = loss_rad     # + loss_dire
+        else:
+            loss = loss_dire
+
         loss.backward()
 
         # cost.backward()
@@ -476,9 +500,14 @@ if __name__ == '__main__':
 
     t = Trainer()
     t.cuda()
-    # t.init_optim()
-    t.train_draft_rl_selfplay()
+    t.init_optim()
+
+    # self-play
+    # t.train_draft_rl_selfplay()
+
+    # train judge
     # t.train_draft_judge_supervised()
 
-
+    # supervised train
+    t.train_draft_supervised()
 

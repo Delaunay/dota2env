@@ -62,9 +62,10 @@ class Dota2DraftEnv(gym.Env):
 
     def reset(self, radiant_start=None):
         self.radiant_started = False
+
         if radiant_start is None:
             radiant_start = random.random() < 0.5
-            self.radiant_started = True
+            self.radiant_started = radiant_start
 
         self.tracker = DraftTracker()
 
