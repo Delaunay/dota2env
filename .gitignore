@@ -38,3 +38,4 @@ replay*.txt
 *.json
 *.zip
 *.pt
+data/metrics/

@@ -340,7 +340,7 @@ class DraftJudge(nn.Module):
         self.hero_encoder = hero_encoder
         self.hero_vec = self.hero_encoder.out_size
 
-        self.encoded_draft_size = DraftFields.Size * 128
+        self.encoded_draft_size = DraftFields.Size * self.hero_vec
 
         self.common = nn.Sequential(
             nn.Linear(self.encoded_draft_size, 256),
@@ -356,6 +356,6 @@ class DraftJudge(nn.Module):
 
         draft_flat = torch.flatten(draft, end_dim=1)
         encoded_flat = self.hero_encoder(draft_flat)
-        encoded_draft = encoded_flat.view(bs, ds * 128)
+        encoded_draft = encoded_flat.view(bs, ds * self.hero_vec)
 
         return self.common(encoded_draft)

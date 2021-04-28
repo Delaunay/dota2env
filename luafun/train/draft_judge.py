@@ -7,7 +7,8 @@ from luafun.model.drafter import SimpleDrafter, LSTMDrafter, DraftJudge
 from luafun.model.components import CategoryEncoder
 from luafun.model.categorizer import HeroRole
 from luafun.environment.draftenv import Dota2DraftEnv
-from luafun.utils.options import datafile
+from luafun.utils.options import datapath, datafile
+from luafun.train.metrics import MetricWriter
 
 import torch
 import torch.nn as nn
@@ -57,13 +58,14 @@ class Trainer:
         self.drafter = LSTMDrafter(self.hero_encoder)
         self.draft_loss = nn.CrossEntropyLoss(ignore_index=-1)
         self.judge = DraftJudge(self.hero_encoder)
-        self.role_trainer = RoleTrainer(self.hero_role)
-        self.metrics = dict()
+        # self.role_trainer = RoleTrainer(self.hero_role)
+        self.writer = MetricWriter(datapath('metrics'))
+        self.meta = dict()
 
     def init_CM_dataloader(self, dataset):
         sampler = RandomSampler(dataset)
 
-        batch_size = 4096
+        batch_size = 2048
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
@@ -88,7 +90,7 @@ class Trainer:
     def init_judge_dataloader(self, dataset):
         sampler = RandomSampler(dataset)
 
-        batch_size = 4096
+        batch_size = 2048
         loader = DataLoader(
             dataset,
             batch_size=batch_size,
@@ -150,42 +152,38 @@ class Trainer:
                 if param.grad is not None:
                     param += param.grad * torch.randn_like(param) * var
 
-    def save(self, epoch):
-        torch.save(
-            self.drafter.state_dict(),
-            datafile('weights', f'lstm_drafter_{epoch}_7.27.pt'))
+    def save(self):
+        import io
 
-        torch.save(
-            self.judge.state_dict(),
-            datafile('weights', f'judge_{epoch}_7.27.pt'))
+        buffer = io.BytesIO()
+        torch.save(self.drafter.state_dict(), buffer)
+        self.writer.save_weights('lstm_drafter', buffer.getbuffer())
 
-        torch.save(
-            self.hero_encoder.state_dict(),
-            datafile('weights', f'henc_{epoch}_7.27.pt'))
+        buffer = io.BytesIO()
+        torch.save(self.judge.state_dict(), buffer)
+        self.writer.save_weights('judge', buffer.getbuffer())
 
-        return
+        buffer = io.BytesIO()
+        torch.save(self.hero_encoder.state_dict(), buffer)
+        self.writer.save_weights('henc', buffer.getbuffer())
+        self.writer.save_meta(self.meta)
 
     def resume(self):
-        epoch = 0
-        current_cost = 0
+        lstm_drafter = self.writer.load_weights('lstm_drafter')
+        self.drafter.load_state_dict(lstm_drafter)
 
-        if True:
-            model_name = 'lstm_drafter'
-            epoch = 3674
-            drafter_state = torch.load(datafile('weights', f'{model_name}_{epoch}_7.27.pt'))
-            self.drafter.load_state_dict(drafter_state, strict=False)
+        judge = self.writer.load_weights('judge')
+        self.judge.load_state_dict(judge)
 
-            judge_state = torch.load(datafile('weights', f'judge_44_7.27.pt'))
-            self.judge.load_state_dict(judge_state)
+        henc = self.writer.load_weights('henc')
+        self.hero_encoder.load_state_dict(henc)
 
-            hero_encoder_state = torch.load(datafile('weights', f'henc_44_7.27.pt'))
-            self.hero_encoder.load_state_dict(hero_encoder_state)
-
-        return epoch, current_cost
+        self.meta = self.writer.load_meta()
+        return
 
     def train_draft_supervised_epoch(self, epoch, loader, optimizer, scheduler):
         optimizer.zero_grad()
-        role_cost = self.role_trainer.forward()
+        # role_cost = self.role_trainer.forward()
         optimizer.step()
 
         count = 0
@@ -218,21 +216,24 @@ class Trainer:
         scheduler.step()
         n = len(loader.dataset)
         return dict(
+            name='CM-draft',
             epoch=epoch,
             cm_draft_cost=total_cost / count,
-            role_cost=role_cost,
+            # role_cost=role_cost,
             acc_pick=acc_pick / (n * 5),    # 5 Picks
             acc_ban=acc_ban / (n * 7),      # 7 Bans
         )
 
-    def train_draft_supervised(self):
+    def train_draft_supervised(self, epochs):
         dataset = Dota2PickBan(datafile('dataset', 'opendota_CM_20210421.zip'), '7.27')
         optimizer, scheduler = self.init_optim()
         loader = self.init_CM_dataloader(dataset)
 
-        epoch, current_cost = self.resume()
+        epoch = self.meta.get('cm_draft_epoch', 0)
+        current_cost = self.meta.get('cm_draft_cost', 0)
+
         err = None
-        while True:
+        for _ in range(epochs):
             epoch += 1
             try:
                 prev = current_cost
@@ -249,25 +250,28 @@ class Trainer:
                 metrics['cm_draft_cost_diff'] = cost_diff
 
                 print(', '.join([str(v) for v in metrics.values()]))
+                self.writer.save_metrics(metrics)
+
+                # self.train_draft_rl_selfplay(5, dict())
 
                 if grad < 1e-5 or abs(cost_diff) < 1e-5:
                     Trainer.pertub(self.drafter.parameters())
                     optimizer, scheduler = self.init_optim()
                     print('pertub')
 
-            except KeyboardInterrupt:
-                break
             except Exception as e:
                 err = e
                 break
 
-        self.save(epoch)
+        self.meta['cm_draft_epoch'] = epoch
+        self.meta['cm_draft_cost'] = current_cost
+
         if err is not None:
             raise err
 
     def train_draft_judge_supervised_epoch(self, epoch, loader, optimizer, scheduler):
         optimizer.zero_grad()
-        role_cost = self.role_trainer.forward()
+        # role_cost = self.role_trainer.forward()
         optimizer.step()
 
         count = 0
@@ -289,7 +293,9 @@ class Trainer:
 
         scheduler.step()
         return dict(
-            role=role_cost,
+            name='judge',
+            epoch=epoch,
+            # role=role_cost,
             judge_cost=total_cost / count,
             judge_acc=total_acc / len(loader.dataset)
         )
@@ -305,14 +311,18 @@ class Trainer:
 
             return ((predicted == target) * filter).sum().item()
 
-    def train_draft_judge_supervised(self, epochs):
+    def train_draft_judge_supervised(self, epochs, optim_scheduler=None):
         dataset = Dota2Matchup(datafile('dataset', 'drafting_all.zip'))
-        optimizer, scheduler = self.init_optim()
+
+        if optim_scheduler is None:
+            optim_scheduler = self.init_optim()
+
+        optimizer, scheduler = optim_scheduler
         loader = self.init_judge_dataloader(dataset)
 
-        epoch = 0
-        current_cost = 0
-        # epoch, current_cost = self.resume()
+        epoch = self.meta.get('judge_epoch', 0)
+        current_cost = self.meta.get('judge_cost', 0)
+
         err = None
         for _ in range(epochs):
             epoch += 1
@@ -329,52 +339,75 @@ class Trainer:
 
                 metrics['grad'] = grad
                 metrics['judge_cost_diff'] = cost_diff
-
-                print(', '.join([str(v) for v in metrics.values()]))
+                self.writer.save_metrics(metrics)
 
                 if grad < 1e-5 or abs(current_cost - prev) < 1e-5:
                     Trainer.pertub(self.judge.parameters())
                     optimizer, scheduler = self.init_optim()
                     print('pertub')
 
-            except KeyboardInterrupt:
-                break
+                if metrics['judge_acc'] > 0.80:
+                    break
+
             except Exception as e:
                 err = e
                 break
 
-        self.save(epoch)
+        self.meta['judge_epoch'] = epoch
+        self.meta['judge_cost'] = current_cost
+
         if err is not None:
             raise err
 
-    def train_draft_rl_selfplay(self):
+    def train_draft_rl_selfplay(self, episodes, win_stats=None, optim_scheduler=None):
         env = Dota2DraftEnv()
-        optimizer, scheduler = self.init_optim()
-        stats = defaultdict(int)
-        self.resume()
 
-        while True:
+        if optim_scheduler is None:
+            optim_scheduler = self.init_optim()
 
-            for _ in range(32):
-                cost, total_reward = self.train_draft_rl_selfplay_episode(env, optimizer, scheduler, stats)
-                print(cost, total_reward)
+        if win_stats is None:
+            win_stats = defaultdict(int)
 
-            self.train_draft_judge_supervised(2)
+        optimizer, scheduler = optim_scheduler
 
-            total = 0
-            for k, v in stats.items():
-                total += v
+        cost_self = 0
+        radiant_reward = 0
+        dire_reward = 0
 
-            first_pick = stats["rad_first_pick"] + stats["dire_first_pick"]
-            radiant = stats["rad_first_pick"] + stats["rad_last_pick"]
+        for _ in range(episodes):
+            metrics = self.train_draft_rl_selfplay_episode(env, optimizer, scheduler, win_stats)
+            self.writer.save_metrics(metrics)
 
-            print()
-            print(f'- First Pick Win Rate: {first_pick * 100 / total:6.2f} ({first_pick})')
-            print(f'- Radiant Win Rate   : {radiant * 100 / total:6.2f} ({radiant})')
+            cost_self += metrics['cost_self']
+            radiant_reward += metrics['radiant_reward']
+            dire_reward += metrics['dire_reward']
 
-            for k, v in stats.items():
-                print(f'    - {k:>15}: {v / total * 100:6.2f} ({v}))')
-            print()
+        metrics = dict(
+            name='self',
+            cost_self=cost_self / episodes,
+            radiant_reward=radiant_reward / episodes,
+            dire_reward=dire_reward / episodes
+        )
+        print(', '.join([str(v) for v in metrics.values()]))
+
+        total = 0
+        for k, v in win_stats.items():
+            total += v
+
+        first_pick = win_stats["rad_first_pick"] + win_stats["dire_first_pick"]
+        radiant = win_stats["rad_first_pick"] + win_stats["rad_last_pick"]
+
+        self.meta['first_pick'] = first_pick
+        self.meta['radiant'] = radiant
+
+        print()
+        print(f'- First Pick Win Rate: {first_pick * 100 / total:6.2f} ({first_pick})')
+        print(f'- Radiant Win Rate   : {radiant * 100 / total:6.2f} ({radiant})')
+
+        for k, v in win_stats.items():
+            print(f'    - {k:>15}: {v / total * 100:6.2f} ({v})')
+        print()
+        self.meta['win_stats'] = win_stats
 
     def train_draft_rl_selfplay_episode(self, env, optimizer, scheduler, stats):
         state, reward, done, info = env.reset()
@@ -444,17 +477,17 @@ class Trainer:
 
             total_reward += last_reward[0, 0].item()
 
-        discount_rate = math.exp(0.10)
+        discount_rate = math.exp(-0.10)
         prev_reward_rad = reward_rad[24]
         prev_reward_dire = reward_dire[24]
 
         # To help training we discount reward from the end to the beginning
         # value now becomes a prediction of future income as well as current reward
         for i in range(23):
-            prev_reward_rad = reward_rad[23 - i] + prev_reward_rad / discount_rate
+            prev_reward_rad = reward_rad[23 - i] + prev_reward_rad * discount_rate
             reward_rad[23 - i] = prev_reward_rad
 
-            prev_reward_dire = reward_dire[23 - i] + prev_reward_dire / discount_rate
+            prev_reward_dire = reward_dire[23 - i] + prev_reward_dire * discount_rate
             reward_dire[23 - i] = prev_reward_dire
 
         advantage_rad = (reward_rad - value_rad).cuda()
@@ -474,18 +507,68 @@ class Trainer:
         action_loss_dire = -(advantage_dire.detach() * logprobs_dire).mean()
         loss_dire = (value_loss_dire + action_loss_dire - entropy_dire.mean())
 
-        if random.random() < 0.5:
-            loss = loss_rad     # + loss_dire
-        else:
-            loss = loss_dire
+        # if random.random() < 0.5:
+        #     loss = loss_rad     # + loss_dire
+        # else:
+        #     loss = loss_dire
 
+        loss = loss_rad + loss_dire
         loss.backward()
 
         # cost.backward()
         optimizer.step()
         scheduler.step()
 
-        return loss.item(), total_reward
+        return dict(
+            cost_self=loss.item(),
+            radiant_reward=last_reward[0, 0].item(),
+            dire_reward=last_reward[0, 1].item()
+        )
+
+    def free_grads(self):
+        import gc
+
+        for param in self.parameters():
+            param.grad = None
+
+        gc.collect()
+        torch.cuda.empty_cache()
+
+    def train_unified(self, uid=None):
+        if uid is not None:
+            self.writer = MetricWriter(datapath('metrics'), uid)
+            self.resume()
+
+        win_stats = self.meta.get('win_stats', defaultdict(int))
+        k = self.meta.get('k', 0)
+        err = None
+
+        # We need the judge for self-play
+        self.train_draft_judge_supervised(50)
+        self.free_grads()
+
+        while True:
+            try:
+                # Do some draft against yourself
+                self.train_draft_rl_selfplay(100, win_stats)
+                self.free_grads()
+
+                # Learn Human strategies
+                self.train_draft_supervised(100)
+                self.free_grads()
+
+                self.save()
+                self.meta['k'] = k
+                k += 1
+            except KeyboardInterrupt:
+                print('exiting out of the training loop')
+                break
+            except Exception as e:
+                err = e
+                break
+
+        if err is not None:
+            raise err
 
 
 if __name__ == '__main__':
@@ -499,8 +582,8 @@ if __name__ == '__main__':
     # output.backward()
 
     t = Trainer()
+    t.save()
     t.cuda()
-    t.init_optim()
 
     # self-play
     # t.train_draft_rl_selfplay()
@@ -509,5 +592,8 @@ if __name__ == '__main__':
     # t.train_draft_judge_supervised()
 
     # supervised train
-    t.train_draft_supervised()
+    # t.train_draft_supervised()
 
+    # Train all together
+    uid = 'f42dedc8acd14f86b8be3520a41195b3'
+    t.train_unified(uid)
