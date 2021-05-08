@@ -6,7 +6,10 @@ class VizEmbeddingSpace:
 
     def pca_manual(self, x: torch.Tensor, normalize=None):
         with torch.no_grad():
+            # norm = torch.norm(x)
+
             # std = x.std(dim=1)
+            x = (x - x.mean()) / x.std()
             mean = x.mean(dim=1).unsqueeze(1)
 
             cov = x.mm(x.T) - mean.mm(mean.T)
@@ -20,8 +23,9 @@ class VizEmbeddingSpace:
             return x.T.mm(V[:, :3]), S[:3].sum() / S.sum()
 
     def pca_torch(self, x: torch.Tensor, normalize=None):
-        U, S, V = torch.pca_lowrank(x, center=False, niter=10)
-        return torch.matmul(x, V[:, :3]), None
+        with torch.no_grad():
+            U, S, V = torch.pca_lowrank(x.T, center=False, niter=10)
+            return torch.matmul(x.T, V[:, :3]), S[:3].sum() / S.sum()
 
 
 def main():
@@ -30,7 +34,7 @@ def main():
     from luafun.model.components import CategoryEncoder
     import luafun.game.constants as const
 
-    uid = 'f42dedc8acd14f86b8be3520a41195b3'
+    uid = '2aa1a55a35c54c9b9be93ec5a6181557'
     writer = MetricWriter(datapath('metrics'), uid)
 
     hero_encoder = CategoryEncoder(const.HERO_COUNT, 128)
@@ -44,7 +48,9 @@ def main():
 
     viz = VizEmbeddingSpace()
     proj, var = viz.pca_torch(weight)
+    # proj, var = viz.pca_manual(weight)
     print(var)
+    print(proj.shape)
 
     points = []
     for i in range(122):

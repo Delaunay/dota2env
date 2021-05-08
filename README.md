@@ -133,3 +133,8 @@ ffc478
 
 Font: Comfortaa
 
+# Extract matchup data from dota2 API
+
+```
+python ./luafun/steamapi/steamapi.py fetch --method brute --skill 3 --mode 22 drafting_all_pick.zip
+```

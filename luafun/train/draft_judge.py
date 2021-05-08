@@ -152,6 +152,32 @@ class Trainer:
                 if param.grad is not None:
                     param += param.grad * torch.randn_like(param) * var
 
+    def init_hero_encoder(self):
+        weight = list(self.hero_encoder.parameters())[0]
+
+        max_w = 0
+        roles = set()
+        for hero in const.HEROES:
+            role = hero.get('roles')
+
+            for r, w in role.items():
+                roles.add(r)
+                max_w = max(int(w), max_w)
+
+        roles = {k: i for i, k in enumerate(list(roles))}
+        for hero in const.HEROES:
+            offset = hero['offset']
+            role = hero.get('roles')
+
+            for i in range(len(roles)):
+                weight[i, offset] = 0
+
+            for k, w in role.items():
+                i = roles[k]
+                weight[i, offset] = int(w) / max_w
+
+        self.hero_encoder.linear.weight = nn.Parameter(weight)
+
     def save(self):
         import io
 
@@ -373,8 +399,10 @@ class Trainer:
         cost_self = 0
         radiant_reward = 0
         dire_reward = 0
+        episode = self.meta.get('episodes_self', 0)
+        start = episode % episodes
 
-        for _ in range(episodes):
+        for i in range(start, episodes):
             metrics = self.train_draft_rl_selfplay_episode(env, optimizer, scheduler, win_stats)
             self.writer.save_metrics(metrics)
 
@@ -382,8 +410,13 @@ class Trainer:
             radiant_reward += metrics['radiant_reward']
             dire_reward += metrics['dire_reward']
 
+            if i % 1000 == 0:
+                self.save()
+
+        self.meta['episodes_self'] = episode + episodes
         metrics = dict(
             name='self',
+            episode=self.meta['episodes_self'],
             cost_self=cost_self / episodes,
             radiant_reward=radiant_reward / episodes,
             dire_reward=dire_reward / episodes
@@ -547,17 +580,23 @@ class Trainer:
         self.train_draft_judge_supervised(50)
         self.free_grads()
 
+        dataset = Dota2PickBan(datafile('dataset', 'opendota_CM_20210421.zip'), '7.27')
+        match_count = len(dataset)
+
+        print(match_count)
+
         while True:
             try:
                 # Do some draft against yourself
-                self.train_draft_rl_selfplay(100, win_stats)
+                self.train_draft_rl_selfplay(match_count * 10, win_stats)
                 self.free_grads()
 
                 # Learn Human strategies
-                self.train_draft_supervised(100)
+                self.train_draft_supervised(10)
                 self.free_grads()
 
                 self.save()
+                print('Saved')
                 self.meta['k'] = k
                 k += 1
             except KeyboardInterrupt:
@@ -582,11 +621,14 @@ if __name__ == '__main__':
     # output.backward()
 
     t = Trainer()
-    t.save()
+
     t.cuda()
 
     # self-play
     # t.train_draft_rl_selfplay()
+    t.init_model()
+    t.init_hero_encoder()
+    t.save()
 
     # train judge
     # t.train_draft_judge_supervised()
@@ -595,5 +637,6 @@ if __name__ == '__main__':
     # t.train_draft_supervised()
 
     # Train all together
-    uid = 'f42dedc8acd14f86b8be3520a41195b3'
+    uid = None
+    # uid = '71161d7d868646328642fa064d935024'
     t.train_unified(uid)

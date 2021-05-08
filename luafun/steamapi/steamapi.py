@@ -6,7 +6,8 @@ import time
 from typing import List
 import zipfile
 import os
-
+import gzip
+import datetime
 import requests
 
 from luafun.utils.options import option
@@ -563,9 +564,96 @@ def main():
         merge(args.output, *args.files)
 
 
-if __name__ == '__main__':
-    # 7991 matches so far
-    main()
+class ExtractMatchDetails:
+    def __init__(self):
+        self.matches = dict()
+        self.api = SteamAPI()
+        self.api.wait_time = 0.50
+        self.count = 0
+        self.skipped = 0
+        self.existing = []
+        self.start_size = 1
+        self.start_time = datetime.datetime.utcnow()
 
-    # for listing in SteamAPI().get_league_listing():
-    #     print(json.dumps(listing))
+    def get_match_ids(self):
+        self.matches = dict()
+
+        with gzip.open("ranked_allpick_7.28.json.gz", "r") as file:
+            for line in file.readlines():
+
+                match = json.loads(line.decode('utf-8'))
+                match_id = match.get('match_id', None)
+                avg_rank_tier = match.get('avg_rank_tier', None)
+
+                if match_id is None and avg_rank_tier is None:
+                    continue
+
+                self.matches[match_id] = match
+
+    def retried_fetch(self, match_id):
+        for i in range(3):
+            try:
+                return self.api.get_match_detail(match_id)
+            except ServerError:
+                continue
+            except requests.exceptions.ConnectionError:
+                continue
+            except ConnectionResetError:
+                continue
+
+        return None
+
+    def status(self, match_id):
+        return f'{match_id} ' \
+               f'(fetched: {self.count})' \
+               f'(skipped: {self.skipped}) ' \
+               f'(total: {len(self.existing)})' \
+               f'(completion: {len(self.existing)/self.start_size * 100:8.2f}) (ETA: {self.estimate_end_time()})'
+
+    def estimate_end_time(self):
+        elapsed_time = (datetime.datetime.utcnow() - self.start_time)
+        time_per_match = elapsed_time / self.count
+        remaining_match = self.start_size - len(self.existing)
+        time_until_end = remaining_match * time_per_match
+        return time_until_end
+
+    def get_match_details(self):
+        self.start_time = datetime.datetime.utcnow()
+
+        with zipfile.ZipFile('ranked_allpick_7.28_picks.zip', mode='a') as output:
+            # Get existing match IDs
+            self.existing = set([int(n.split('.')[0]) for n in output.namelist()])
+            self.start_size = len(self.matches)
+
+            print(f'Fetched  : {len(self.existing)}')
+            print(f'Total    : {self.start_size}')
+            print(f'Remaining: {self.start_size - len(self.existing)}')
+
+            while len(self.matches) > 0:
+                match_id, match = self.matches.popitem()
+
+                if match_id in self.existing:
+                    self.skipped += 1
+                    continue
+
+                self.existing.add(match_id)
+                details = self.retried_fetch(match_id)
+
+                if details is None or not isinstance(details, dict):
+                    self.skipped += 1
+                    continue
+
+                match.update(details)
+                with output.open(f'{match_id}.json', 'w') as matchfile:
+                    jsonstr = json.dumps(match)
+                    matchfile.write(jsonstr.encode('utf-8'))
+
+                self.count += 1
+                print(f'\r{self.status(match_id)}', end='')
+
+
+if __name__ == '__main__':
+    obj = ExtractMatchDetails()
+    obj.get_match_ids()
+    obj.get_match_details()
+
