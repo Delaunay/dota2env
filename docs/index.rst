@@ -87,6 +87,7 @@ Features
    :caption: API
    :maxdepth: 1
 
+   pages/drafting
    pages/options
    pages/dotaenv
    pages/action

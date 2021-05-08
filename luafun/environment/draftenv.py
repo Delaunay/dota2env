@@ -31,7 +31,94 @@ PICK_BAN_ORDER = {
 }
 
 
+def radiant_ban(hero_id):
+    return (None, hero_id), None
+
+
+def radiant_pick(hero_id):
+    return (hero_id, None), None
+
+
+def dire_ban(hero_id):
+    return None, (None, hero_id)
+
+
+def dire_pick(hero_id):
+    return None, (hero_id, None)
+
+
 class Dota2DraftEnv(gym.Env):
+    """Dota2 Drafting environment
+
+    Examples
+    --------
+    >>> import luafun.game.constants as const
+
+    >>> env = Dota2DraftEnv(radiant_start=True)
+    >>> env.decision_human
+    'Radiant ban'
+
+    >>> ban = const.HERO_LOOKUP.from_name('npc_dota_hero_arc_warden')['offset']
+    >>> state, reward, done, info = env.step(radiant_ban(ban))
+    >>> env.summary()
+            Ban01: Arc Warden
+
+    >>> env.decision_human
+    'Dire ban'
+
+    >>> ban = const.HERO_LOOKUP.from_name('npc_dota_hero_winter_wyvern')['offset']
+    >>> state, reward, done, info = env.step(dire_ban(ban))
+    >>> env.summary()
+            Ban01: Arc Warden
+            Ban02: Winter Wyvern
+
+    >>> env.decision_human
+    'Radiant ban'
+
+    >>> ban = const.HERO_LOOKUP.from_name('npc_dota_hero_techies')['offset']
+    >>> state, reward, done, info = env.step(radiant_ban(ban))
+    >>> env.summary()
+            Ban01: Arc Warden
+            Ban02: Winter Wyvern
+            Ban03: Techies
+
+    >>> env.decision_human
+    'Dire ban'
+
+    >>> ban = const.HERO_LOOKUP.from_name('npc_dota_hero_phoenix')['offset']
+    >>> state, reward, done, info = env.step(dire_ban(ban))
+    >>> env.summary()
+            Ban01: Arc Warden
+            Ban02: Winter Wyvern
+            Ban03: Techies
+            Ban04: Phoenix
+
+    >>> env.decision_human
+    'Radiant pick'
+
+    >>> pick = const.HERO_LOOKUP.from_name('npc_dota_hero_oracle')['offset']
+    >>> state, reward, done, info = env.step(radiant_pick(pick))
+    >>> env.summary()
+    Radiant Pick0: Oracle
+            Ban01: Arc Warden
+            Ban02: Winter Wyvern
+            Ban03: Techies
+            Ban04: Phoenix
+
+    >>> env.decision_human
+    'Dire pick'
+
+    >>> pick = const.HERO_LOOKUP.from_name('npc_dota_hero_dark_willow')['offset']
+    >>> state, reward, done, info = env.step(dire_pick(pick))
+    >>> env.summary()
+    Radiant Pick0: Oracle
+       Dire Pick5: Dark Willow
+            Ban01: Arc Warden
+            Ban02: Winter Wyvern
+            Ban03: Techies
+            Ban04: Phoenix
+
+    """
     def __init__(self, radiant_start=None, version='7.28'):
         self.radiant_start = radiant_start
         self.tracker: DraftTracker = None
@@ -48,9 +135,11 @@ class Dota2DraftEnv(gym.Env):
         self.booked_id = set()
         self.done = False
         self.radiant_started = False
+        self.log_fun = lambda x: x
 
     @property
     def reserved_offsets(self):
+        """List of heroes already picked or ban that cannot be picked or banned"""
         return list(self.booked_id)
 
     def _load_phase(self, version):
@@ -61,6 +150,7 @@ class Dota2DraftEnv(gym.Env):
                 self.phase_lookup[d] = phase
 
     def reset(self, radiant_start=None):
+        """Reset the environment"""
         self.radiant_started = False
 
         if radiant_start is None:
@@ -91,18 +181,112 @@ class Dota2DraftEnv(gym.Env):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
 
+    def summary(self):
+        """Print a summary of the draft"""
+        self.tracker.draft.summary()
+
     @property
     def phase(self):
+        """Returns the current drafting phase"""
         return self.phase_lookup[self.decision]
 
     @property
     def decision(self):
+        """Returns the current decision that is expected"""
+        if self.phase_step == len(self.order):
+            return 'Finished'
+
         return self.order[self.phase_step]
 
+    @property
+    def decision_human(self):
+        """Returns a string describing the expected action, decode the string returned by ``decision``
+
+        Examples
+        --------
+        >>> from luafun.environment.draftenv import Dota2DraftEnv
+        >>> env = Dota2DraftEnv(radiant_start=True)
+        >>> while not env.done:
+        ...     radiant, dire = env.action_space.sample()
+        ...     print(env.decision_human)
+        ...     state, reward, done, info = env.step((radiant, dire))
+        Radiant ban
+        Dire ban
+        Radiant ban
+        Dire ban
+        Radiant pick
+        Dire pick
+        Dire pick
+        Radiant pick
+        Radiant ban
+        Dire ban
+        Radiant ban
+        Dire ban
+        Radiant ban
+        Dire ban
+        Dire pick
+        Radiant pick
+        Dire pick
+        Radiant pick
+        Radiant ban
+        Dire ban
+        Radiant ban
+        Dire ban
+        Radiant pick
+        Dire pick
+        Finished
+        """
+        dec = self.decision
+        action = None
+        faction = None
+
+        if dec[0] == 'P':
+            action = 'pick'
+        elif dec[0] == 'B':
+            action = 'ban'
+        else:
+            return dec
+
+        if dec[1] == self.radiant:
+            faction = 'Radiant'
+        else:
+            faction = 'Dire'
+
+        return f'{faction} {action}'
+
     def render(self, mode=None):
+        """Part of Gym API but not used, use summary to print the drafting state"""
         pass
 
     def step(self, action):
+        """Execute one action pick/ban
+
+        Parameters
+        ----------
+        action: Tuple[Tuple[Pick, Ban], Tuple[Pick, Ban]]
+            Tuple of actions
+
+        Notes
+        -----
+        Only the expected action is taken by the environment.
+        i.e if radiant has to make a pick only the pick is taken and everything else is discarded.
+        This is meant to simplify developing drafting AIs as they do not need to understand the drafting steps
+        to work.
+
+        You can use ``env.decision_human`` to know which action is expected
+
+        The environment does not enforce pick/ban uniqueness but it will apply a penalty to the reward if not respected.
+        The penalty can be tweaked using the attribute ``bad_order_penalty``
+
+        Examples
+        --------
+        >>> env = Dota2DraftEnv(radiant_start=True)
+        >>> rad_pick, rad_ban = (1, 2)
+        >>> dire_pick, dire_ban = (3, 4)
+        >>> env.decision_human
+        'Radiant ban'
+        >>> (rad_state, dire_state), reward, done, info = env.step(((rad_pick, rad_ban), (dire_pick, dire_ban)))
+        """
         radiant_action, dire_action = action
 
         class Reward:
@@ -132,17 +316,17 @@ class Dota2DraftEnv(gym.Env):
             if dec[0] == 'B':
                 if action[0] in self.booked_id:
                     reward.value += self.bad_order_penalty
-                    print(f'[BAN] Applying penalty: {action[0]}')
+                    self.log_fun(f'[BAN] Applying penalty: {action[1]}')
 
-                self.booked_id.add(action[0])
-                self.tracker.ban(team, action[0])
+                self.booked_id.add(action[1])
+                self.tracker.ban(team, action[1])
             elif dec[0] == 'P':
                 if action[1] in self.booked_id:
                     reward.value += self.bad_order_penalty
-                    print(f'[PICK] Applying penalty: {action[0]}')
+                    self.log_fun(f'[PICK] Applying penalty: {action[0]}')
 
-                self.booked_id.add(action[1])
-                self.tracker.pick(team, action[1])
+                self.booked_id.add(action[0])
+                self.tracker.pick(team, action[0])
             else:
                 raise RuntimeError('Unreachable')
 
@@ -156,6 +340,7 @@ class Dota2DraftEnv(gym.Env):
 
     @property
     def action_space(self):
+        """Returns the expected action space"""
         action = gym.spaces.Tuple((
             gym.spaces.Discrete(const.HERO_COUNT),
             gym.spaces.Discrete(const.HERO_COUNT)
@@ -181,6 +366,5 @@ if __name__ == '__main__':
             radiant, dire = env.action_space.sample()
 
             state, reward, done, info = env.step((radiant, dire))
-
 
         print()

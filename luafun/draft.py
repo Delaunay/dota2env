@@ -90,6 +90,34 @@ class DraftStatus:
     Ban13: int = -1
     Ban14: int = -1
 
+    def summary(self):
+        """
+
+        Examples
+        --------
+        >>> draft = DraftStatus()
+        >>> draft.Pick4 = 1
+        >>> draft.Ban01 = 2
+        >>> draft.Pick5 = 3
+        >>> draft.summary()
+        Radiant Pick4: Axe
+           Dire Pick5: Bloodseeker
+           Dire Ban01: Bane
+        """
+        for i, (k, hero_id) in enumerate(asdict(self).items()):
+            if hero_id == -1:
+                continue
+
+            if i < 5:
+                faction = "Radiant"
+            else:
+                faction = "Dire"
+
+            if i >= 10:
+                faction = ''
+
+            print(f'{faction:>7} {k}: {const.HERO_LOOKUP.from_offset(hero_id)["pretty_name"]}')
+
     def as_tensor(self, faction):
         """Generate a one-hot encoded tensor for the ban/picks.
         Ally team is first, then enemies and bans are last
@@ -131,11 +159,13 @@ class DraftStatus:
         if faction == TEAM_DIRE:
             remap = DIRE_DRAFT_REMAP
 
-        for k, v in asdict(self).items():
-            if v >= 0:
-                original = int(getattr(DraftFields, k))
-                f = int(remap.get(original, original))
-                draft_status[f, v] = 1
+        for k, hero_id in asdict(self).items():
+            if hero_id == -1:
+                continue
+
+            original = int(getattr(DraftFields, k))
+            f = int(remap.get(original, original))
+            draft_status[f, hero_id] = 1
 
         return draft_status
 
