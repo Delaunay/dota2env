@@ -5,6 +5,7 @@ from enum import IntEnum
 from PIL import Image
 from torchvision import transforms
 
+
 # Map constant
 # Extracted using Lua
 # might be automated so it never gets out of date
@@ -29,9 +30,10 @@ RANGE = (8288, 8288)
 # Game Unit
 # (16576, 16576)
 SIZE = (
-    BOUNDS[1][0] - BOUNDS[0][0],    # x_max -  x_min
-    BOUNDS[1][1] - BOUNDS[0][1],    # y_max - y_min
+    BOUNDS[1][0] - BOUNDS[0][0],  # x_max -  x_min
+    BOUNDS[1][1] - BOUNDS[0][1],  # y_max - y_min
 )
+
 
 #
 # Max vision comes from the Dota2 Lua API some functions are limited to this range
@@ -107,7 +109,6 @@ def position_to_key(x, y, div=27):
 
 IGNORED_TREES = dict()
 DUP_TREES = dict()
-
 
 topo_map = None
 
@@ -312,7 +313,7 @@ class HeroLookup:
     special_bonus_hp_275
     special_bonus_night_vision_400
     special_bonus_unique_winter_wyvern_1
-    special_bonus_unique_winter_wyvern_2
+    special_bonus_unique_winter_wyvern_7
     special_bonus_unique_winter_wyvern_3
     special_bonus_unique_winter_wyvern_4
     None
@@ -349,7 +350,7 @@ class HeroLookup:
     special_bonus_hp_275
     special_bonus_night_vision_400
     special_bonus_unique_winter_wyvern_1
-    special_bonus_unique_winter_wyvern_2
+    special_bonus_unique_winter_wyvern_7
     special_bonus_unique_winter_wyvern_3
     special_bonus_unique_winter_wyvern_4
 
@@ -383,6 +384,7 @@ class HeroLookup:
     special_bonus_unique_invoker_2
     special_bonus_unique_invoker_11
     """
+
     def __init__(self):
         self.ability_count = 0
         self._from_id = dict()
@@ -503,8 +505,8 @@ class ItemSlot(IntEnum):
     Stash4 = 12
     Stash5 = 13
     Stash6 = 14
-    Item15 = 15     # TP
-    Item16 = 16     # Neutral ?
+    Item15 = 15  # TP
+    Item16 = 16  # Neutral ?
 
 
 assert len(ItemSlot) == 17, '17 item slots'
@@ -512,30 +514,30 @@ assert len(ItemSlot) == 17, '17 item slots'
 
 # might have to normalize talent so it is easier to learn
 class SpellSlot(IntEnum):
-    Ablity0 = 0         # Q                 | invoker_quas
-    Ablity1 = 1         # W                 | invoker_wex
-    Ablity2 = 2         # E                 | invoker_exort
-    Ablity3 = 3         # D generic_hidden  | invoker_empty1
-    Ablity4 = 4         # F generic_hidden  | invoker_empty2
-    Ablity5 = 5         # R                 | invoker_invoke
-    Ablity6 = 6         # .                 | invoker_cold_snap
-    Ablity7 = 7         # .                 | invoker_ghost_walk
-    Ablity8 = 8         # .                 | invoker_tornado
-    Ablity9 = 9         # .                 | invoker_emp
-    Ablity10 = 10       # .                 | invoker_alacrity
-    Ablity11 = 11       # .                 | invoker_chaos_meteor
-    Ablity12 = 12       # .                 | invoker_sun_strike
-    Ablity13 = 13       # .                 | invoker_forge_spirit
-    Ablity14 = 14       # .                 | invoker_ice_wall
-    Ablity15 = 15       # .                 | invoker_deafening_blast
-    Ablity16 = 16       # Talent 1  (usually but the talent offset can be shifted)
-    Ablity17 = 17       # Talent 2  example: rubick, invoker, etc..
-    Ablity18 = 18       # Talent 3
-    Ablity19 = 19       # Talent 4  98 heroes follow the pattern above
-    Ablity20 = 20       # Talent 5
-    Ablity21 = 21       # Talent 6
-    Ablity22 = 22       # Talent 7
-    Ablity23 = 23       # Talent 8
+    Ablity0 = 0  # Q                 | invoker_quas
+    Ablity1 = 1  # W                 | invoker_wex
+    Ablity2 = 2  # E                 | invoker_exort
+    Ablity3 = 3  # D generic_hidden  | invoker_empty1
+    Ablity4 = 4  # F generic_hidden  | invoker_empty2
+    Ablity5 = 5  # R                 | invoker_invoke
+    Ablity6 = 6  # .                 | invoker_cold_snap
+    Ablity7 = 7  # .                 | invoker_ghost_walk
+    Ablity8 = 8  # .                 | invoker_tornado
+    Ablity9 = 9  # .                 | invoker_emp
+    Ablity10 = 10  # .                 | invoker_alacrity
+    Ablity11 = 11  # .                 | invoker_chaos_meteor
+    Ablity12 = 12  # .                 | invoker_sun_strike
+    Ablity13 = 13  # .                 | invoker_forge_spirit
+    Ablity14 = 14  # .                 | invoker_ice_wall
+    Ablity15 = 15  # .                 | invoker_deafening_blast
+    Ablity16 = 16  # Talent 1  (usually but the talent offset can be shifted)
+    Ablity17 = 17  # Talent 2  example: rubick, invoker, etc..
+    Ablity18 = 18  # Talent 3
+    Ablity19 = 19  # Talent 4  98 heroes follow the pattern above
+    Ablity20 = 20  # Talent 5
+    Ablity21 = 21  # Talent 6
+    Ablity22 = 22  # Talent 7
+    Ablity23 = 23  # Talent 8
 
 
 assert len(SpellSlot) == 24, '24 abilities'
@@ -543,13 +545,13 @@ assert len(SpellSlot) == 24, '24 abilities'
 
 # Could bundle the courier action as a hero action
 class CourierAction(IntEnum):
-    BURST               = 0
+    BURST = 0
     # hidden
     # ENEMY_SECRET_SHOP   = 1
-    RETURN              = 2
-    SECRET_SHOP         = 3
-    TAKE_STASH_ITEMS    = 4
-    TRANSFER_ITEMS      = 5
+    RETURN = 2
+    SECRET_SHOP = 3
+    TAKE_STASH_ITEMS = 4
+    TRANSFER_ITEMS = 5
     # bots will have to do 2 actions for those
     # not a big deal IMO
     # TAKE_AND_TRANSFER_ITEMS
@@ -564,3 +566,84 @@ class HeightLevel(IntEnum):
     Elevated = 3
     Cliffs = 4
     Valley = 5
+
+
+def rank_to_offset(rank):
+    return rank - 10
+
+
+class Rank(IntEnum):
+    # 80 is the rank sent by OpenDota
+    # with offset it back by 10 so we get numbers starting from 0
+    Immortal  = rank_to_offset(80)
+    Divine9   = rank_to_offset(79)
+    Divine8   = rank_to_offset(78)
+    Divine7   = rank_to_offset(77)
+    Divine6   = rank_to_offset(76)
+    Divine5   = rank_to_offset(75)
+    Divine4   = rank_to_offset(74)
+    Divine3   = rank_to_offset(73)
+    Divine2   = rank_to_offset(72)
+    Divine1   = rank_to_offset(71)
+    Divine0   = rank_to_offset(70)
+    Ancient9  = rank_to_offset(69)
+    Ancient8  = rank_to_offset(68)
+    Ancient7  = rank_to_offset(67)
+    Ancient6  = rank_to_offset(66)
+    Ancient5  = rank_to_offset(65)
+    Ancient4  = rank_to_offset(64)
+    Ancient3  = rank_to_offset(63)
+    Ancient2  = rank_to_offset(62)
+    Ancient1  = rank_to_offset(61)
+    Ancient0  = rank_to_offset(60)
+    Legend9   = rank_to_offset(59)
+    Legend8   = rank_to_offset(58)
+    Legend7   = rank_to_offset(57)
+    Legend6   = rank_to_offset(56)
+    Legend5   = rank_to_offset(55)
+    Legend4   = rank_to_offset(54)
+    Legend3   = rank_to_offset(53)
+    Legend2   = rank_to_offset(52)
+    Legend1   = rank_to_offset(51)
+    Legend0   = rank_to_offset(50)
+    Archon9   = rank_to_offset(49)
+    Archon8   = rank_to_offset(48)
+    Archon7   = rank_to_offset(47)
+    Archon6   = rank_to_offset(46)
+    Archon5   = rank_to_offset(45)
+    Archon4   = rank_to_offset(44)
+    Archon3   = rank_to_offset(43)
+    Archon2   = rank_to_offset(42)
+    Archon1   = rank_to_offset(41)
+    Archon0   = rank_to_offset(40)
+    Crusader9 = rank_to_offset(39)
+    Crusader8 = rank_to_offset(38)
+    Crusader7 = rank_to_offset(37)
+    Crusader6 = rank_to_offset(36)
+    Crusader5 = rank_to_offset(35)
+    Crusader4 = rank_to_offset(34)
+    Crusader3 = rank_to_offset(33)
+    Crusader2 = rank_to_offset(32)
+    Crusader1 = rank_to_offset(31)
+    Crusader0 = rank_to_offset(30)
+    Guardian9 = rank_to_offset(29)
+    Guardian8 = rank_to_offset(28)
+    Guardian7 = rank_to_offset(27)
+    Guardian6 = rank_to_offset(26)
+    Guardian5 = rank_to_offset(25)
+    Guardian4 = rank_to_offset(24)
+    Guardian3 = rank_to_offset(23)
+    Guardian2 = rank_to_offset(22)
+    Guardian1 = rank_to_offset(21)
+    Guardian0 = rank_to_offset(20)
+    Herald9   = rank_to_offset(19)
+    Herald8   = rank_to_offset(18)
+    Herald7   = rank_to_offset(17)
+    Herald6   = rank_to_offset(16)
+    Herald5   = rank_to_offset(15)
+    Herald4   = rank_to_offset(14)
+    Herald3   = rank_to_offset(13)
+    Herald2   = rank_to_offset(12)
+    Herald1   = rank_to_offset(11)
+    Herald0   = rank_to_offset(10)
+    Size = 71

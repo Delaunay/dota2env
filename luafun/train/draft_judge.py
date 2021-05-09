@@ -4,7 +4,7 @@ from collections import defaultdict
 import luafun.game.constants as const
 from luafun.dataset.draft import Dota2PickBan, Dota2Matchup
 from luafun.model.drafter import SimpleDrafter, LSTMDrafter, DraftJudge
-from luafun.model.components import CategoryEncoder
+from luafun.model.components import HeroEmbedding
 from luafun.model.categorizer import HeroRole
 from luafun.environment.draftenv import Dota2DraftEnv
 from luafun.utils.options import datapath, datafile
@@ -53,7 +53,7 @@ class RoleTrainer:
 
 class Trainer:
     def __init__(self):
-        self.hero_encoder = CategoryEncoder(const.HERO_COUNT, 128)
+        self.hero_encoder = HeroEmbedding(128)
         self.hero_role = HeroRole(self.hero_encoder)
         self.drafter = LSTMDrafter(self.hero_encoder)
         self.draft_loss = nn.CrossEntropyLoss(ignore_index=-1)
@@ -102,7 +102,10 @@ class Trainer:
 
     @staticmethod
     def stack_judge_obs(args):
-        return torch.stack([x for x, _ in args]), torch.stack([y for _, y in args])
+        return torch.stack([x for x, _, _, _ in args]), \
+               torch.stack([y for _, y, _, _ in args]), \
+               torch.stack([z for _, _, z, _ in args]), \
+               torch.stack([d for _, _, _, d in args])
 
     def parameters(self):
         params = (
@@ -176,7 +179,7 @@ class Trainer:
                 i = roles[k]
                 weight[i, offset] = int(w) / max_w
 
-        self.hero_encoder.linear.weight = nn.Parameter(weight)
+        self.hero_encoder.baseline.linear.weight = nn.Parameter(weight)
 
     def save(self):
         import io
@@ -251,7 +254,7 @@ class Trainer:
         )
 
     def train_draft_supervised(self, epochs):
-        dataset = Dota2PickBan(datafile('dataset', 'opendota_CM_20210421.zip'), '7.27')
+        dataset = Dota2PickBan(datafile('dataset', 'opendota_CM_20210421.zip'))
         optimizer, scheduler = self.init_optim()
         loader = self.init_CM_dataloader(dataset)
 
@@ -301,20 +304,47 @@ class Trainer:
         optimizer.step()
 
         count = 0
+        total_cost_norm = 0
         total_cost = 0
         total_acc = 0
 
-        for x, win_target in loader:
-            optimizer.zero_grad()
+        prev_cost_win = 1
+        prev_cost_est = 1
+        prev_cost_win_c = 0
+        prev_cost_est_c = 0
 
+        for x, win_target, meta, rank in loader:
+            x = x.cuda()
+            rank = rank.cuda()
             win_target = win_target.cuda()
-            win_predict = self.judge(x.cuda())
-            cost = nn.CrossEntropyLoss()(win_predict, win_target)
+            meta = meta.cuda()
+
+            self.judge.compute_estimates = True
+
+            optimizer.zero_grad()
+            win_predict, estimates = self.judge(x, rank)
+            # Normalize cost, to make them both as important
+            cost_win = nn.CrossEntropyLoss()(win_predict, win_target)
+            cost_est = nn.L1Loss()(estimates, meta)
+            cost = (cost_win / prev_cost_win) + (cost_est / prev_cost_est)
+
             cost.backward()
             optimizer.step()
 
+            prev_cost_win = cost_win.item()
+            prev_cost_est = cost_est.item()
+
+            if prev_cost_est_c == 0:
+                prev_cost_est_c = prev_cost_est
+                prev_cost_win_c = prev_cost_win
+
             count += 1
-            total_cost += cost.item()
+            if count == 1:
+                total_cost_norm += 1
+            else:
+                total_cost_norm += cost.item()
+
+            total_cost += ((cost_win / prev_cost_win_c) + (cost_est / prev_cost_est_c)).item()
             total_acc += self.accuracy(win_predict, win_target)
 
         scheduler.step()
@@ -322,6 +352,7 @@ class Trainer:
             name='judge',
             epoch=epoch,
             # role=role_cost,
+            judge_cost_norm=total_cost_norm / count,
             judge_cost=total_cost / count,
             judge_acc=total_acc / len(loader.dataset)
         )
@@ -338,7 +369,7 @@ class Trainer:
             return ((predicted == target) * filter).sum().item()
 
     def train_draft_judge_supervised(self, epochs, optim_scheduler=None):
-        dataset = Dota2Matchup(datafile('dataset', 'drafting_all.zip'))
+        dataset = Dota2Matchup(datafile('dataset', 'ranked_allpick_7.28_picks_wip.zip'))
 
         if optim_scheduler is None:
             optim_scheduler = self.init_optim()
@@ -348,6 +379,8 @@ class Trainer:
 
         epoch = self.meta.get('judge_epoch', 0)
         current_cost = self.meta.get('judge_cost', 0)
+
+        self.judge = DraftJudge(self.hero_encoder, compute_estimates=True).cuda()
 
         err = None
         for _ in range(epochs):
@@ -367,6 +400,9 @@ class Trainer:
                 metrics['judge_cost_diff'] = cost_diff
                 self.writer.save_metrics(metrics)
 
+                # grad < 1e-5       : Training is stuck
+                # cost_diff < 1e-5  : Training is stuck
+                # grad > 10         : Init has been bad for some time
                 if grad < 1e-5 or abs(current_cost - prev) < 1e-5:
                     Trainer.pertub(self.judge.parameters())
                     optimizer, scheduler = self.init_optim()
@@ -381,6 +417,7 @@ class Trainer:
 
         self.meta['judge_epoch'] = epoch
         self.meta['judge_cost'] = current_cost
+
 
         if err is not None:
             raise err
@@ -490,6 +527,7 @@ class Trainer:
 
         with torch.no_grad():
             radiant_draft_state = state[0].unsqueeze(0).cuda()
+            self.judge.compute_estimates = False
             last_reward = self.judge(radiant_draft_state)
 
             radiant_win = last_reward[0, 0].item()
@@ -638,5 +676,6 @@ if __name__ == '__main__':
 
     # Train all together
     uid = None
-    # uid = '71161d7d868646328642fa064d935024'
-    t.train_unified(uid)
+    uid = 'c66acbc68bbc40d69b16f9ddd88a1657'
+    # t.train_unified(uid)
+    t.train_draft_judge_supervised(1000)

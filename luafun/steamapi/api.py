@@ -1,4 +1,6 @@
 import time
+import json
+import os
 
 
 class LimitExceeded(RuntimeError):
@@ -10,20 +12,41 @@ class ServerError(RuntimeError):
 
 
 class WebAPI:
-    """
-"""
+    """"""
     URL = ''
 
-    def __init__(self):
+    def __init__(self, name):
         # 100,000 API calls per day.
         # 1 request per second
         # 60 request per minute
         self.max_api_call_day = 100000
         self.start = None
+        self.name = name
         # make sure we respect the T&C of valve and do not get banned
         self.wait_time = 1
         self.limiter = True
         self.request_count = 0
+
+    def state_path(self):
+        return f'~/.config/api/{self.name}'
+
+    def __enter__(self):
+        if os.path.exists(self.state_path()):
+            with open(self.state_path(), 'r') as f:
+                save = json.load(f)
+                self.start = save['start']
+                self.request_count = save['count']
+
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        os.makedirs('~/.config/api', exist_ok=True)
+        with open(self.state_path(), 'w') as f:
+            save = dict(
+                start=self.start,
+                count=self.request_count
+            )
+            json.dump(save, f)
 
     def limit_stats(self):
         return self.request_count / self.max_api_call_day

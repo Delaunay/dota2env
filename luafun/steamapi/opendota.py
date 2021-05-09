@@ -76,7 +76,7 @@ class OpenDotaAPI(WebAPI):
     KEY = option('opendota.api', None)
 
     def __init__(self):
-        super(OpenDotaAPI, self).__init__()
+        super(OpenDotaAPI, self).__init__('opendota')
 
         now = datetime.datetime.now()
         day_count = calendar.monthrange(now.year, now.month)[1]
@@ -244,10 +244,10 @@ class OpenDotaAPI(WebAPI):
 
 
 class DatasetBuilder:
-    def __init__(self):
+    def __init__(self, api):
         self.running = True
         self.known_match = defaultdict(int)
-        self.api = OpenDotaAPI()
+        self.api = api
         self.error_retry = 3
         self.error_sleep = 30
         self.count = 5000
@@ -379,10 +379,12 @@ def extract_ranked_all_pick_match_id():
 
 if __name__ == '__main__':
     import json
-    # get_captains_mode()
-    # builder = DatasetBuilder()
-    # builder.run('opendota_ranked_all_pick.zip')
 
-    # cleanup()
+    # with OpenDotaAPI() as api:
+        # get_captains_mode()
+        # builder = DatasetBuilder()
+        # builder.run('opendota_ranked_all_pick.zip')
+
+        # cleanup()
 
 

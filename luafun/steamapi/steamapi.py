@@ -167,7 +167,7 @@ class SteamAPI(WebAPI):
     URL_STATS = 'https://api.steampowered.com/IDOTA2MatchStats_{game_id}/{method}/v1'
 
     def __init__(self):
-        super(SteamAPI, self).__init__()
+        super(SteamAPI, self).__init__('steamapi')
 
         # 100,000 API calls per day.
         # 1 request per second
@@ -565,10 +565,9 @@ def main():
 
 
 class ExtractMatchDetails:
-    def __init__(self):
+    def __init__(self, api):
         self.matches = dict()
-        self.api = SteamAPI()
-        self.api.wait_time = 0.50
+        self.api = api
         self.count = 0
         self.skipped = 0
         self.existing = []
@@ -588,7 +587,7 @@ class ExtractMatchDetails:
                 if match_id is None and avg_rank_tier is None:
                     continue
 
-                self.matches[match_id] = match
+                yield match_id, match
 
     def retried_fetch(self, match_id):
         for i in range(3):
@@ -623,15 +622,16 @@ class ExtractMatchDetails:
         with zipfile.ZipFile('ranked_allpick_7.28_picks.zip', mode='a') as output:
             # Get existing match IDs
             self.existing = set([int(n.split('.')[0]) for n in output.namelist()])
-            self.start_size = len(self.matches)
+            self.start_size = 9513251
 
             print(f'Fetched  : {len(self.existing)}')
             print(f'Total    : {self.start_size}')
             print(f'Remaining: {self.start_size - len(self.existing)}')
 
-            while len(self.matches) > 0:
-                match_id, match = self.matches.popitem()
+            # while len(self.matches) > 0:
+            #     match_id, match = self.matches.popitem()
 
+            for match_id, match in self.get_match_ids():
                 if match_id in self.existing:
                     self.skipped += 1
                     continue
@@ -653,7 +653,8 @@ class ExtractMatchDetails:
 
 
 if __name__ == '__main__':
-    obj = ExtractMatchDetails()
-    obj.get_match_ids()
-    obj.get_match_details()
+    with SteamAPI() as api:
+        api.wait_time = 0.75
+        obj = ExtractMatchDetails(api)
+        obj.get_match_details()
 

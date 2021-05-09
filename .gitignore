@@ -39,3 +39,4 @@ replay*.txt
 *.zip
 *.pt
 data/metrics/
+~/

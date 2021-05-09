@@ -9,6 +9,7 @@ from luafun.game.ipc_send import TEAM_RADIANT, TEAM_DIRE
 from luafun.draft import DraftTracker
 import luafun.game.constants as const
 from luafun.game.game import DOTA_GameMode
+from luafun.model.drafter import JudgeEstimates, JudgeEstimatesNorm
 
 
 DECISION_COUNT = {
@@ -120,8 +121,6 @@ class Dota2PickBan(ZipDataset):
         return self.patch_count
 
     def filter_by(self, dataset, patch):
-        if patch is None:
-            return list(dataset.namelist())
 
         count = DECISION_COUNT.get(patch, 24)
         matches = []
@@ -136,12 +135,13 @@ class Dota2PickBan(ZipDataset):
             decision_count = len(picks_bans)
             self.patch_decision[match_patch][decision_count] += 1
 
-            if match_patch == patch:
-                if decision_count != count:
-                    self.patch_count['error'] += 1
+            if patch is not None and match_patch != patch:
+                continue
 
-                else:
-                    matches.append(match)
+            elif decision_count != count:
+                self.patch_count['error'] += 1
+            else:
+                matches.append(match)
 
             self.patch_count[match_patch] += 1
 
@@ -226,7 +226,7 @@ class Dota2Matchup(ZipDataset):
 
     def filter_by(self, dataset, modes):
         if modes is None:
-            return
+            return list(dataset.namelist())
 
         matches = []
 
@@ -235,10 +235,11 @@ class Dota2Matchup(ZipDataset):
             game_mode = match_data['game_mode']
             picks_bans = match_data.get('picks_bans')
             radiant_win = match_data.get('radiant_win')
+            avg_rank_tier = match_data.get('avg_rank_tier')
 
             self.mode_counts[DOTA_GameMode(game_mode).name] += 1
 
-            if game_mode in self.modes and picks_bans is not None and radiant_win is not None:
+            if game_mode in self.modes and picks_bans is not None and radiant_win is not None and avg_rank_tier is not None:
                 matches.append(match)
 
         return matches
@@ -249,26 +250,66 @@ class Dota2Matchup(ZipDataset):
 
         picks = match['picks_bans']
         is_radiant_win = match['radiant_win']
+
         players = match['players']
+        # players.sort(key=lambda p: p['player_slot'])
+
+        meta = torch.zeros(JudgeEstimates.Size)
+        meta[JudgeEstimates.Duration] = match['duration']
 
         heroes = set()
         for p in players:
             heroes.add(p['hero_id'])
+            slot = p['player_slot']
 
-        return encode_draft(picks, is_radiant_win, False, heroes)
+            if slot >= 128:
+                slot = slot - 128 + 5
+
+            meta[getattr(JudgeEstimates, f'GoldPerMin{slot}')] = \
+                (p['gold_per_min'] - JudgeEstimatesNorm.GoldPerMinAvg) / JudgeEstimatesNorm.GoldPerMinStd
+            meta[getattr(JudgeEstimates, f'HeroDamage{slot}')] = \
+                (p['hero_damage'] - JudgeEstimatesNorm.HeroDamageAvg) / JudgeEstimatesNorm.HeroDamageStd
+            meta[getattr(JudgeEstimates, f'TowerDamage{slot}')] = \
+                (p['tower_damage'] - JudgeEstimatesNorm.TowerDamageAvg) / JudgeEstimatesNorm.TowerDamageStd
+
+        draft, win = encode_draft(picks, is_radiant_win, False, heroes)
+
+        # Fetch rank data
+        rank = None
+        if 'avg_rank_tier' in match:
+            rank_offset = match['avg_rank_tier'] - 10
+            rank = torch.zeros((draft.shape[0], const.Rank.Size,))
+            rank[:, rank_offset] = 1
+
+        return draft, win, meta, rank
 
 
 if __name__ == '__main__':
-    dataset = Dota2Matchup('/home/setepenre/work/LuaFun/drafting_all.zip')
+    from luafun.utils.options import datafile
+    from math import sqrt
 
-    x, y = dataset[0]
-    print(len(dataset))
-    print(x.shape)
-    print(x.sum(dim=1), x.sum(dim=1).sum(), y)
+    dataset = Dota2Matchup(datafile('dataset', 'ranked_allpick_7.28_picks_wip.zip'))
 
-    for i in range(len(dataset)):
-        print(dataset[i][1])
+    min_v = float('+inf')
+    max_v = float('-inf')
+    avg = 0
+    count = 0
+    std = 0
 
+    for x, y, meta in dataset:
+        for i in range(0, 10):
+            v = meta[JudgeEstimates.TowerDamage0 + i]
+
+            min_v = min(v, min_v)
+            max_v = max(v, max_v)
+            avg += v
+            count += 1
+            std += v * v
+
+    print(f'min {min_v}')
+    print(f'max {max_v}')
+    print(f'avg {avg / count}')
+    print(f'std {sqrt(std / count - (avg / count) ** 2)}')
 
     # dataset = Dota2PickBan('/home/setepenre/work/LuaFun/opendota_CM_20210421.zip', patch='7.29')
     #

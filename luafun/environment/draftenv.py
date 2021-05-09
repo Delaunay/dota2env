@@ -50,6 +50,12 @@ def dire_pick(hero_id):
 class Dota2DraftEnv(gym.Env):
     """Dota2 Drafting environment
 
+    Parameters
+    ----------
+    radiant_start: bool
+        control who is starting the banning phase.
+        If set to none the starting team will be decided by a coin flip
+
     Examples
     --------
     >>> import luafun.game.constants as const
@@ -118,6 +124,13 @@ class Dota2DraftEnv(gym.Env):
             Ban03: Techies
             Ban04: Phoenix
 
+
+    The starting faction can be selected as well.
+
+    >>> env = Dota2DraftEnv(radiant_start=False)
+    >>> env.decision_human
+    'Dire ban'
+
     """
     def __init__(self, radiant_start=None, version='7.28'):
         self.radiant_start = radiant_start
@@ -150,7 +163,14 @@ class Dota2DraftEnv(gym.Env):
                 self.phase_lookup[d] = phase
 
     def reset(self, radiant_start=None):
-        """Reset the environment"""
+        """Reset the environment
+
+        Parameters
+        ----------
+        radiant_start: bool
+            control who is starting the banning phase.
+            If set to None the starting team will be decided by a coin flip
+        """
         self.radiant_started = False
 
         if radiant_start is None:
@@ -314,14 +334,14 @@ class Dota2DraftEnv(gym.Env):
                 raise RuntimeError('Unreachable')
 
             if dec[0] == 'B':
-                if action[0] in self.booked_id:
+                if action[1] in self.booked_id:
                     reward.value += self.bad_order_penalty
                     self.log_fun(f'[BAN] Applying penalty: {action[1]}')
 
                 self.booked_id.add(action[1])
                 self.tracker.ban(team, action[1])
             elif dec[0] == 'P':
-                if action[1] in self.booked_id:
+                if action[0] in self.booked_id:
                     reward.value += self.bad_order_penalty
                     self.log_fun(f'[PICK] Applying penalty: {action[0]}')
 

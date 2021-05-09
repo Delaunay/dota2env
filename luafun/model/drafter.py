@@ -1,3 +1,5 @@
+from enum import IntEnum, auto
+
 import torch
 import torch.nn as nn
 import torch.distributions as distributions
@@ -5,7 +7,7 @@ import torch.distributions as distributions
 from luafun.draft import DraftFields
 import luafun.game.constants as const
 
-from luafun.model.components import CategoryEncoder
+from luafun.model.components import CategoryEncoder, SkillBias
 
 
 class SparseDrafter(nn.Module):
@@ -64,6 +66,7 @@ class LSTMDrafter(nn.Module):
         self.lstm_in = DraftFields.Size * self.hero_vec
         self.lstm_hidden = 256
         self.lstm_layer = 4
+        self.dummy_offset = const.HERO_LOOKUP.from_name('npc_dota_hero_target_dummy')['offset']
 
         self.rnn = nn.LSTM(
             # nonlinearity='tanh',
@@ -123,18 +126,21 @@ class LSTMDrafter(nn.Module):
         return result
 
     def filter(self, pick_probs, ban_probs, reserved):
+        pick_filter = torch.ones_like(pick_probs)
+        ban_filter = torch.ones_like(ban_probs)
+
+        pick_filter[:, :, self.dummy_offset] = 0
+        ban_filter[:, :, self.dummy_offset] = 0
+
         # set the probability of selected heroes to 0
         # No incorrect action can be made
         if reserved:
-            pick_filter = torch.ones_like(pick_probs)
-            ban_filter = torch.ones_like(ban_probs)
-
             for r in reserved:
                 pick_filter[:, :, r] = 0
                 ban_filter[:, :, r] = 0
 
-            pick_probs = pick_probs * pick_filter
-            ban_probs = ban_probs * ban_filter
+        pick_probs = pick_probs * pick_filter
+        ban_probs = ban_probs * ban_filter
 
         return pick_probs, ban_probs
 
@@ -316,8 +322,109 @@ class SimpleDrafter(nn.Module):
         return select, ban
 
 
+# SELECT AVG(gold_per_min), MIN(gold_per_min), MAX(gold_per_min), stddev(gold_per_min)
+# FROM
+#     player_matches
+# INNER JOIN match_patch USING(match_id)
+# INNER JOIN matches USING(match_id)
+# WHERE
+#     matches.start_time >= 1608249726 AND
+#     matches.start_time <= 1617981499 AND
+#     match_patch.patch = '7.28'
+#
+class JudgeEstimatesNorm:
+    DurationAvg = 2425  # 2425 = 40 min
+    DurationStd = 586   # 10 minutes
+    DurationMin = 375   # 6 minutes
+    DurationMax = 8937  # 2h 30 minutes
+
+    # 7.28 pro matches: 416.422	7	1302	172.9726
+    # anything higher must be a crazy stomp
+    GoldPerMinAvg = 435
+    GoldPerMinStd = 154.88
+    GoldPerMinMin = 96
+    GoldPerMinMax = 1607
+
+    # 7.28 pro matches: 16739.2685	0	178220	11413.4691
+    # 100 0000 is similar to zeus ulting all the time
+    HeroDamageAvg = 23344
+    HeroDamageStd = 14983
+    HeroDamageMin = 0
+    HeroDamageMax = 178220
+
+    # 7.28 pro matches: 2225.2344	0	31983	3867.2067
+    # 8000 is probably close to max as well
+    TowerDamageAvg = 2744
+    TowerDamageStd = 3989
+    TowerDamageMin = 0
+    TowerDamageMax = 33082
+
+    KillsAvg = 5.23
+    KillsMin = 0
+    KillsMax = 41
+    KillsStd = 4.39
+
+    DeathAvg = 5.32
+    DeathMin = 0
+    DeathMax = 25
+    DeathStd = 3.47
+
+    AssistsAvg = 11.27
+    AssistsMin = 0
+    AssistsMax = 45
+    AssistsStd = 7
+
+    XpPerMinAvg = 510.45
+    XpPerMinMin = 15
+    XpPerMinMax = 1153
+    XpPerMinStd = 182.23
+
+
+class JudgeEstimates(IntEnum):
+    Duration = 0
+    # Gold Per Minute include Last Hits
+    GoldPerMin0 = 1
+    GoldPerMin1 = 2
+    GoldPerMin2 = 3
+    GoldPerMin3 = 4
+    GoldPerMin4 = 5
+    GoldPerMin5 = 6
+    GoldPerMin6 = 7
+    GoldPerMin7 = 8
+    GoldPerMin8 = 9
+    GoldPerMin9 = 10
+    # How much that hero do damage
+    HeroDamage0 = 11
+    HeroDamage1 = 12
+    HeroDamage2 = 13
+    HeroDamage3 = 14
+    HeroDamage4 = 15
+    HeroDamage5 = 16
+    HeroDamage6 = 17
+    HeroDamage7 = 18
+    HeroDamage8 = 19
+    HeroDamage9 = 20
+    # How much that hero pushes
+    TowerDamage0 = 21
+    TowerDamage1 = 22
+    TowerDamage2 = 23
+    TowerDamage3 = 24
+    TowerDamage4 = 25
+    TowerDamage5 = 26
+    TowerDamage6 = 27
+    TowerDamage7 = 28
+    TowerDamage8 = 29
+    TowerDamage9 = 30
+    Size = auto()
+
+
 class DraftJudge(nn.Module):
     """Returns which faction is more likely to win the game given a draft
+
+    Notes
+    -----
+    The judge also can train stats estimators, the goal of the estimators is to constraint the
+    HeroEncoder further by forcing it to understand multiple dimensions
 
     Examples
     --------
@@ -331,7 +438,7 @@ class DraftJudge(nn.Module):
     >>> result
     tensor([0.4986, 0.4986], grad_fn=<ViewBackward>)
     """
-    def __init__(self, hero_encoder):
+    def __init__(self, hero_encoder, compute_estimates=False):
         super(DraftJudge, self).__init__()
 
         if hero_encoder is None:
@@ -347,15 +454,35 @@ class DraftJudge(nn.Module):
             nn.ReLU(),
             nn.Linear(256, 256),
             nn.ReLU(),
+        )
+
+        self.rank_bias = SkillBias(256)
+
+        self.win_layer = nn.Sequential(
             nn.Linear(256, 2),
             nn.Softmax(dim=-1),
         )
+        self.compute_estimates = compute_estimates
 
-    def forward(self, draft):
+        # estimates
+        self.estimates = nn.Sequential(
+            nn.Linear(self.encoded_draft_size, JudgeEstimates.Size),
+        )
+
+    def forward(self, draft, rank=None):
         bs, ds, hc = draft.shape
 
         draft_flat = torch.flatten(draft, end_dim=1)
-        encoded_flat = self.hero_encoder(draft_flat)
+        encoded_flat = self.hero_encoder(draft_flat, rank)
         encoded_draft = encoded_flat.view(bs, ds * self.hero_vec)
 
-        return self.common(encoded_draft)
+        cm = self.common(encoded_draft)
+        if rank is not None:
+            rank = rank[:, 0, :]
+            cm = cm + self.rank_bias(rank)
+
+        estimates = None
+        if self.compute_estimates:
+            estimates = self.estimates(encoded_draft)
+
+        return self.win_layer(cm), estimates
