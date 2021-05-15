@@ -654,7 +654,11 @@ class ExtractMatchDetails:
 
 if __name__ == '__main__':
     with SteamAPI() as api:
-        api.wait_time = 0.75
-        obj = ExtractMatchDetails(api)
-        obj.get_match_details()
+        try:
+            api.wait_time = 0.5
+            obj = ExtractMatchDetails(api)
+            obj.get_match_details()
+        except KeyboardInterrupt:
+            pass
+
 

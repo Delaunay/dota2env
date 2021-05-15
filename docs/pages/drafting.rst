@@ -25,6 +25,9 @@ was trained to recognize winning drafts.
             state, reward, done, info = env.step((radiant, dire))
 
 
+.. image:: ../_static/drafting_model.png
+
+
 .. automodule:: luafun.environment.draftenv
     :members:
     :undoc-members:

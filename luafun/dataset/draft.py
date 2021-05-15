@@ -220,6 +220,7 @@ class Dota2Matchup(ZipDataset):
         self.mode_counts = defaultdict(int)
 
         self.dataset = zipfile.ZipFile(filename, mode='r')
+        self.missing_stat = defaultdict(int)
         self.matches = self.filter_by(self.dataset, self.modes)
         self.dataset.close()
         self.dataset = None
@@ -232,17 +233,44 @@ class Dota2Matchup(ZipDataset):
 
         for match in dataset.namelist():
             match_data = self.load_match(match)
-            game_mode = match_data['game_mode']
-            picks_bans = match_data.get('picks_bans')
-            radiant_win = match_data.get('radiant_win')
-            avg_rank_tier = match_data.get('avg_rank_tier')
 
-            self.mode_counts[DOTA_GameMode(game_mode).name] += 1
+            if not self.is_good_match(match_data):
+                continue
 
-            if game_mode in self.modes and picks_bans is not None and radiant_win is not None and avg_rank_tier is not None:
-                matches.append(match)
+            matches.append(match)
+
+        print('Matches with missing statsWhen ')
+        for k, v in self.missing_stat.items():
+            print(f'{k:>30} {v}')
 
         return matches
+
+    def is_good_match(self, match_data):
+        cols = [
+            'gold_per_min',
+            'hero_damage',
+            'tower_damage'
+        ]
+
+        game_mode = match_data['game_mode']
+        self.mode_counts[DOTA_GameMode(game_mode).name] += 1
+
+        picks_bans = match_data.get('picks_bans')
+        radiant_win = match_data.get('radiant_win')
+        avg_rank_tier = match_data.get('avg_rank_tier')
+
+        players = match_data['players']
+
+        for p in players:
+            for c in cols:
+                if c not in p:
+                    self.missing_stat[c] += 1
+                    return False
+
+        if game_mode in self.modes and picks_bans is not None and radiant_win is not None and avg_rank_tier is not None:
+            return True
+
+        return False
 
     def __getitem__(self, item):
         name = self.matches[item]
@@ -255,7 +283,7 @@ class Dota2Matchup(ZipDataset):
         # players.sort(key=lambda p: p['player_slot'])
 
         meta = torch.zeros(JudgeEstimates.Size)
-        meta[JudgeEstimates.Duration] = match['duration']
+        meta[JudgeEstimates.Duration] = (match['duration'] - JudgeEstimatesNorm.DurationAvg) / JudgeEstimatesNorm.DurationStd
 
         heroes = set()
         for p in players:

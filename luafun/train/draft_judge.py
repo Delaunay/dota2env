@@ -308,10 +308,12 @@ class Trainer:
         total_cost = 0
         total_acc = 0
 
-        prev_cost_win = 1
-        prev_cost_est = 1
-        prev_cost_win_c = 0
-        prev_cost_est_c = 0
+        prev_cost_win = 0.70
+        prev_cost_est = 0.80
+        total_win = 0
+        total_est = 0
+        # prev_cost_win_c = 0
+        # prev_cost_est_c = 0
 
         for x, win_target, meta, rank in loader:
             x = x.cuda()
@@ -326,35 +328,32 @@ class Trainer:
             # Normalize cost, to make them both as important
             cost_win = nn.CrossEntropyLoss()(win_predict, win_target)
             cost_est = nn.L1Loss()(estimates, meta)
+
             cost = (cost_win / prev_cost_win) + (cost_est / prev_cost_est)
+
+            # prev_cost_win = cost_win.item()
+            # prev_cost_est = cost_est.item()
 
             cost.backward()
             optimizer.step()
 
-            prev_cost_win = cost_win.item()
-            prev_cost_est = cost_est.item()
-
-            if prev_cost_est_c == 0:
-                prev_cost_est_c = prev_cost_est
-                prev_cost_win_c = prev_cost_win
-
             count += 1
-            if count == 1:
-                total_cost_norm += 1
-            else:
-                total_cost_norm += cost.item()
-
-            total_cost += ((cost_win / prev_cost_win_c) + (cost_est / prev_cost_est_c)).item()
+            total_cost_norm += cost.item()
+            total_cost += (cost_win + cost_est).item()
+            total_win += cost_win.item()
+            total_est += cost_est.item()
             total_acc += self.accuracy(win_predict, win_target)
 
         scheduler.step()
         return dict(
             name='judge',
-            epoch=epoch,
+            judge_epoch=epoch,
             # role=role_cost,
             judge_cost_norm=total_cost_norm / count,
             judge_cost=total_cost / count,
-            judge_acc=total_acc / len(loader.dataset)
+            judge_acc=total_acc / len(loader.dataset),
+            judge_cost_win=total_win / count,
+            judge_cost_est=total_est / count,
         )
 
     def accuracy(self, predict, target, ignore_index=None):
@@ -369,7 +368,7 @@ class Trainer:
             return ((predicted == target) * filter).sum().item()
 
     def train_draft_judge_supervised(self, epochs, optim_scheduler=None):
-        dataset = Dota2Matchup(datafile('dataset', 'ranked_allpick_7.28_picks_wip.zip'))
+        dataset = Dota2Matchup(datafile('dataset', 'ranked_allpick_7.28_picks.zip'))
 
         if optim_scheduler is None:
             optim_scheduler = self.init_optim()
@@ -389,9 +388,10 @@ class Trainer:
                 prev = current_cost
                 metrics = self.train_draft_judge_supervised_epoch(epoch, loader, optimizer, scheduler)
 
+                params = list(self.judge.parameters())
                 grad = sum([
-                    abs(p.grad.abs().mean().item()) for p in self.judge.parameters() if p.grad is not None
-                ])
+                    abs(p.grad.abs().mean().item()) for p in params if p.grad is not None
+                ]) / len(params)
 
                 current_cost = metrics['judge_cost']
                 cost_diff = current_cost - prev
@@ -417,7 +417,6 @@ class Trainer:
 
         self.meta['judge_epoch'] = epoch
         self.meta['judge_cost'] = current_cost
-
 
         if err is not None:
             raise err
@@ -666,7 +665,6 @@ if __name__ == '__main__':
     # t.train_draft_rl_selfplay()
     t.init_model()
     t.init_hero_encoder()
-    t.save()
 
     # train judge
     # t.train_draft_judge_supervised()
@@ -676,6 +674,19 @@ if __name__ == '__main__':
 
     # Train all together
     uid = None
-    uid = 'c66acbc68bbc40d69b16f9ddd88a1657'
+    # uid = 'ea844d250dfa4137a8c386972424939c'
     # t.train_unified(uid)
-    t.train_draft_judge_supervised(1000)
+
+    if uid is not None:
+        t.writer = MetricWriter(datapath('metrics'), uid)
+        t.resume()
+    else:
+        t.save()
+
+    try:
+        t.train_draft_judge_supervised(1000)
+    except KeyboardInterrupt:
+        pass
+
+    t.save()
+

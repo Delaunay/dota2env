@@ -31,19 +31,19 @@ class VizEmbeddingSpace:
 def main():
     from luafun.train.metrics import MetricWriter
     from luafun.utils.options import datapath
-    from luafun.model.components import CategoryEncoder
+    from luafun.model.components import HeroEmbedding
     import luafun.game.constants as const
 
-    uid = '2aa1a55a35c54c9b9be93ec5a6181557'
+    uid = 'ea844d250dfa4137a8c386972424939c'
     writer = MetricWriter(datapath('metrics'), uid)
 
-    hero_encoder = CategoryEncoder(const.HERO_COUNT, 128)
+    hero_encoder = HeroEmbedding(128)
 
     henc = writer.load_weights('henc')
     hero_encoder.load_state_dict(henc)
     # ==== Done loading the model
 
-    weight = list(hero_encoder.parameters())[0]
+    weight = list(hero_encoder.baseline.parameters())[0]
     print(weight.shape)
 
     viz = VizEmbeddingSpace()

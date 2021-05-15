@@ -28,7 +28,7 @@ class WebAPI:
         self.request_count = 0
 
     def state_path(self):
-        return f'~/.config/api/{self.name}'
+        return os.path.expanduser(f'~/.config/api/{self.name}')
 
     def __enter__(self):
         if os.path.exists(self.state_path()):
@@ -40,7 +40,7 @@ class WebAPI:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        os.makedirs('~/.config/api', exist_ok=True)
+        os.makedirs(os.path.expanduser(f'~/.config/api'), exist_ok=True)
         with open(self.state_path(), 'w') as f:
             save = dict(
                 start=self.start,
